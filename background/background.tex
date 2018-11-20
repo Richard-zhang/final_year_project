@@ -14,17 +14,75 @@
 \section{Free monad}
 Free monad, a terminology from category theory, is a construction that is left adjoint to a forgetful functor whose domain is the category of Monads and whose co-domain is the category of Endofunctors \cite{contributorsCatsFreeMonads}. Intuitively, it says a monad can be constructed from any functor. Functional programming language exploit this concept because of its applications in domain specific language, especially in interpreting (section \ref{b:fm:a}).
 \subsection{Definition}
-In practice, free monad in Haskell can be defined as a an algebraic data type.
-% \begin{lstlisting}[frame=single, language=Haskell]
-% data Free f a =
-%     Pure a
-%   | Free f (Free f a)
-% \end{lstlisting}
+In practice, free monad in Haskell can be defined as a an algebraic data type(ADT). As promosied in category theory, it is an instance of monad type class given f is a functor (shown in listing \ref{b:fm:c1}). Many useful helper functions are derived from the simple definition of free monad (shown in listing \ref{b:fm:c2}).
+\begin{listing}[ht]
+  \inputminted{haskell}{background/fm-construction.hs}
+  \caption{Free monad in Haskell}
+  \label{b:fm:c1}
+\end{listing}
+\begin{listing}[ht]
+  \inputminted{haskell}{background/fm-helper.hs}
+  \caption{Helper functions based on free monad}
+  \label{b:fm:c2}
+\end{listing}
+\subsection{Example} \label{b:fm:e}
+As mentioned, free monad is useful in interpreting an abstract syntax tree (AST). In order to apply free monad to a given AST, we can follow a routine \cite{contributorsCatsFreeMonads}.
+\begin{enumerate}
+  \item Create an AST, usually represented as an ADT
+  \item Implement functor for the ADT
+  \item Create helper constructors to Free ADT for each type constructor in ADT by liftF 
+  \item Write a monadic program using helper constructors. It is essentially a program written in DSL operations.
+  \item Build interpreters for Free ADT by interpret
+  \item Interpret the program by the interpreter.
+\end{enumerate}
+We will demo the above procedure by a made-up example. Fist of all, we create a simple AST in ADT. 
 \begin{minted}{haskell}
-data Free f a =
-    Pure a
-  | Free f (Free f a)
+data GreetingF next
+  = Getname (String -> next)
+  | Greet String next
+  deriving Functor
+
+type Greeting = Free GreetingF
 \end{minted}
-\subsection{Example}
-    
+Then we create helper constructors of Greeting using liftF.
+\begin{minted}{haskell}
+getName = liftF $ Getname id
+greet str = liftF $ Greet str ()
+\end{minted}
+Then we can write a simple program using operations provided by Greeting.
+\begin{minted}{haskell}
+exampleProgram :: Greeting ()
+exampleProgram = do
+    a <- getName
+    greet a
+    b <- getName
+    greet b
+\end{minted}
+Then we can easily implement an interpreter for the example program
+\begin{minted}{haskell}
+goodMorningInterpreter :: Greeting a -> IO a
+goodMorningInterpreter = interpret helper
+    where
+        helper (Getname next) = fmap next getLine
+        helper (Greet str next) = putStrLn ("Good morning " ++ str) >> return next  
+\end{minted} 
+Finally, execute the program.
+\begin{minted}{bash}
+ghci:> goodMorningInterpreter exampleProgram
+Tom
+Good morning Tom
+Mary
+Good morning Mary
+\end{minted}
+% \begin{listing}
+%   \inputminted{haskell}{background/fm-example.hs}
+%   \caption{An example of free moand}
+%   \label{b:fm:c3}
+% \end{listing}
+
 \subsection{Applications} \label{b:fm:a}
+As illustrated by the example (section \ref{b:fm:e}), free monad decouple the abstract syntax tree of domain specific language (DSL) and the interpreter. Interpreters with different purposes can be implemented without changing the syntax.
+
+TODO: How to apply it to my project (i.e code generationg, prototyping)
+
+In this project, we apply free monad to our own representation of local process. Based on the free monad version of local process, implementing different interpreters for prototyping (using haskell runtime), code generation to different target languages and topology visualization is at ease.
