@@ -1,2 +1,30 @@
 \chapter{Background}
-\section{Multiparty Session Types \cite{coppoGentleIntroductionMultiparty2015}}
+\section{Multiparty session types} 
+\subsection{Process calculus}
+\subsubsection{Syntax}
+\subsubsection{Operation semantics}
+\subsection{Type system}
+\subsubsection{Global types and session types}
+\subsubsection{Projection between types}
+\subsection{Example: arithmetic server}
+\subsection{Applications in parallel computing}
+\section{Parallel algebraic language}
+\subsection{Arrows}
+\subsection{Applications with session types}
+\section{Free monad}
+Free monad, a terminology from category theory, is a construction that is left adjoint to a forgetful functor whose domain is the category of Monads and whose co-domain is the category of Endofunctors \cite{contributorsCatsFreeMonads}. Intuitively, it says a monad can be constructed from any functor. Functional programming language exploit this concept because of its applications in domain specific language, especially in interpreting (section \ref{b:fm:a}).
+\subsection{Definition}
+In practice, free monad in Haskell can be defined as a an algebraic data type.
+% \begin{lstlisting}[frame=single, language=Haskell]
+% data Free f a =
+%     Pure a
+%   | Free f (Free f a)
+% \end{lstlisting}
+\begin{minted}{haskell}
+data Free f a =
+    Pure a
+  | Free f (Free f a)
+\end{minted}
+\subsection{Example}
+    
+\subsection{Applications} \label{b:fm:a}
