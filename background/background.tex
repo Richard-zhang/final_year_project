@@ -1,39 +1,108 @@
-\chapter{Background}
-This section is an overview of arrows, multiparty session types (MPST) and free monad. Arrow is an interface of implicit dataflow and MPST can be used to describe explicit dataflow. Free monad is a technique to convert normal DSL to a monadic DSL.
-\section{Arrows}
-\subsection{Definition}
-\subsection{Example: Merge Sort}
-\subsection{Application in parallel computing}
-\subsection{Relationship with the project}
-\section{Multiparty session types} 
-Multiparty session types is a branch of behavioural types specifically targeted at describing protocols in distributed systems based on asynchonous communication \cite{coppoGentleIntroductionMultiparty2015}: this is the theoretical foundation of TBD.
+\chapter{Background} \label{b}
+% This section is an overview of arrows, multiparty session types (MPST) and free monad. Arrow is an interface of implicit data flow, and MPST can be used to describe explicit data flow. Free monad is a technique to convert normal DSL to a monadic DSL. 
+As mentioned in the section \ref{i:m}, this section is an overview of a high-level language (section \ref{b:arrows} and \ref{b:pal}), from which a translation rule will be proposed to our intermediate languages, multiparty session types (section \ref{b:mpst}), the theoretical backbone giving rich features of the intermediate languages, and the free monad (section \ref{b:fm}), a technique in designing the intermediate languages.
 
-In multiparty session types theory, the whole distributed system is described by global types which represents the communication protocols from a global view point. The concrete behaviour of each participant in the distributed system is described by process calculus. They are typed by local types which characterize the same communication protocols as global types but from a perspective of individual participants \cite{coppoGentleIntroductionMultiparty2015}. 
-\subsection{Global types}
+\section{Arrows} \label{b:arrows}
+Arrows, a general interface to describe computation, is the theoretical foundation of the high-level languages described in section \ref{b:pal}.
+\subsection{Definition}
+Definition of arrows will be represented in Haskell for convenience (shown in listing \ref{b:ar:c1}). In general, it can be defined in any programming language.
+
+Intuitively, an arrow (y a b) can be regarded as computation from parameterised input a to parameterised output b. The simplest instance of arrow class is the basic function (shown in listing \ref{b:ar:c2}). Visually, arrows are like pipelines of computation with at least two inputs and at least two outputs (shown in figures \ref{b:ar:p1}\cite{HaskellUnderstandingArrows}). Programs formed by arrows are like compositions of pipelines.
+\begin{listing}[ht]
+  \inputminted{haskell}{background/ar-def.hs}
+  \caption{Arrow class in Haskell}
+  \label{b:ar:c1}
+\end{listing}
+\begin{listing}[ht]
+  \inputminted{haskell}{}
+\end{listing}
+\begin{listing}[ht]
+  \inputminted{haskell}{background/ar-func.hs}
+  \caption{$(\rightarrow)$ instance of Arrow class} 
+  \label{b:ar:c2}
+\end{listing}
+\begin{figure*}
+  \centering
+  \begin{subfigure}[b]{0.475\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{background/image/ArrowsConveyors_first2.png}
+      % \caption{{\small Network 1}}    
+      \label{fig:mean and std of net14}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.475\textwidth}  
+      \centering 
+      \includegraphics[width=\textwidth]{background/image/ArrowsConveyors_bind2.png}
+      % \caption{{\small Network 2}}    
+      \label{fig:mean and std of net24}
+  \end{subfigure}
+  \vskip\baselineskip
+  \begin{subfigure}[b]{0.475\textwidth}   
+      \centering 
+      \includegraphics[width=\textwidth]{background/image/ArrowsConveyors_ampersand2.png}
+      % \caption{{\small Network 3}}    
+      \label{fig:mean and std of net34}
+  \end{subfigure}
+  \quad
+  \begin{subfigure}[b]{0.475\textwidth}   
+      \centering 
+      \includegraphics[width=\textwidth]{background/image/ArrowsConveyors_star2.png}
+      % \caption{{\small Network 4}}    
+      \label{fig:mean and std of net44}
+  \end{subfigure}
+  \caption
+  {\small The visual representations of arrow combinatorcis}
+  \label{b:ar:p1}
+\end{figure*}
+\subsection{Example: Calculate the mean}
+Consider the a function to calculate the mean from a list of floating number, we will compare the usual implementation, implementations in arrows and point-free implementation.
+\begin{minted}{haskell}
+mean :: [Float] -> Float
+mean xs = sum xs / (fromIntegral . length) xs
+
+mean' :: [Float] -> Float
+mean' = (sum &&& (length >>> fromIntegral)) >>> uncurry (/)
+
+mean'' :: [Float] -> Float
+mean'' = liftM2 (/) sum (fromIntegral . length)
+\end{minted}
+Above program can be visualized in figure \ref{b:ar:p2}.
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=8cm]{example-image} 
+  \caption{TODO: Add a visualization to show the pipelines}\label{b:ar:p2}
+\end{figure}
+The simple example demos that arrows combinatorcis make writing point-free programs easier. Arrows union the implementation of algorithm and data-flow in the algorithm. 
+
+\subsection{Application in parallel computation}
+From the previous example, the data flow of programs written regarding arrow combinators can be easily visualised. It is intuitive to recognise that the clean separation between the flow of data and computation will be useful in generating parallel codes. Indeed, arrow describes data flow implicitly, and it is an example of the so-called algebraic pattern. Many works (\cite{braunArrowsParallelComputation2018}, \cite{elliottGenericFunctionalParallel2017b} and \cite{authorAlgebraicMultipartyProtocol2018}) has been done to generate parallel codes from algebraic patterns.
+In patricular, details of \cite{authorAlgebraicMultipartyProtocol2018} are introduced in section \ref{b:pal}.
+\section{Parallel Algebraic Language} \label{b:pal}
+It is an example of the high-level languages to generate parallel codes, proposed in the paper \cite{authorAlgebraicMultipartyProtocol2018}. In this project, a translation rule from this languages to the intermediate languages will be introduced.
+\subsection{Syntax}
+\subsection{Recursion schemes}
+\subsection{Example: Merge sort}
+\section{Multiparty session types} \label{b:mpst}
+Multiparty session types is a branch of behavioural types specifically targeted at describing protocols in distributed systems based on asynchonous communication \cite{coppoGentleIntroductionMultiparty2015}: this is the theoretical foundation of TODO.
+
+In multiparty session types theory, the whole distributed system is described by global types which represent the communication protocols from a global viewpoint. Process calculus describes the actual behaviour of each participant in the distributed systems. They are typed by local types which characterise the same communication protocols as global types but from a perspective of individual participants \cite{coppoGentleIntroductionMultiparty2015}.
+
+TODO: Add describtions about the MPST 1. describes explicit dataflow 2. so it can be used as the high-level programming languages to generate paralllel codes 3. in section \ref{b:mpst:app}.
 \subsection{Process calculus}
-\subsubsection{Syntax}
-\subsubsection{Operation semantics}
-\subsection{Type system}
-\subsubsection{Global types and local types}
-\subsubsection{Projection between types}
-There is an unique correspondance between global types and local type of a peer. For any given peer in the system, we can find its local type by taking a projection from the global types. Exact rules of the projection are provided in \cite{coppoGentleIntroductionMultiparty2015}.
-
-TODO: Role of Projection
-\subsubsection{Duality of local types}
+\subsection{Global types and local types}
 \subsection{Example: arithmetic server}
-\subsection{Applications in parallel computing}
-Without doubt, multiparty session types has rich applications in the domain of distributed systems. It also have important applications in parallel computing. 
+\subsection{Applications in parallel computing} \label{b:mpst:app}
+Multiparty session types not only have rich applications in distributed systems but also value in the domain of parallel computation. 
 
-Existing work\cite{ngSafeMPICode} has shown a way to generate MPI\footnote{Message Passing Interface (MPI) is a standardized and portable message-passing standard designed by a group of researchers from academia and industry to function on a wide variety of parallel computing architectures \cite{MessagePassingInterface2018}.} programs using session types. Users describe the communication topology as a skeleton using a protocol language which is type checked by session types. After that, a MPI program is generated by merging the skeleton and user-provided kernels for each peer. The parallel codes obtained in this way is guaranted to be deadlock-free and progressing. 
+Existing work\cite{ngSafeMPICode} has shown how to generate MPI\footnote{Message Passing Interface (MPI) is a standardised and portable message-passing standard designed by a group of researchers from academia and industry to function on a wide variety of parallel computing architectures \cite{MessagePassingInterface2018}.} programs using session types. Users describe the communication topology as a skeleton using a protocol language which is type checked by session types. After that, an MPI program is generated by merging the skeleton and user-provided kernels for each peer. The parallel codes obtained in this way is guaranteed to be deadlock-free and progressing. 
 
-This project is built on top of a project, introduced in seection \ref{b:pal}, which also exploits advantages of multiparty session types in parallel code generation by a different approach from the above.
-\section{Parallel algebraic language} \label{b:pal}
-\subsection{Arrows}
-\subsection{Applications with session types}
-\section{Free monad}
-Free monad, a terminology from category theory, is a construction that is left adjoint to a forgetful functor whose domain is the category of Monads and whose co-domain is the category of Endofunctors \cite{contributorsCatsFreeMonads}. Intuitively, it says a monad can be constructed from any functor. Functional programming language exploit this concept because of its applications in domain specific language, especially in interpreting (section \ref{b:fm:a}).
+This project is built on top of a project, introduced in section \ref{b:pal}, which also exploits advantages of multiparty session types in parallel code generation by a different approach from the above.
+\section{Free monad} \label{b:fm}
+Free monad \footnote{The mathematical definition of the free monad can be found in \cite{contributorsCatsFreeMonads}} is a concept from category theory.
+% \footnote{Free monad is a construction that is left adjoint to a forgetful functor whose domain is the category of Monads and whose co-domain is the category of Endofunctors \cite{contributorsCatsFreeMonads}. Intuitively, it says any functor can construct a monad}. 
+Functional programming language exploits this concept because of its applications in domain specific language, especially in interpreters (section \ref{b:fm:a}).
 \subsection{Definition}
-In practice, free monad in Haskell can be defined as a an algebraic data type(ADT). As promosied in category theory, it is an instance of monad type class given f is a functor (shown in listing \ref{b:fm:c1}). Many useful helper functions are derived from the simple definition of free monad (shown in listing \ref{b:fm:c2}).
+In practice, a free monad in Haskell can be defined as an algebraic data type(ADT). As promised in category theory, it is an instance of monad type class given f is a functor (shown in listing \ref{b:fm:c1}). Many useful helper functions are derived from the simple definition of the free monad (shown in listing \ref{b:fm:c2}).
 \begin{listing}[ht]
   \inputminted{haskell}{background/fm-construction.hs}
   \caption{Free monad in Haskell}
@@ -51,7 +120,7 @@ As mentioned, free monad is useful in interpreting an abstract syntax tree (AST)
   \item Implement functor for the ADT
   \item Create helper constructors to Free ADT for each type constructor in ADT by liftF 
   \item Write a monadic program using helper constructors. It is essentially a program written in DSL operations.
-  \item Build interpreters for Free ADT by interpret
+  \item Build interpreters for Free ADT by interpreting
   \item Interpret the program by the interpreter.
 \end{enumerate}
 We will demo the above procedure by a made-up example. First of all, we create a simple AST in ADT. 
@@ -102,7 +171,5 @@ Good morning Mary
 \subsection{Applications} \label{b:fm:a}
 As illustrated by the example (section \ref{b:fm:e}), free monad decouple the abstract syntax tree of domain specific language (DSL) and the interpreter. Interpreters with different purposes can be implemented without changing the syntax.
 
-TODO: How to apply it to my project (i.e code generationg, prototyping)
-
-In this project, we apply free monad to our own representation of local process. Based on the free monad version of local process, implementing different interpreters for prototyping (using haskell runtime), code generation to different target languages and topology visualization is at ease.
+In the project, we apply free monad to the intermediate language so not only we make the languages monadic for free but also benefits from decoupling the interpreter and the syntax to implement different interpreters, e.g. Simulator, code generators to different platforms easily.
 \section{Summary}
