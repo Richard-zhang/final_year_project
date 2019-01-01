@@ -81,10 +81,38 @@ In patricular, details of \cite{authorAlgebraicMultipartyProtocol2018} are intro
 \section{Multiparty session types} \label{b:mpst}
 Multiparty session types is a branch of behavioural types specifically targeted at describing protocols in distributed systems based on asynchonous communication \cite{coppoGentleIntroductionMultiparty2015}: this is the theoretical foundation of TODO.
 
-In multiparty session types theory, the whole distributed system is described by global types which represent the communication protocols from a global viewpoint. Process calculus describes the actual behaviour of each participant in the distributed systems. They are typed by local types which characterise the same communication protocols as global types but from a perspective of individual participants \cite{coppoGentleIntroductionMultiparty2015}.
-
 TODO: Add describtions about the MPST 1. describes explicit dataflow 2. so it can be used as the high-level programming languages to generate paralllel codes 3. in section \ref{b:mpst:app}.
-\subsection{Global types and local types}
+\subsection{Global types and session types}
+In multiparty session types theory, the whole distributed system is described by global types representing the communication protocols from a global viewpoint.  Each process are typed by local types which characterise the same communication protocols as global types but from a perspective of individual participants \cite{coppoGentleIntroductionMultiparty2015}.
+\begin{table}[ht]
+\centering
+\begin{grammar}{G\Coloneqq}{Global types}
+  p \rightarrow q : \langle S \rangle.G & Value exchange \\
+  p \rightarrow q : \langle T \rangle.G & Channel exchange \\
+  p \rightarrow q : \{ l_i : G_i \}_{i \in I} & Bracnhing \\
+  \mu \mathbf{t}.G  \mid \mathbf{t} \mid \text{end} & Recursion/End
+\end{grammar}
+\caption{Global types} \label{b:mpst:gt}
+\end{table}
+\begin{table}[ht]
+\centering
+\begin{grammar}{T\Coloneqq}{Session types/local types}
+  ! \langle p, Sorts \rangle . T & Send value\\
+  ! \langle p, T \rangle . T & Send channel\\
+  ? ( p, Sorts | T ) . T & Receive\\
+  \oplus \langle p, \{ l_i : T_i \}_{i \in I} \rangle & Selection \\
+  \&(p, \{l_i : T_i \}_{i \in I}) & Bracnhing \\
+  \mu \mathbf{t}.T  \mid \mathbf{t} \mid \text{end} & Recursion/End
+\end{grammar}
+\caption{Session types/local types} \label{b:mpst:st}
+\end{table}
+\subsubsection{Projection between global types and local types}
+\subsubsection{Duality of session types}
+\begin{table}[ht]
+\begin{align*}
+\end{align*}
+\caption{Inductive definition of duality} \label{b:mpst:dual}
+\end{table}
 \subsection{Example: arithmetic server}
 \subsection{Applications in parallel computing} \label{b:mpst:app}
 Multiparty session types not only have rich applications in distributed systems but also value in the domain of parallel computation. 

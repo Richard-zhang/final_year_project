@@ -15,6 +15,13 @@
 
 %% Automatic Reference
 
+% BNF Rule
+\usepackage{mathtools,array}
+\newenvironment{grammar}[2]
+ {\begin{tabular}{@{\qquad}>{$}l<{$}@{\qquad}l@{}}
+  \multicolumn{1}{@{}l@{}}{$#1$}&\multicolumn{1}{l@{}}{\hspace{-2em}#2}\\}
+ {\end{tabular}}
+
 %% Placeholder picture
 % \usepackage{todonotes}
 \usepackage{mwe}
