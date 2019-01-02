@@ -1,7 +1,88 @@
 % \chapter{Design and Implementation}
 \chapter{TBD:the theory and the practice}
-\section{Parallel Algebraic Language} \label{b:pal}
-It is an example of the high-level languages to generate parallel codes, proposed in the paper \cite{authorAlgebraicMultipartyProtocol2018}. In this project, a translation rule from this languages to the intermediate languages will be introduced.
+\section{Parallel algebraic language} \label{b:pal}
+Parallel algebraic language (PAL) is an example of the high-level languages to generate parallel codes, proposed in the paper \cite{authorAlgebraicMultipartyProtocol2018}. In this project, a translation rule from this languages to the intermediate languages will be introduced.
 \subsection{Syntax}
-\subsection{Recursion schemes}
+Besides primitives type like int, unit and function types, PAL use four functors to form more types hence representing complicated data structures by composing them (seen in table). For example, a list of integer is expressed in listing \ref{p:pal:c1}.
+\begin{table}[ht]
+\begin{grammar}{F_1, F_2 \Coloneqq}{}
+    I & Identity functor\\
+    K t & Constatnt functor\\
+    F_1 + F_2 & Sum functor\\
+    F_1 \times F_2 & Product functor
+\end{grammar}
+\hfill
+\begin{grammar}{t_1, t_2 \Coloneqq}{Type}
+    () \mid \text{int} \mid \dots & Primitive types\\
+    F \ t_1 & Functor types\\
+    \mu .F & Recursive types\\
+\end{grammar}
+\caption{Functor and Type definitions}
+\end{table}
+\begin{listing}[ht]
+\begin{lstlisting}{language=Haskell}
+    newtype L = K () + K Int * I
+    type List = Rec L
+\end{lstlisting}
+\caption{Type of integer list in PAL}
+\label{p:pal:c1}
+\end{listing}
+
+An important feature of PAL is the lack of usual control flow like if branch or while loop, instead, it uses data structures to replace control flow. Data structures in PAL not only store data but also serves as control structures. It uses the idea of recursion schemes (seen in section \ref{p:pal:rs}) to build sophiscated algorithms. 
+
+To summary, algorithms in PAL are represented as a series of transformations of data, making it easy to transform the PAL programmes to programmes in arrows mechanically since arrows also express flow of data and their transformations naturally. This property allows us to generate parallel codes without burnders.
+\subsection{Recursion schemes} \label{p:pal:rs}
+Recursion schemes are patterns for expressing general computation. In particular, they are like high order function abstracting recursion so that programmer can express any kind of recursion by data structures combined with recursion schemes instead of explicit recursive functions.
+
+We will introduce three typical recursion shcemes: catamorphisms, anamorphisms and hylomorphisms (seen in listing \ref{p:pal:c3}). As mentioned before, recrusion schemes express recrusion with the help of data structures, in particular, the fixed point of data structures (seen in listing \ref{p:pal:c2})
+\begin{listing}[ht]
+\begin{minted}{haskell}
+newtype Fix f = Fix { unfix :: f (Fix f) }
+
+-- Example of Tree
+data TreeF a =
+    Node a a
+  | Leaf int
+  | Empty
+  deriving Functor
+
+type Tree = Fix TreeF
+\end{minted}
+\caption{Definition of fix point of data structures} \label{p:pal:c2}
+\end{listing}
+
+Anamorphisms takes a function from a to f a (called the co-algebra) and a value a and return the Fix f. Used Tree as an example, anamorphisms takes a single value a and applies the co-algebra to the value. It continues to apply itself to the branches of the TreeF recursively and finally expands a single value to a complete tree. Intuitively, anamorphism unfolds a single value to a complicated data structure top-down.
+
+Catamorphisms is the reverse of anamorphisms, folding a data structure to a single value bottom-up. It takes a function from f a to a (called the algebra) and Fix f to fold and return a single value a. Catamorphisms and anamorphisms describe the process globally (from a to Fix f and from Fix f to a) while co-algebra and algebra capture what happened locally. The elegant part is while co-algebra and algebra do not involve with any recursion data structure (TreeF is not recursive), catamorphisms and anamorphism can build or consume recursive data structures.
+
+Hylomorphisms is applying anamorphism followed by catamorphisms. It is the most common pattern to use. We will use an example to illustrate its usefulness. 
+\begin{listing}[ht]
+\inputminted{haskell}{project/pal-rs.hs}
+\caption{Recursion schemes in haskell} \label{p:pal:c3}
+\end{listing}
 \subsection{Example: Merge sort}
+We can write merge sort recursively. First of all, we split the list in half and then apply the merge sort recrusively to both parts and finally we merge two list into a single list. 
+
+To write merge sort in terms of recursion scheme, we need to define the recursive structure to represent the control structure. By the definition of merge sort, this structure must have a case with two branches, a base case representing a singleton list and a base case representing an empty list hence this structure is the TreeF we defined above. Splitting a list is like co-algebra while merging is like algebra. We use hylomorphisms to combine them hence getting a sorted list (seen in listing \ref{p:pal:c4}).
+\begin{listing}[ht]
+\inputminted{haskell}{project/pal-ms.hs}
+\caption{Merge sort using hylomorphisms} \label{p:pal:c4}
+\end{listing}
+
+Similarly, PAL make these recursion shcemes built-in and hence express computation. A merge sort in PAL is shown in listing \ref{p:pal:c5}
+\begin{listing}[ht]
+\begin{lstlisting}[language=haskell]
+poly T = K (() + int) + I * I;
+poly L = K () + K int * I;
+
+atom split : Rec L -> T Rec L;
+
+atom merge : T Rec L -> Rec L;
+
+fun ms : Rec L -> Rec L
+  = rec [T] merge split;
+\end{lstlisting}
+\caption{Merge sort in PAL} \label{p:pal:c5}
+\end{listing}
+
+\subsection{Code generation}
