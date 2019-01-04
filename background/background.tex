@@ -142,19 +142,32 @@ The work done by \cite{claessenFunctionalPearlsPoor1999} constructs a monad to e
 An example of program written in Concurrency Monad.
 \begin{minted}{haskell}
 example :: C ()
-example = do
-    atom $ putStrLn "Hello"
-    name <- atom getLine
+example = do 
+    atom $ putStrLn "Hello" #\clabel{mylin2}#
+    name <- atom getLine #\clabel{myline}#
     fork $ atom $ putStrLn "World"
     atom $ putStrLn name
 \end{minted}
 
-It is worth mentioning that the concurrency monad can be extended to support many features. For example, work done by \cite{marlowMonadDeterministicParallelism} modifies the definition of Action as well as implements a work-stealing parallel scheduler (seen in listing \ref{b:mo:c3}) to build a monad for parallel computation. 
+Fuck my \cref{mylin2}.It is worth mentioning that the concurrency monad can be extended to support many features. For example, work done by \cite{marlowMonadDeterministicParallelism} modifies the definition of Action as well as implements a work-stealing parallel scheduler (seen in listing \ref{b:mo:c3}) to build a monad for parallel computation. 
 
 Besides, Extending the concurrency monad to monad for message-passing concurrency can be done by adding channel primitives like newChan, writeChan and readChan into the Action. Since channel primitives are possible to represent in this monad, we naturally think of its prospect in connecting with MPST (will be discussed in the later section).
 \begin{listing}[ht]
   \inputminted{haskell}{background/mo-par.hs}
-  \caption{Par Monads}
+%   \caption[.]{
+%   \begin{minipage}{\linewidth}
+%     Par Monad
+%     \begin{itemize}
+%       \item[\cref{mylin2} :] hello 
+%       \item[\cref{mylin2} :] hello 
+%     \end{itemize}
+%     % \begin{align*}
+%       % x &= y\\ 
+%       % x &= x + 1\\ 
+%       % x &= 0\\
+%     % \end{align*}
+%  \end{minipage}
+%  }
   \label{b:mo:c3}
 \end{listing}
 
@@ -186,6 +199,7 @@ As mentioned, free monad is useful in interpreting an abstract syntax tree (AST)
   \item Interpret the program by the interpreter.
 \end{enumerate}
 We will demo the above procedure by a made-up example. First of all, we create a simple AST in ADT. 
+\begin{code}
 \begin{minted}{haskell}
 data GreetingF next
   = Getname (String -> next)
@@ -194,6 +208,16 @@ data GreetingF next
 
 type Greeting = Free GreetingF
 \end{minted}
+% \caption[.]{
+%   \begin{minipage}{\linewidth}
+%     Par monad
+%     \begin{itemize}
+%       \item[\cref{mylin2} :] hello 
+%       \item[\cref{mylin2} :] hello 
+%     \end{itemize}
+%  \end{minipage}
+%  }
+\end{code}
 Then we create helper constructors of Greeting using liftF.
 \begin{minted}{haskell}
 getName = liftF $ Getname id

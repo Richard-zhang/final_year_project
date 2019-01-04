@@ -13,6 +13,23 @@
 \usepackage{minted}
 \usepackage{listings}
 
+%% Code line references
+\setminted[haskell]{escapeinside=\#\#, linenos=true, mathescape=true}
+\usepackage{caption}
+\usepackage{tikz}
+\newcommand*\circled[1]{\tikz[baseline=(char.base)]{
+            \node[shape=circle,draw,inner sep=1pt, text=white] (char) {#1};}}
+\newcommand*\clabel[1]{$\label{#1} \circled{\ref{#1}}$}
+\newcommand*\cref[1]{\circled{\ref{#1}}}
+\newcommand*\ccaption[1]{
+    \caption[.]{
+        \begin{minipage}{\linewidth}
+            #1
+        \end{minipage}
+    }
+}
+
+\newenvironment{code}{\captionsetup{type=listing}}{}
 %% Automatic Reference
 
 % BNF Rule
