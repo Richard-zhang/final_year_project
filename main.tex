@@ -21,10 +21,11 @@
             \node[shape=circle,draw,inner sep=1pt, text=white] (char) {#1};}}
 \newcommand*\clabel[1]{$\label{#1} \circled{\ref{#1}}$}
 \newcommand*\cref[1]{\circled{\ref{#1}}}
-\newcommand*\ccaption[1]{
+\newcommand*\ccaption[2]{
     \caption[.]{
+        #1\newline
         \begin{minipage}{\linewidth}
-            #1
+            #2
         \end{minipage}
     }
 }

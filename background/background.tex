@@ -8,19 +8,16 @@ Arrows, a general interface to describe computation, is the theoretical foundati
 Definition of arrows will be represented in Haskell for convenience (shown in listing \ref{b:ar:c1}). In general, it can be defined in any programming language.
 
 Intuitively, an arrow (y a b) can be regarded as computation from parameterised input a to parameterised output b. The simplest instance of arrow class is the basic function (shown in listing \ref{b:ar:c2}). Visually, arrows are like pipelines of computation with at least two inputs and at least two outputs (shown in figures \ref{b:ar:p1}\cite{HaskellUnderstandingArrows}). Programs formed by arrows are like compositions of pipelines.
-\begin{listing}[ht]
+\begin{code}
   \inputminted{haskell}{background/ar-def.hs}
   \caption{Arrow class in Haskell}
   \label{b:ar:c1}
-\end{listing}
-\begin{listing}[ht]
-  \inputminted{haskell}{}
-\end{listing}
-\begin{listing}[ht]
+\end{code}
+\begin{code}
   \inputminted{haskell}{background/ar-func.hs}
   \caption{$(\rightarrow)$ instance of Arrow class} 
   \label{b:ar:c2}
-\end{listing}
+\end{code}
 \begin{figure*}
   \centering
   \begin{subfigure}[b]{0.475\textwidth}
@@ -125,19 +122,19 @@ This section introduce some interfaces for message passing concurrency from the 
 For the simplicity, they're represented in Hasekll but in general most languages can implement similar interfaces. 
 \subsection{Primitives for message-passing concurrency}
 In section \ref{b:mpst}, channels are bi-directional and used for communication between two parties. In Haskell, channel primitives are represented in listing \ref{b:mo:c1}. However, just using these primitives cannot guarantee progress or communication safety. For example, a program that has one thread writing channel once combined with another thread reading channel twice is type-correct but will cause deadlock. Many kinds of research to encode MPST using Haskell's type system are presented in \cite{orchardSessionTypesLinearity} so that an (MPST) type-correct Haskell program assures progress, communication safety and session fidelity.
-\begin{listing}[ht]
+\begin{code}
   \inputminted{haskell}{background/mo-chan.hs}
   \caption{Channel primitives in Haskell}
   \label{b:mo:c1}
-\end{listing}
+\end{code}
 \subsection{Concurrency Monads}
 The work done by \cite{claessenFunctionalPearlsPoor1999} constructs a monad to express concurrent computation. The definition is in listing \ref{b:mo:c2}. The idea is using continuation to represent the "future" so that computation can pause and resume as well as expressing sequential computation. Atom wraps the actual computation and Fork is responsible for process spawning. Monad encapsulates the continuation and makes writing program compositionally in a monadic way.
 
-\begin{listing}[ht]
+\begin{code}
   \inputminted{haskell}{background/mo-cm.hs}
   \caption{Concurrency Monads and sequential scheduler}
   \label{b:mo:c2}
-\end{listing}
+\end{code}
 
 An example of program written in Concurrency Monad.
 \begin{minted}{haskell}
@@ -149,10 +146,10 @@ example = do
     atom $ putStrLn name
 \end{minted}
 
-Fuck my \cref{mylin2}.It is worth mentioning that the concurrency monad can be extended to support many features. For example, work done by \cite{marlowMonadDeterministicParallelism} modifies the definition of Action as well as implements a work-stealing parallel scheduler (seen in listing \ref{b:mo:c3}) to build a monad for parallel computation. 
+It is worth mentioning that the concurrency monad can be extended to support many features. For example, work done by \cite{marlowMonadDeterministicParallelism} modifies the definition of Action as well as implements a work-stealing parallel scheduler (seen in listing \ref{b:mo:c3}) to build a monad for parallel computation. 
 
 Besides, Extending the concurrency monad to monad for message-passing concurrency can be done by adding channel primitives like newChan, writeChan and readChan into the Action. Since channel primitives are possible to represent in this monad, we naturally think of its prospect in connecting with MPST (will be discussed in the later section).
-\begin{listing}[ht]
+\begin{code}
   \inputminted{haskell}{background/mo-par.hs}
 %   \caption[.]{
 %   \begin{minipage}{\linewidth}
@@ -168,8 +165,9 @@ Besides, Extending the concurrency monad to monad for message-passing concurrenc
 %     % \end{align*}
 %  \end{minipage}
 %  }
+  \ccaption{Par Monad}{}
   \label{b:mo:c3}
-\end{listing}
+\end{code}
 
 In summary, many techniques and ideas like continuation presented in the implementation of this monad afford us inspirations in designing the intermediate language.
 \section{Free monad} \label{b:fm}
@@ -178,16 +176,16 @@ Free monad \footnote{The mathematical definition of the free monad can be found 
 Functional programming language exploits this concept because of its applications in domain specific language, especially in interpreters (section \ref{b:fm:a}).
 \subsection{Definition}
 In practice, a free monad in Haskell can be defined as an algebraic data type(ADT). As promised in category theory, it is an instance of monad type class given f is a functor (shown in listing \ref{b:fm:c1}). Many useful helper functions are derived from the simple definition of the free monad (shown in listing \ref{b:fm:c2}).
-\begin{listing}[ht]
+\begin{code}
   \inputminted{haskell}{background/fm-construction.hs}
   \caption{Free monad in Haskell}
   \label{b:fm:c1}
-\end{listing}
-\begin{listing}[ht]
+\end{code}
+\begin{code}
   \inputminted{haskell}{background/fm-helper.hs}
   \caption{Helper functions based on free monad}
   \label{b:fm:c2}
-\end{listing}
+\end{code}
 \subsection{Example} \label{b:fm:e}
 As mentioned, free monad is useful in interpreting an abstract syntax tree (AST). In order to apply free monad to a given AST, we can follow a routine \cite{contributorsCatsFreeMonads}.
 \begin{enumerate}
@@ -252,7 +250,7 @@ Good morning Mary
 %   \inputminted{haskell}{background/fm-example.hs}
 %   \caption{An example of free moand}
 %   \label{b:fm:c3}
-% \end{listing}
+% \end{code}
 
 \subsection{Applications} \label{b:fm:a}
 As illustrated by the example (section \ref{b:fm:e}), free monad decouple the abstract syntax tree of domain specific language (DSL) and the interpreter. Interpreters with different purposes can be implemented without changing the syntax.
