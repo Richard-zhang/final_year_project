@@ -1,6 +1,6 @@
 -- Basic unit of computation : Action
 -- A program is the composition of Actions.
-data Action = 
+data Action =
     Atom (IO Action)   -- Atom is a IO computation followed by an action
   | Fork Action Action -- Fork is two 'parallel' action
   | Stop               -- Stop is the termination of an action

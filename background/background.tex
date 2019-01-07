@@ -105,11 +105,11 @@ In multiparty session types theory, the whole distributed system is described by
 \end{table}
 \subsubsection{Projection between global types and local types}
 \subsubsection{Duality of session types}
-\begin{table}[ht]
-\begin{align*}
-\end{align*}
-\caption{Inductive definition of duality} \label{b:mpst:dual}
-\end{table}
+% \begin{table}[ht]
+% \begin{align*}
+% \end{align*}
+% \caption{Inductive definition of duality} \label{b:mpst:dual}
+% \end{table}
 \subsection{Example: arithmetic server}
 \subsection{Applications in parallel computing} \label{b:mpst:app}
 Multiparty session types not only have rich applications in distributed systems but also value in the domain of parallel computation. 
@@ -122,35 +122,92 @@ This section introduce some interfaces for message passing concurrency from the 
 For the simplicity, they're represented in Hasekll but in general most languages can implement similar interfaces. 
 \subsection{Primitives for message-passing concurrency}
 In section \ref{b:mpst}, channels are bi-directional and used for communication between two parties. In Haskell, channel primitives are represented in listing \ref{b:mo:c1}. However, just using these primitives cannot guarantee progress or communication safety. For example, a program that has one thread writing channel once combined with another thread reading channel twice is type-correct but will cause deadlock. Many kinds of research to encode MPST using Haskell's type system are presented in \cite{orchardSessionTypesLinearity} so that an (MPST) type-correct Haskell program assures progress, communication safety and session fidelity.
-\begin{code}
+\begin{listing}[ht]
   \inputminted{haskell}{background/mo-chan.hs}
   \caption{Channel primitives in Haskell}
   \label{b:mo:c1}
-\end{code}
+\end{listing}
 \subsection{Concurrency Monads}
-The work done by \cite{claessenFunctionalPearlsPoor1999} constructs a monad to express concurrent computation. The definition is in listing \ref{b:mo:c2}. The idea is using continuation to represent the "future" so that computation can pause and resume as well as expressing sequential computation. Atom wraps the actual computation and Fork is responsible for process spawning. Monad encapsulates the continuation and makes writing program compositionally in a monadic way.
+The work done by \cite{claessenFunctionalPearlsPoor1999} constructs a monad to express concurrent computation. The definition is in listing \ref{b:mo:c2}. The idea is using continuation to represent the "future" so that computation can pause and resume as well as expressing sequential computation. Atom wraps the actual computation and Fork is responsible for thread spawning. Monad encapsulates the continuation and makes writing program compositionally in a monadic way.
 
 \begin{code}
-  \inputminted{haskell}{background/mo-cm.hs}
-  \caption{Concurrency Monads and sequential scheduler}
+  % \inputminted{haskell}{background/mo-cm.hs}
+  \begin{minted}{haskell}
+    data Action =          #\clabel{mo-cm:1}#
+        Atom (IO Action)   #\clabel{mo-cm:2}# 
+      | Fork Action Action #\clabel{mo-cm:3}# 
+      | Stop               #\clabel{mo-cm:4}# 
+    
+    newtype C a = C { runC :: (a -> Action) -> Action } #\clabel{mo-cm:5}#
+    
+    instance Monad C where
+        (>>=) :: C a -> (a -> C b) -> C b #\clabel{mo-cm:6}#
+        m >>= f  = C $ \k -> runC m (\v -> runC (f v) k)
+        return :: a -> C a
+        return x = C $ \k -> k x
+    
+    schedule :: [Action] -> IO () #\clabel{mo-cm:7}#
+    schedule [] = return ()
+    schedule (a:as) = sched as a
+    
+    sched :: [Action] -> Action -> IO ()
+    sched as (Atom ioa) = do
+        a <- ioa
+        schedule $ as ++ [a] 
+    sched as (Fork a1 a2) = schedule $ as ++ [a2, a1]
+    sched as Stop = schedule as
+    
+    atom :: IO a -> C a #\clabel{mo-cm:8}#
+    atom m = C $ \k -> Atom $ do
+        r <- m
+        return $ k r
+    
+    fork :: C () -> C ()
+    fork m = C $ \k -> Fork (runC m (const Stop)) (k ())
+  \end{minted}
+  \ccaption{Concurrency Monads and sequential scheduler}{
+    \begin{itemize}
+      \item[\cref{mo-cm:1}] Basic unit of computation : Action. A program is the composition of Actions.
+      \item[\cref{mo-cm:2}] Atom is a IO computation followed by an action.
+      \item[\cref{mo-cm:3}] Fork is two 'parallel' action.
+      \item[\cref{mo-cm:4}] Stop is the termination of an action.
+      \item[\cref{mo-cm:5}] Using a monad C to encapsulates continuation
+      \item[\cref{mo-cm:6}] Monad bind is used to represent sequence of Actions.
+      \item[\cref{mo-cm:7}] An implementation of a sequential scheduler. sched is the helper function.
+      \item[\cref{mo-cm:8}] Atom and fork are combinators to compose programs.
+    \end{itemize}      
+  }
   \label{b:mo:c2}
 \end{code}
 
-An example of program written in Concurrency Monad.
+\begin{code}
 \begin{minted}{haskell}
 example :: C ()
 example = do 
-    atom $ putStrLn "Hello" #\clabel{mylin2}#
-    name <- atom getLine #\clabel{myline}#
+    atom $ putStrLn "Hello" 
+    name <- atom getLine 
     fork $ atom $ putStrLn "World"
     atom $ putStrLn name
 \end{minted}
+\caption{Example of a program writen in concurrency monad}
+\end{code}
 
-It is worth mentioning that the concurrency monad can be extended to support many features. For example, work done by \cite{marlowMonadDeterministicParallelism} modifies the definition of Action as well as implements a work-stealing parallel scheduler (seen in listing \ref{b:mo:c3}) to build a monad for parallel computation. 
+It is worth mentioning that the concurrency monad can be extended to support many features. For example, work done by \cite{marlowMonadDeterministicParallelism} modifies the definition of Action as. well as implements a work-stealing parallel scheduler (seen in listing \ref{b:mo:c3}) to build a monad for parallel computation. 
 
-Besides, Extending the concurrency monad to monad for message-passing concurrency can be done by adding channel primitives like newChan, writeChan and readChan into the Action. Since channel primitives are possible to represent in this monad, we naturally think of its prospect in connecting with MPST (will be discussed in the later section).
+Besides, Extending the concurrency monad to monad for message-passing concurrency can be done by adding channel primitives like newChan, writeChan and readChan into the Action.. Since channel primitives are possible to represent in this monad, we naturally think of its prospect in connecting with MPST (will be discussed in the later section).
 \begin{code}
-  \inputminted{haskell}{background/mo-par.hs}
+  % \inputminted{haskell}{background/mo-par.hs}
+  \begin{minted}{haskell}
+    newtype IVar a = IVar (IORef (IVarContents a)) #\clabel{po:ivar}#
+    data IVarContents a = Full a | Blocked [a -> Action.]
+    
+    data Action .=
+        Fork Action Action
+      | Stop
+      | forall a . Get (IVar a) (a -> Action) #\clabel{po:get}#
+      | forall a . Put (IVar a) a Action #\clabel{po:put}#
+      | forall a . New (IVar a -> Action)
+  \end{minted}
 %   \caption[.]{
 %   \begin{minipage}{\linewidth}
 %     Par Monad
@@ -165,7 +222,13 @@ Besides, Extending the concurrency monad to monad for message-passing concurrenc
 %     % \end{align*}
 %  \end{minipage}
 %  }
-  \ccaption{Par Monad}{}
+  \ccaption{Par Monad}{
+    \begin{itemize}
+      \item[\cref{po:ivar}] Parent threads and child threads communicate data via IVar
+      \item[\cref{po:get}] Get operation blocks when the underlying IVarContents is Blocked  
+      \item[\cref{po:put}] Put operation updates the underlying IVarContetns to Full with the result a and resume the list of blocking threads by applying a to the continuation.
+    \end{itemize}
+  }
   \label{b:mo:c3}
 \end{code}
 
