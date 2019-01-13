@@ -9,6 +9,9 @@
 % \newcommand{\hsp}{\hspace{20pt}}
 % \titleformat{\chapter}[hang]{\Huge\bfseries}{\thechapter\hsp|\hsp}{0pt}{\Huge\bfseries}
 
+%% Forced float
+\usepackage{float}
+
 %% Source code highlight
 \usepackage{minted}
 \usepackage{listings}
@@ -23,7 +26,7 @@
 \newcommand*\cref[1]{\circled{\ref{#1}}}
 \newcommand*\ccaption[2]{
     \caption[.]{
-        #1\newline
+        \centering #1\newline
         \begin{minipage}{\linewidth}
             #2
         \end{minipage}
@@ -57,6 +60,7 @@
 
 %% Useful packages
 \usepackage{amsmath}
+\usepackage{amssymb}
 \usepackage{graphicx}
 \usepackage{subcaption}
 \usepackage[colorinlistoftodos]{todonotes}

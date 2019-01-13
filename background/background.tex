@@ -9,13 +9,35 @@ Definition of arrows will be represented in Haskell for convenience (shown in li
 
 Intuitively, an arrow (y a b) can be regarded as computation from parameterised input a to parameterised output b. The simplest instance of arrow class is the basic function (shown in listing \ref{b:ar:c2}). Visually, arrows are like pipelines of computation with at least two inputs and at least two outputs (shown in figures \ref{b:ar:p1}\cite{HaskellUnderstandingArrows}). Programs formed by arrows are like compositions of pipelines.
 \begin{code}
-  \inputminted{haskell}{background/ar-def.hs}
-  \caption{Arrow class in Haskell}
+  % \inputminted{haskell}{background/ar-def.hs}
+  \begin{minted}{haskell}
+    class Arrow y where #\clabel{ar-def:1}#
+      arr :: (a -> b) -> y a b
+      first :: y a b -> y (a, c) (b, c)
+      second :: y a b -> y (c, a) (c, b)
+      (***) :: y a c -> y b d -> y (a, b) (c, d)
+      (&&&) :: y a b -> y a c -> y a (b, c)
+      (|||) :: y a c -> y b c -> y (Either a b) c  
+  \end{minted}
+  \ccaption{Arrow class in Haskell}{
+    \begin{itemize}
+      \item[\cref{ar-def:1}] Types of arrow functions 
+    \end{itemize}
+  }
   \label{b:ar:c1}
 \end{code}
 \begin{code}
-  \inputminted{haskell}{background/ar-func.hs}
-  \caption{$(\rightarrow)$ instance of Arrow class} 
+  % \inputminted{haskell}{background/ar-func.hs}
+  \begin{minted}{haskell}
+    instance Arrow (->) where #\clabel{ar-func:1}#
+      arr f = f
+      (***) f g ~(x,y) = (f x, g y)
+  \end{minted}
+  \ccaption{$(\rightarrow)$ instance of Arrow class}{
+    \begin{itemize}
+      \item[\cref{ar-func:1}] Minimal implementation of arrow class are arr and ***
+    \end{itemize}
+  }
   \label{b:ar:c2}
 \end{code}
 \begin{figure*}
@@ -76,11 +98,23 @@ From the previous example, the data flow of programs written regarding arrow com
 In patricular, details of \cite{authorAlgebraicMultipartyProtocol2018} are introduced in section \ref{b:pal}.
 
 \section{Multiparty session types} \label{b:mpst}
-Multiparty session types is a branch of behavioural types specifically targeted at describing protocols in distributed systems based on asynchonous communication \cite{coppoGentleIntroductionMultiparty2015}: this is the theoretical foundation of TODO.
+In complicated distributed systems, participants agree on a protocol, specifying type and direction of data exchanged. Multiparty session types are a branch of behavioural types specifically targeted at describing protocols in distributed systems based on asynchonous communication \cite{coppoGentleIntroductionMultiparty2015}. They're a type formalism used to model communication-based programming by codifying the structure of communication. The evolution of computing from the era of data processsing to the era of commucation witnessed the growth and significance of the theory of sesssion types.
 
-TODO: Add describtions about the MPST 1. describes explicit dataflow 2. so it can be used as the high-level programming languages to generate paralllel codes 3. in section \ref{b:mpst:app}.
-\subsection{Global types and session types}
-In multiparty session types theory, the whole distributed system is described by global types representing the communication protocols from a global viewpoint.  Each process are typed by local types which characterise the same communication protocols as global types but from a perspective of individual participants \cite{coppoGentleIntroductionMultiparty2015}.
+The theory of multiparty session type contains three main elements. Global types (seen in section \ref{b:mpst:st}), local (session) types and processes. Processes are the concrete descriptions of the behaviour of the peers involed in the distributed system \cite{coppoGentleIntroductionMultiparty2015} using a formal language. Usually, the most used and the original langauge is $\pi$-calculus \cite{milnerCalculusMobileProcesses1992}. However, for the simplicity, we will not introduce $\pi$-calculus and use message passing primitives in Haskell (seen in section \label{b:mo:mpc}) instead. The coming sections are an intuitive introduction of session types by examples.
+TODO: Add describtions about the MPST 1. describes explicit dataflow 2. so it can be used as the high-level programming languages to generate parallel codes 3. in section \ref{b:mpst:app}.
+\subsection{Global types and local types} \label{b:mpst:st}
+Global type is at the most abstract level, describing a communication protocol from a neutral viewpoing in terms of the interfactions that are supposed to occur between the protocol peers, of the order of these interactions, and of the kind of messages excahnged during these interactions \cite{coppoGentleIntroductionMultiparty2015}. The syntax of the global types is shwon in table \ref{b:mpst:gt} and an example of gloabl types is shown in \ref{b:mpst:gtex}.
+
+Local types or session types characterise the same communication protocol as the global type, but from the viewpoint of each peer \cite{coppoGentleIntroductionMultiparty2015}. Each process is typed by local type. THe syntax of local types is shwon in table \ref{b:mpst:lt} and an example of local type is shown in \ref{b:mpst:ltex}. 
+
+The relationship between global types and local types are established by the projection (seen in \ref{b:mpst:proj}) and a type system performs syntactic checks, ensuring that processes are typed by their corresponding local types. Hence, at the compile time, three important properties follows \cite{coppoGentleIntroductionMultiparty2015}. 
+\begin{itemize}
+  \item \textbf{communication safety}: Mismatches between the types of sent and expected messages, despite the same communication channel is used for excahnging messages of different types, do not exist \cite{coppoGentleIntroductionMultiparty2015}. 
+  \item \textbf{protocol fidelity}: The interfactions that occurs are accounted for by the global type and therefore are allowed by the protocol \cite{coppoGentleIntroductionMultiparty2015}.
+  \item \textbf{progress}: Every message sent is eventually received, and every process waiting for a message eventually receives one \cite{coppoGentleIntroductionMultiparty2015}.
+\end{itemize}
+We will learn that these properties are valuable not only in the distributed system but also in the domain of parallle computing in section \ref{b:mpst:app}.
+% In the theory of multiparty session types, the whole distributed system is described by global types representing the communication protocols from a global viewpoint.  Each process are typed by local types which characterise the same communication protocols as global types but from a perspective of individual participants \cite{coppoGentleIntroductionMultiparty2015}.
 \begin{table}[ht]
 \centering
 \begin{grammar}{G\Coloneqq}{Global types}
@@ -92,19 +126,103 @@ In multiparty session types theory, the whole distributed system is described by
 \caption{Global types} \label{b:mpst:gt}
 \end{table}
 \begin{table}[ht]
-\centering
+\begin{grammar}{S\Coloneqq}{Sorts}
+  \text{bool} \mid \text{nat} \mid \text{string} \\
+  \dots\\
+\end{grammar}
+% \begin{grammar}{T\Coloneqq}{Session types/local types}
+%   ! \langle p, S \rangle . T & Send value\\
+%   ! \langle p, T \rangle . T & Send channel\\
+%   ? ( p, T ) . T & Channel Receive\\
+%   ? ( p, S ) . T & Sorts Receive\\
+%   \oplus \langle p, \{ l_i : T_i \}_{i \in I} \rangle & Selection \\
+%   \&(p, \{l_i : T_i \}_{i \in I}) & Bracnhing \\
+%   \mu \mathbf{t}.T  \mid \mathbf{t} \mid \text{end} & Recursion/End
+% \end{grammar}
+\hfill
 \begin{grammar}{T\Coloneqq}{Session types/local types}
-  ! \langle p, Sorts \rangle . T & Send value\\
+  ! \langle p, S \rangle . T & Send value\\
   ! \langle p, T \rangle . T & Send channel\\
-  ? ( p, Sorts | T ) . T & Receive\\
+  ? ( p, T ) . T & Channel Receive\\
+  ? ( p, S ) . T & Sorts Receive\\
   \oplus \langle p, \{ l_i : T_i \}_{i \in I} \rangle & Selection \\
   \&(p, \{l_i : T_i \}_{i \in I}) & Bracnhing \\
   \mu \mathbf{t}.T  \mid \mathbf{t} \mid \text{end} & Recursion/End
 \end{grammar}
-\caption{Session types/local types} \label{b:mpst:st}
+\caption{Session types/local types} \label{b:mpst:lt}
+\end{table}[ht]
+\begin{table}
+  \begin{minipage}{0.45\textwidth}
+    \begin{enumerate}
+      \item Customer(0) sends an order number to Agency(1) and Agency sends back a quote to customer.
+      \item If Customer is happy with the price then Customer selects accept option and notifies Agency.
+      \item If Customer thinks the price is too high then Customer terminate the trade by selecting reject.
+      \item If accept is selected, Agency notify both Customer and Agency2(2). 
+      \item Customer sends an address to Agency2 and Agency2 sends back a deliver date.
+    \end{enumerate}
+  \end{minipage}
+  \hfill
+  \begin{minipage}{0.45\textwidth}
+    \begin{align*}
+      G = \\
+      & 0 \rightarrow 1: && \langle \text{string} \rangle .\\
+      & 1 \rightarrow 0: && \langle \text{int} \rangle .\\
+      & 0 \rightarrow 1: \{ && \text{accept}: \\
+      & && 1 \rightarrow \{ 0, 2 \}: \langle \text{string} \rangle . \\
+      & &&  0 \rightarrow 2: \langle \text{string} \rangle .\\
+      & &&  2 \rightarrow 0: \langle \text{int} \rangle . \text{end}, \\
+      & && \text{reject}: \text{end} \} \\
+    \end{align*}
+  \end{minipage}
+  \caption{An example of protocal described by global types G}
+  \label{b:mpst:gtex}
 \end{table}
-\subsubsection{Projection between global types and local types}
+\begin{table}[ht]
+  \begin{minipage}{0.45\textwidth}
+    \begin{align*}
+      S \triangleq \mu t.(\&\{ & \text{balance}: ![\text{nat}];t, \\
+        & \text{deposit}: ?[\text{nat}];![\text{nat}];t, \\
+        & \text{exit}: \text{end}\}) \\
+    \end{align*}
+  \end{minipage}
+  \hfill
+  \begin{minipage}{0.45\textwidth}
+    \begin{align*}
+      C \triangleq \oplus \{ &\text{balance}: ?[\text{nat}];\text{end}, \\
+                             &\text{deposit}: ![\text{nat}];?[\text{nat}];\text{end} \} 
+    \end{align*}
+  \end{minipage}
+  \caption{Session types of client and server end point of a ATM service}
+  \label{b:mpst:ltex}
+\end{table}
+\subsubsection{Projection between global types and local types} \label{b:mpst:proj}
+Projection is the formalisation of the relationship between global and local types. It's an operation extracting the local type of each peer from the global type \cite{coppoGentleIntroductionMultiparty2015}. The definition of projection is shown in table \ref{b:mpst:pdef}.
+
+As an example, a projection of global type in table \ref{b:mpst:gtex} is
+$$
+  G \upharpoonright 0 = !\langle 1, \text{string} \rangle;?(1, \text{string});\&(1, \{ \text{accept}: ?(1, \text{string});!\langle 2, \text{string} \rangle;?(2, \text{int}), 
+  \text{reject}: \text{end} \})
+$$  
+\begin{table}[H]
+\includegraphics[width=\textwidth]{background/image/proj-def.png}
+\caption{The definition of projection of a global type G onto a participants q\cite{coppoGentleIntroductionMultiparty2015}}
+\label{b:mpst:pdef}
+\end{table}
 \subsubsection{Duality of session types}
+In binary session types where all protocals are pairwise, duality formalise the relationship between the types of opposite endpoints. For a type $T$, its dual or co type, written $\bar{T}$ is defined inductively as in table \ref{b:mpst:dualdef}.
+\begin{table}[H]
+\includegraphics[width=\textwidth]{background/image/dual-def.png}
+\caption{Inductive definition of duality}
+\label{b:mpst:dualdef}
+\end{table}
+
+Duality is essential for checking type compatability. Compatible types mean that each common channel $k$ is associated with complementary behaviour: this ensures that the interactions on $k$ run without erros. 
+
+In order to apply duality into multiparty session types in which more than two participants are allowed, we introduce the partial projection (seen in \cite{coppoGentleIntroductionMultiparty2015}) from multiparty session type to binary session type so that we can resue the definition of duality after applying the partial projection.
+% \begin{table}[H]
+% \caption{The pa}
+% \label{b:mpst:partproj}
+% \end{table}
 % \begin{table}[ht]
 % \begin{align*}
 % \end{align*}
@@ -120,7 +238,7 @@ Existing work\cite{ngSafeMPICode} has shown how to generate MPI\footnote{Message
 This section introduce some interfaces for message passing concurrency from the primitive case: channel to more advanced one: monad for message passing concurrency.
 
 For the simplicity, they're represented in Hasekll but in general most languages can implement similar interfaces. 
-\subsection{Primitives for message-passing concurrency}
+\subsection{Primitives for message-passing concurrency} \label{b:mo:mpc}
 In section \ref{b:mpst}, channels are bi-directional and used for communication between two parties. In Haskell, channel primitives are represented in listing \ref{b:mo:c1}. However, just using these primitives cannot guarantee progress or communication safety. For example, a program that has one thread writing channel once combined with another thread reading channel twice is type-correct but will cause deadlock. Many kinds of research to encode MPST using Haskell's type system are presented in \cite{orchardSessionTypesLinearity} so that an (MPST) type-correct Haskell program assures progress, communication safety and session fidelity.
 \begin{listing}[ht]
   \inputminted{haskell}{background/mo-chan.hs}
@@ -128,7 +246,7 @@ In section \ref{b:mpst}, channels are bi-directional and used for communication 
   \label{b:mo:c1}
 \end{listing}
 \subsection{Concurrency Monads}
-The work done by \cite{claessenFunctionalPearlsPoor1999} constructs a monad to express concurrent computation. The definition is in listing \ref{b:mo:c2}. The idea is using continuation to represent the "future" so that computation can pause and resume as well as expressing sequential computation. Atom wraps the actual computation and Fork is responsible for thread spawning. Monad encapsulates the continuation and makes writing program compositionally in a monadic way.
+The work done by \cite{claessenFunctionalPearlsPoor1999} constructs a monad to express concurrent computation. The definition is in listing \ref{b:mo:c2}. The idea is using continuation to represent the "future" so that computation can pause and resume as well as expressing sequential computation. Atom wraps the actual computation and Fork is responsible for spawning threads. Monad encapsulates the continuation and makes writing program compositionally in a monadic way.
 
 \begin{code}
   % \inputminted{haskell}{background/mo-cm.hs}
@@ -174,7 +292,7 @@ The work done by \cite{claessenFunctionalPearlsPoor1999} constructs a monad to e
       \item[\cref{mo-cm:5}] Using a monad C to encapsulates continuation
       \item[\cref{mo-cm:6}] Monad bind is used to represent sequence of Actions.
       \item[\cref{mo-cm:7}] An implementation of a sequential scheduler. sched is the helper function.
-      \item[\cref{mo-cm:8}] Atom and fork are combinators to compose programs.
+      \item[\cref{mo-cm:8}] atom and fork are combinators to compose programs.
     \end{itemize}      
   }
   \label{b:mo:c2}
