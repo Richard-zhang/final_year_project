@@ -97,6 +97,52 @@ The simple example demos that arrows combinatorcis make writing point-free progr
 From the previous example, the data flow of programs written regarding arrow combinators can be easily visualised. It is intuitive to recognise that the clean separation between the flow of data and computation will be useful in generating parallel codes. Indeed, arrow describes data flow implicitly, and it is an example of the so-called algebraic pattern. Many works (\cite{braunArrowsParallelComputation2018}, \cite{elliottGenericFunctionalParallel2017b} and \cite{authorAlgebraicMultipartyProtocol2018}) has been done to generate parallel codes from algebraic patterns.
 In patricular, details of \cite{authorAlgebraicMultipartyProtocol2018} are introduced in section \ref{b:pal}.
 
+\section{Recursion Schemes} \label{b:rs}
+Recursion schemes are patterns for expressing general computation. In particular, they are like high order function abstracting recursion so that programmer can express any kind of recursion by data structures combined with recursion schemes instead of explicit recursive functions.
+\subsection{Definition}
+We will introduce three typical recursion shcemes: catamorphisms, anamorphisms and hylomorphisms (seen in listing \ref{p:pal:c3}). As mentioned before, recrusion schemes express recrusion with the help of data structures, in particular, the fixed point of data structures (seen in listing \ref{p:pal:c2})
+\begin{code}
+\begin{minted}{haskell}
+newtype Fix f = Fix { unfix :: f (Fix f) }
+
+data TreeF a =
+    Node a a
+  | Leaf int
+  | Empty
+  deriving Functor
+
+type Tree = Fix TreeF
+\end{minted}
+\caption{Definition of fix point of data structures} \label{p:pal:c2}
+\end{code}
+
+Anamorphisms takes a function from a to f a (called the co-algebra) and a value a and return the Fix f. Used Tree as an example, anamorphisms takes a single value a and applies the co-algebra to the value. It continues to apply itself to the branches of the TreeF recursively and finally expands a single value to a complete tree. Intuitively, anamorphism unfolds a single value to a complicated data structure top-down.
+
+Catamorphisms is the reverse of anamorphisms, folding a data structure to a single value bottom-up. It takes a function from f a to a (called the algebra) and Fix f to fold and return a single value a. Catamorphisms and anamorphisms describe the process globally (from a to Fix f and from Fix f to a) while co-algebra and algebra capture what happened locally. The elegant part is while co-algebra and algebra do not involve with any recursion data structure (TreeF is not recursive), catamorphisms and anamorphism can build or consume recursive data structures.
+
+Hylomorphisms is applying anamorphism followed by catamorphisms. It is the most common pattern to use. We will use an example to illustrate its usefulness. 
+\begin{code}
+\begin{minted}{haskell}
+ana :: Functor f => (a -> f a) -> a -> Fix f
+ana coalg = Fix . fmap (ana coalg) . coalg
+
+cata :: Functor f => (f a -> a) -> Fix f -> a
+cata alg = alg . fmap (cata alg) . unfix
+
+hylo :: (f b -> b) -> (a -> f a) -> b -> a 
+hylo g f = cata g . ana f 
+\end{minted}
+\caption{Recursion schemes in haskell} \label{p:pal:c3}
+\end{code}
+
+\subsection{Example: Merge sort} \label{b:rs:ex}
+We can write merge sort recursively. First of all, we split the list in half and then apply the merge sort recrusively to both parts and finally we merge two list into a single list. 
+
+To write merge sort in terms of recursion scheme, we need to define the recursive structure to represent the control structure. By the definition of merge sort, this structure must have a case with two branches, a base case representing a singleton list and a base case representing an empty list hence this structure is the TreeF we defined above. Splitting a list is like co-algebra while merging is like algebra. We use hylomorphisms to combine them hence getting a sorted list (seen in listing \ref{p:pal:c4}).
+\begin{code}
+\inputminted{haskell}{project/pal-ms.hs}
+\caption{Merge sort using hylomorphisms} \label{p:pal:c4}
+\end{code}
 \section{Multiparty session types} \label{b:mpst}
 In complicated distributed systems, participants agree on a protocol, specifying type and direction of data exchanged. Multiparty session types are a branch of behavioural types specifically targeted at describing protocols in distributed systems based on asynchonous communication \cite{coppoGentleIntroductionMultiparty2015}. They're a type formalism used to model communication-based programming by codifying the structure of communication. The evolution of computing from the era of data processsing to the era of commucation witnessed the growth and significance of the theory of sesssion types.
 
