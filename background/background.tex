@@ -88,8 +88,23 @@ mean'' = liftM2 (/) sum (fromIntegral . length)
 Above program can be visualized in figure \ref{b:ar:p2}.
 \begin{figure}[ht]
   \centering
-  \includegraphics[width=8cm]{example-image} 
-  \caption{TODO: Add a visualization to show the pipelines}\label{b:ar:p2}
+  % \includegraphics[width=8cm]{example-image} 
+  \begin{tikzpicture}[xscale=1.5]
+    \tikzstyle{proc} = [rectangle, rounded corners, minimum width=2cm, minimum height=1cm,text centered, draw=black] 
+    \tikzstyle{proc1} = [circle,  minimum width=1cm, minimum height=1cm,text centered, draw=black] 
+    \tikzstyle{arrow} = [thick,->,>=stealth]
+    \node (a) [proc1] at (0, 0) {\&\&\&};
+    \node (b) [proc] at (2, 1) {length};
+    \node (c) [proc] at (4, 1) {fromIntegral};
+    \node (d) [proc] at (6, 0) {uncurry (/)};
+    \node (e) [proc] at (3, -1) {sum};
+    \draw[arrow] (a) to (b);
+    \draw[arrow] (b) to (c);
+    \draw[arrow] (c) to (d);
+    \draw[arrow] (a) to (e);
+    \draw[arrow] (e) to (d);
+  \end{tikzpicture}
+  \caption{Visualization of mean'}\label{b:ar:p2}
 \end{figure}
 The simple example demos that arrows combinatorcis make writing point-free programs easier. Arrows union the implementation of algorithm and data-flow in the algorithm. 
 
