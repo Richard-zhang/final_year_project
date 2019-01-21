@@ -1,0 +1,106 @@
+\documentclass[a4paper, twoside]{report}
+%% Language and font encodings
+\usepackage[english]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+
+%% Chapter Beautify
+\usepackage{titlesec}
+% \newcommand{\hsp}{\hspace{20pt}}
+% \titleformat{\chapter}[hang]{\Huge\bfseries}{\thechapter\hsp|\hsp}{0pt}{\Huge\bfseries}
+
+%% Very nice Font
+\usepackage{palatino}
+
+%% Diagram drawing
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows}
+
+%% Forced float
+\usepackage{float}
+
+%% Source code highlight
+\usepackage{minted}
+\usepackage{listings}
+
+%% Code line references
+\setminted[haskell]{escapeinside=\#\#, linenos=true, mathescape=true}
+\usepackage{caption}
+\usepackage{tikz}
+\newcommand*\circled[1]{\tikz[baseline=(char.base)]{
+            \node[shape=circle,draw,inner sep=1pt, text=white] (char) {#1};}}
+\newcommand*\clabel[1]{$\label{#1} \circled{\ref{#1}}$}
+\newcommand*\cref[1]{\circled{\ref{#1}}}
+\newcommand*\ccaption[2]{
+    \caption[.]{
+        \centering #1\newline
+        \begin{minipage}{\linewidth}
+            #2
+        \end{minipage}
+        \newline
+    }
+}
+
+\newenvironment{code}{\captionsetup{type=listing}}{}
+%% Automatic Reference
+
+% BNF Rule
+\usepackage{mathtools,array}
+\newenvironment{grammar}[2]
+ {\begin{tabular}{@{\qquad}>{$}l<{$}@{\qquad}l@{}}
+  \multicolumn{1}{@{}l@{}}{$#1$}&\multicolumn{1}{l@{}}{\hspace{-2em}#2}\\}
+ {\end{tabular}}
+
+%% Placeholder picture
+% \usepackage{todonotes}
+\usepackage{mwe}
+
+%% Format Paragraph
+\setcounter{secnumdepth}{4}
+\titleformat{\paragraph}
+{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+\titlespacing*{\paragraph}
+{0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+
+%% Sets page size and margins
+\usepackage[a4paper,top=3cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
+
+%% Useful packages
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage[colorinlistoftodos]{todonotes}
+\usepackage[colorlinks=true, allcolors=black]{hyperref}
+
+\title{TBD}
+\author{Shuhao Zhang}
+% Update supervisor and other title stuff in title/title.tex
+
+\begin{document}
+\input{title/title.tex}
+
+\begin{abstract}
+TBD
+\end{abstract}
+
+\renewcommand{\abstractname}{Acknowledgements}
+\begin{abstract}
+TBD
+\end{abstract}
+
+\tableofcontents
+\listoffigures
+\listoftables
+
+\input{introduction/introduction.tex}
+\input{background/background.tex}
+\input{project/project.tex}
+\input{evaluation/evaluation.tex}
+\input{conclusion/conclusion.tex}
+\input{appendix/appendix.tex}
+
+\bibliographystyle{ieeetr}
+\bibliography{bibs/main}
+
+\end{document}

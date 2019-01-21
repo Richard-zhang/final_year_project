@@ -1,0 +1,197 @@
+
+@incollection{coppoGentleIntroductionMultiparty2015,
+  address = {Cham},
+  title = {A {{Gentle Introduction}} to {{Multiparty Asynchronous Session Types}}},
+  volume = {9104},
+  isbn = {978-3-319-18940-6 978-3-319-18941-3},
+  abstract = {This article provides a gentle introduction to multiparty session types, a class of behavioural types specifically targeted at describing protocols in distributed systems based on asynchronous communication. The type system ensures well-typed processes to enjoy non-trivial properties, including communication safety, protocol fidelity, as well as progress. The adoption of multiparty session types can positively affect the whole software lifecycle, from design to deployment, improving software reliability and reducing its development costs.},
+  language = {en},
+  booktitle = {Formal {{Methods}} for {{Multicore Programming}}},
+  publisher = {{Springer International Publishing}},
+  author = {Coppo, Mario and {Dezani-Ciancaglini}, Mariangiola and Padovani, Luca and Yoshida, Nobuko},
+  editor = {Bernardo, Marco and Johnsen, Einar Broch},
+  year = {2015},
+  pages = {146-178},
+  file = {/Users/r/Zotero/storage/PR6PURST/Coppo et al. - 2015 - A Gentle Introduction to Multiparty Asynchronous S.pdf},
+  doi = {10.1007/978-3-319-18941-3_4}
+}
+
+@article{ngSafeMPICode,
+  title = {Safe {{MPI Code Generation}} Based on {{Session Types}}},
+  abstract = {This paper presents a code generation framework for type-safe and deadlock-free Message Passing Interface (MPI) programs. The code generation process starts with the definition of the global topology using a protocol specification language based on parameterised multiparty session types (MPST). An MPI parallel program backbone is automatically generated from the global specification. The backbone code can then be merged with the sequential code describing the application behaviour, resulting in a complete MPI program. This merging process is fully automated through the use of an aspect-oriented compilation approach. In this way, programmers only need to supply the intended communication protocol and provide sequential code to automatically obtain parallelised programs that are guaranteed free from communication mismatch, type errors or deadlocks. The code generation framework also integrates an optimisation method that overlaps communication and computation, and can derive not only representative parallel programs with common parallel patterns (such as ring and stencil), but also distributed applications from any MPST protocols. We show that our tool generates efficient and scalable MPI applications, and improves productivity of programmers. For instance, our benchmarks involving representative parallel and applicationspecific patterns speed up sequential execution by up to 31 times and reduce programming effort by an average of 39\%.},
+  language = {en},
+  author = {Ng, Nicholas and Coutinho, Jose G F and Yoshida, Nobuko},
+  keywords = {read},
+  pages = {22},
+  file = {/Users/r/Zotero/storage/U7H9HDKV/Ng et al. - Safe MPI Code Generation based on Session Types.pdf}
+}
+
+@article{swierstraDataTypesCarte2008,
+  title = {Data Types \`a La Carte},
+  volume = {18},
+  issn = {0956-7968, 1469-7653},
+  doi = {10.1017/S0956796808006758},
+  abstract = {This paper describes a technique for assembling both data types and functions from isolated individual components. We also explore how the same technology can be used to combine free monads and, as a result, structure Haskell's monolithic IO monad.},
+  language = {en},
+  number = {04},
+  journal = {Journal of Functional Programming},
+  author = {Swierstra, Wouter},
+  month = jul,
+  year = {2008},
+  file = {/Users/r/Zotero/storage/C9YP5MUL/Swierstra - 2008 - Data types à la carte.pdf}
+}
+
+@incollection{hughesProgrammingArrows2005,
+  address = {Berlin, Heidelberg},
+  title = {Programming with {{Arrows}}},
+  volume = {3622},
+  isbn = {978-3-540-28540-3 978-3-540-31872-9},
+  language = {en},
+  booktitle = {Advanced {{Functional Programming}}},
+  publisher = {{Springer Berlin Heidelberg}},
+  author = {Hughes, John},
+  editor = {Hutchison, David and Kanade, Takeo and Kittler, Josef and Kleinberg, Jon M. and Mattern, Friedemann and Mitchell, John C. and Naor, Moni and Nierstrasz, Oscar and Pandu Rangan, C. and Steffen, Bernhard and Sudan, Madhu and Terzopoulos, Demetri and Tygar, Dough and Vardi, Moshe Y. and Weikum, Gerhard and Vene, Varmo and Uustalu, Tarmo},
+  year = {2005},
+  pages = {73-129},
+  file = {/Users/r/Zotero/storage/ZSWY2TQT/Hughes - 2005 - Programming with Arrows.pdf},
+  doi = {10.1007/11546382_2}
+}
+
+@misc{contributorsCatsFreeMonads,
+  title = {Cats: {{FreeMonads}}},
+  shorttitle = {Cats},
+  abstract = {Lightweight, modular, and extensible library for functional programming},
+  journal = {Cats},
+  howpublished = {http://typelevel.org/cats/},
+  author = {{contributors}, Cats},
+  file = {/Users/r/Zotero/storage/Z6M7N3GV/freemonad.html}
+}
+
+@article{MessagePassingInterface2018,
+  title = {Message {{Passing Interface}}},
+  copyright = {Creative Commons Attribution-ShareAlike License},
+  abstract = {Message Passing Interface (MPI) is a standardized and portable message-passing standard designed by a group of researchers from academia and industry to function on a wide variety of parallel computing architectures.  The standard defines the syntax and semantics of a core of library routines useful to a wide range of users writing portable message-passing programs in C, C++, and Fortran.  There are several well-tested and efficient implementations of MPI, many of which are open-source or in the public domain.  These fostered the development of a parallel software industry, and encouraged development of portable and scalable large-scale parallel applications.},
+  language = {en},
+  journal = {Wikipedia},
+  month = oct,
+  year = {2018},
+  file = {/Users/r/Zotero/storage/SP253PWS/index.html},
+  note = {Page Version ID: 863149040}
+}
+
+@book{claessenFunctionalPearlsPoor1999,
+  title = {Functional {{Pearls}}: {{A Poor Man}}'s {{Concurrency Monad}}},
+  shorttitle = {Functional {{Pearls}}},
+  abstract = {Without adding any primitives to the language, we define a concurrency monad transformer in Haskell. This allows us to add a limited form of concurrency to any existing monad. The atomic actions of the new monad are lifted actions of the underlying monad. Some extra operations, such as fork , to initiate new processes, are provided. We discuss the implementation, and use some examples to illustrate the usefulness of this construction.},
+  author = {Claessen, Koen},
+  year = {1999},
+  file = {/Users/r/Zotero/storage/4FDU7RS7/Claessen - 1999 - Functional Pearls A Poor Man's Concurrency Monad.pdf;/Users/r/Zotero/storage/549VDJJD/summary.html}
+}
+
+@article{braunArrowsParallelComputation2018,
+  archivePrefix = {arXiv},
+  eprinttype = {arxiv},
+  eprint = {1801.02216},
+  primaryClass = {cs},
+  title = {Arrows for {{Parallel Computation}}},
+  abstract = {Arrows are a general interface for computation and an alternative to Monads for API design. In contrast to Monad-based parallelism, we explore the use of Arrows for specifying generalised parallelism. Specifically, we define an Arrow-based language and implement it using multiple parallel Haskells. As each parallel computation is an Arrow, such parallel Arrows (PArrows) can be readily composed and transformed as such. To allow for more sophisticated communication schemes between computation nodes in distributed systems, we utilise the concept of Futures to wrap direct communication. To show that PArrows have similar expressive power as existing parallel languages, we implement several algorithmic skeletons and four benchmarks. Benchmarks show that our framework does not induce any notable performance overhead. We conclude that Arrows have considerable potential for composing parallel programs and for producing programs that can execute on multiple parallel language implementations.},
+  journal = {arXiv:1801.02216 [cs]},
+  author = {Braun, Martin and Lobachev, Oleg and Trinder, Phil},
+  month = jan,
+  year = {2018},
+  keywords = {Computer Science - Programming Languages},
+  file = {/Users/r/Zotero/storage/A5E345TE/Braun et al. - 2018 - Arrows for Parallel Computation.pdf;/Users/r/Zotero/storage/DLISLFKZ/1801.html}
+}
+
+@incollection{meijerFunctionalProgrammingBananas1991,
+  address = {Berlin, Heidelberg},
+  title = {Functional Programming with Bananas, Lenses, Envelopes and Barbed Wire},
+  volume = {523},
+  isbn = {978-3-540-54396-1 978-3-540-47599-6},
+  abstract = {We develop a calculus for lazy functional programming based on recursion operators associated with data type de nitions. For these operators we derive various algebraic laws that are useful in deriving and manipulating programs. We shall show that all example functions in Bird and Wadler's $\backslash$Introduction to Functional Programming" can be expressed using these operators.},
+  language = {en},
+  booktitle = {Functional {{Programming Languages}} and {{Computer Architecture}}},
+  publisher = {{Springer Berlin Heidelberg}},
+  author = {Meijer, Erik and Fokkinga, Maarten and Paterson, Ross},
+  editor = {Goos, Gerhard and Hartmanis, Juris and Hughes, John},
+  year = {1991},
+  pages = {124-144},
+  file = {/Users/r/Zotero/storage/4394SS3X/Meijer et al. - 1991 - Functional programming with bananas, lenses, envel.pdf},
+  doi = {10.1007/3540543961_7}
+}
+
+@article{authorAlgebraicMultipartyProtocol2018,
+  title = {Algebraic {{Multiparty Protocol Programming}}},
+  language = {en},
+  journal = {New York},
+  author = {Author, Anonymous},
+  year = {2018},
+  pages = {20},
+  file = {/Users/r/Zotero/storage/CXGNBQ9Q/Author - 2018 - Algebraic Multiparty Protocol Programming.pdf}
+}
+
+@article{elliottGenericFunctionalParallel2017b,
+  title = {Generic Functional Parallel Algorithms: Scan and {{FFT}}},
+  volume = {1},
+  issn = {24751421},
+  shorttitle = {Generic Functional Parallel Algorithms},
+  doi = {10.1145/3110251},
+  language = {en},
+  number = {ICFP},
+  journal = {Proceedings of the ACM on Programming Languages},
+  author = {Elliott, Conal},
+  month = aug,
+  year = {2017},
+  pages = {1-25},
+  file = {/Users/r/Zotero/storage/R9966FDF/Elliott - 2017 - Generic functional parallel algorithms scan and F.pdf}
+}
+
+@misc{HaskellUnderstandingArrows,
+  title = {Haskell/{{Understanding}} Arrows - {{Wikibooks}}, Open Books for an Open World},
+  howpublished = {https://en.wikibooks.org/wiki/Haskell/Understanding\_arrows},
+  file = {/Users/r/Zotero/storage/D5QGLMP6/Understanding_arrows.html}
+}
+
+@misc{mlotEnglishDataFlow2015,
+  title = {English: {{Data}} Flow in the Mean1 Example of b:En:{{Haskell}}/{{Arrow}} Tutorial. {{Rectangles}} Are Arrows (Rounded Rectangles Are Arrows Made with Arr) and Circles Are Other Data Flow Split/Merge Points.},
+  shorttitle = {English},
+  author = {Mlot, Daniel},
+  month = jul,
+  year = {2015},
+  file = {/Users/r/Zotero/storage/HL4E5HMD/FileUnderstanding_arrows_mean1_data_flow.html}
+}
+
+@article{marlowMonadDeterministicParallelism,
+  title = {A {{Monad}} for {{Deterministic Parallelism}}},
+  abstract = {We present a new programming model for deterministic parallel computation in a pure functional language. The model is monadic and has explicit granularity, but allows dynamic construction of dataflow networks that are scheduled at runtime, while remaining deterministic and pure. The implementation is based on monadic concurrency, which has until now only been used to simulate concurrency in functional languages, rather than to provide parallelism. We present the API with its semantics, and argue that parallel execution is deterministic. Furthermore, we present a complete workstealing scheduler implemented as a Haskell library, and we show that it performs at least as well as the existing parallel programming models in Haskell.},
+  language = {en},
+  author = {Marlow, Simon and Newton, Ryan and Jones, Simon Peyton},
+  pages = {12},
+  file = {/Users/r/Zotero/storage/XYFASX75/Marlow et al. - A Monad for Deterministic Parallelism.pdf}
+}
+
+@article{orchardSessionTypesLinearity,
+  title = {Session {{Types}} with {{Linearity}} in {{Haskell}}},
+  abstract = {Type systems with parametric polymorphism can encode a significant proportion of the information contained in session types. This allows concurrent programming with session-type-like guarantees in languages like ML and Java. However, statically enforcing the linearity properties of session types, in a way that is also natural to program with, is more challenging. Haskell provides various language features that can capture concurrent programming with session types, with full linearity invariants and in a mostly idiomatic style. This chapter overviews various approaches in the literature for session typed programming in Haskell.},
+  language = {en},
+  author = {Orchard, Dominic and Yoshida, Nobuko},
+  pages = {24},
+  file = {/Users/r/Zotero/storage/2PQSZG4D/Orchard and Yoshida - Session Types with Linearity in Haskell.pdf}
+}
+
+@article{milnerCalculusMobileProcesses1992,
+  title = {A Calculus of Mobile Processes, {{I}}},
+  volume = {100},
+  issn = {08905401},
+  doi = {10.1016/0890-5401(92)90008-4},
+  language = {en},
+  number = {1},
+  journal = {Information and Computation},
+  author = {Milner, Robin and Parrow, Joachim and Walker, David},
+  month = sep,
+  year = {1992},
+  pages = {1-40},
+  file = {/Users/r/Zotero/storage/TJYLRIXK/Milner et al. - 1992 - A calculus of mobile processes, I.pdf}
+}
+
+
