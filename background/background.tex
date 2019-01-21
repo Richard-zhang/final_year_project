@@ -1,13 +1,13 @@
 \chapter{Background} \label{b}
 % This section is an overview of arrows, multiparty session types (MPST) and free monad. Arrow is an interface of implicit data flow, and MPST can be used to describe explicit data flow. Free monad is a technique to convert normal DSL to a monadic DSL. 
-As mentioned in the section \ref{i:m}, this section is an overview of a high-level language (section \ref{b:arrows} and \ref{b:pal}), from which a translation rule will be proposed to our intermediate languages, multiparty session types (section \ref{b:mpst}), the theoretical backbone giving rich features of the intermediate languages, and the free monad (section \ref{b:fm}), a technique in designing the intermediate languages.
+As mentioned in the \secref{i:m}, this section is an overview of a high-level language (\secref{b:arrows} and \secref{b:pal}), from which a translation rule will be proposed to our intermediate languages, multiparty session types (\secref{b:mpst}), the theoretical backbone giving rich features of the intermediate languages, and the free monad (\secref{b:fm}), a technique in designing the intermediate languages.
 
 \section{Arrows} \label{b:arrows}
-Arrows, a general interface to describe computation, is the theoretical foundation of the high-level languages described in section \ref{b:pal}.
+Arrows, a general interface to describe computation, is the theoretical foundation of the high-level languages described in \secref{b:pal}.
 \subsection{Definition}
-Definition of arrows will be represented in Haskell for convenience (shown in listing \ref{b:ar:c1}). In general, it can be defined in any programming language.
+Definition of arrows will be represented in Haskell for convenience (shown in \coref{b:ar:c1}). In general, it can be defined in any programming language.
 
-Intuitively, an arrow (y a b) can be regarded as computation from parameterised input a to parameterised output b. The simplest instance of arrow class is the basic function (shown in listing \ref{b:ar:c2}). Visually, arrows are like pipelines of computation with at least two inputs and at least two outputs (shown in figures \ref{b:ar:p1}\cite{HaskellUnderstandingArrows}). Programs formed by arrows are like compositions of pipelines.
+Intuitively, an arrow (y a b) can be regarded as computation from parameterised input a to parameterised output b. The simplest instance of arrow class is the basic function (shown in \coref{b:ar:c2}). Visually, arrows are like pipelines of computation with at least two inputs and at least two outputs (shown in \figref{b:ar:p1}). Programs formed by arrows are like compositions of pipelines.
 \begin{code}
   % \inputminted{haskell}{background/ar-def.hs}
   \begin{minted}{haskell}
@@ -70,7 +70,7 @@ Intuitively, an arrow (y a b) can be regarded as computation from parameterised 
       \label{fig:mean and std of net44}
   \end{subfigure}
   \caption
-  {\small The visual representations of arrow combinatorcis}
+  {\small The visual representations of arrow combinatorcis\cite{HaskellUnderstandingArrows}}
   \label{b:ar:p1}
 \end{figure*}
 \subsection{Example: Calculate the mean}
@@ -85,7 +85,7 @@ mean' = (sum &&& (length >>> fromIntegral)) >>> uncurry (/)
 mean'' :: [Float] -> Float
 mean'' = liftM2 (/) sum (fromIntegral . length)
 \end{minted}
-Above program can be visualized in figure \ref{b:ar:p2}.
+Above program can be visualized in \figref{b:ar:p2}.
 \begin{figure}[ht]
   \centering
   % \includegraphics[width=8cm]{example-image} 
@@ -109,13 +109,13 @@ Above program can be visualized in figure \ref{b:ar:p2}.
 The simple example demos that arrows combinatorcis make writing point-free programs easier. Arrows union the implementation of algorithm and data-flow in the algorithm. 
 
 \subsection{Application in parallel computation}
-From the previous example, the data flow of programs written regarding arrow combinators can be easily visualised. It is intuitive to recognise that the clean separation between the flow of data and computation will be useful in generating parallel codes. Indeed, arrow describes data flow implicitly, and it is an example of the so-called algebraic pattern. Many works (\cite{braunArrowsParallelComputation2018}, \cite{elliottGenericFunctionalParallel2017b} and \cite{authorAlgebraicMultipartyProtocol2018}) has been done to generate parallel codes from algebraic patterns.
-In patricular, details of \cite{authorAlgebraicMultipartyProtocol2018} are introduced in section \ref{b:pal}.
+From the previous example, the data flow of programs written regarding arrow combinators can be easily visualised. It is intuitive to recognise that the clean separation between the flow of data and computation will be useful in generating parallel code. Indeed, arrow describes data flow implicitly, and it is an example of the so-called algebraic pattern. Many works (\cite{braunArrowsParallelComputation2018}, \cite{elliottGenericFunctionalParallel2017b} and \cite{authorAlgebraicMultipartyProtocol2018}) has been done to generate parallel code from algebraic patterns.
+In patricular, details of \cite{authorAlgebraicMultipartyProtocol2018} are introduced in \secref{b:pal}.
 
 \section{Recursion Schemes} \label{b:rs}
 Recursion schemes are patterns for expressing general computation. In particular, they are like high order function abstracting recursion so that programmer can express any kind of recursion by data structures combined with recursion schemes instead of explicit recursive functions.
 \subsection{Definition}
-We will introduce three typical recursion shcemes: catamorphisms, anamorphisms and hylomorphisms (seen in listing \ref{p:pal:c3}). As mentioned before, recrusion schemes express recrusion with the help of data structures, in particular, the fixed point of data structures (seen in listing \ref{p:pal:c2})
+We will introduce three typical recursion shcemes: catamorphisms, anamorphisms and hylomorphisms (seen in \coref{p:pal:c3}). As mentioned before, recrusion schemes express recrusion with the help of data structures, in particular, the fixed point of data structures (seen in \coref{p:pal:c2})
 \begin{code}
 \begin{minted}{haskell}
 newtype Fix f = Fix { unfix :: f (Fix f) }
@@ -153,28 +153,28 @@ hylo g f = cata g . ana f
 \subsection{Example: Merge sort} \label{b:rs:ex}
 We can write merge sort recursively. First of all, we split the list in half and then apply the merge sort recrusively to both parts and finally we merge two list into a single list. 
 
-To write merge sort in terms of recursion scheme, we need to define the recursive structure to represent the control structure. By the definition of merge sort, this structure must have a case with two branches, a base case representing a singleton list and a base case representing an empty list hence this structure is the TreeF we defined above. Splitting a list is like co-algebra while merging is like algebra. We use hylomorphisms to combine them hence getting a sorted list (seen in listing \ref{p:pal:c4}).
+To write merge sort in terms of recursion scheme, we need to define the recursive structure to represent the control structure. By the definition of merge sort, this structure must have a case with two branches, a base case representing a singleton list and a base case representing an empty list hence this structure is the TreeF we defined above. Splitting a list is like co-algebra while merging is like algebra. We use hylomorphisms to combine them hence getting a sorted list (seen in \coref{p:pal:c4}).
 \begin{code}
 \inputminted{haskell}{project/pal-ms.hs}
 \caption{Merge sort using hylomorphisms} \label{p:pal:c4}
 \end{code}
 \section{Multiparty session types} \label{b:mpst}
-In complicated distributed systems, participants agree on a protocol, specifying type and direction of data exchanged. Multiparty session types are a branch of behavioural types specifically targeted at describing protocols in distributed systems based on asynchonous communication \cite{coppoGentleIntroductionMultiparty2015}. They're a type formalism used to model communication-based programming by codifying the structure of communication. The evolution of computing from the era of data processsing to the era of commucation witnessed the growth and significance of the theory of sesssion types.
+In complicated distributed systems, participants agree on a protocol, specifying type and direction of data exchanged. Multiparty session types are a branch of behavioural types specifically targeted at describing protocols in distributed systems based on asynchonous communication \cite{coppoGentleIntroductionMultiparty2015}. They are a type formalism used to model communication-based programming by codifying the structure of communication. The evolution of computing from the era of data processsing to the era of commucation witnessed the growth and significance of the theory of sesssion types.
 
-The theory of multiparty session type contains three main elements. Global types (seen in section \ref{b:mpst:st}), local (session) types and processes. Processes are the concrete descriptions of the behaviour of the peers involed in the distributed system \cite{coppoGentleIntroductionMultiparty2015} using a formal language. Usually, the most used and the original langauge is $\pi$-calculus \cite{milnerCalculusMobileProcesses1992}. However, for the simplicity, we will not introduce $\pi$-calculus and use message passing primitives in Haskell (seen in section \label{b:mo:mpc}) instead. The coming sections are an intuitive introduction of session types by examples.
-TODO: Add describtions about the MPST 1. describes explicit dataflow 2. so it can be used as the high-level programming languages to generate parallel codes 3. in section \ref{b:mpst:app}.
+The theory of multiparty session type contains three main elements. Global types (seen in \secref{b:mpst:st}), local (session) types and processes. Processes are the concrete descriptions of the behaviour of the peers involed in the distributed system \cite{coppoGentleIntroductionMultiparty2015} using a formal language. Usually, the most used and the original langauge is $\pi$-calculus \cite{milnerCalculusMobileProcesses1992}. However, for the simplicity, we will not introduce $\pi$-calculus and use message passing primitives in Haskell (seen in section \label{b:mo:mpc}) instead. The coming sections are an intuitive introduction of session types by examples.
+TODO: Add describtions about the MPST 1. describes explicit dataflow 2. so it can be used as the high-level programming languages to generate parallel code 3. in \secref{b:mpst:app}.
 \subsection{Global types and local types} \label{b:mpst:st}
-Global type is at the most abstract level, describing a communication protocol from a neutral viewpoing in terms of the interfactions that are supposed to occur between the protocol peers, of the order of these interactions, and of the kind of messages excahnged during these interactions \cite{coppoGentleIntroductionMultiparty2015}. The syntax of the global types is shwon in table \ref{b:mpst:gt} and an example of gloabl types is shown in \ref{b:mpst:gtex}.
+Global type is at the most abstract level, describing a communication protocol from a neutral viewpoing in terms of the interactions that are supposed to occur between the protocol peers, of the order of these interactions, and of the kind of messages excahnged during these interactions \cite{coppoGentleIntroductionMultiparty2015}. The syntax of the global types is shwon in \tabref{b:mpst:gt} and an example of gloabl types is shown in \tabref{b:mpst:gtex}.
 
-Local types or session types characterise the same communication protocol as the global type, but from the viewpoint of each peer \cite{coppoGentleIntroductionMultiparty2015}. Each process is typed by local type. THe syntax of local types is shwon in table \ref{b:mpst:lt} and an example of local type is shown in \ref{b:mpst:ltex}. 
+Local types or session types characterise the same communication protocol as the global type, but from the viewpoint of each peer \cite{coppoGentleIntroductionMultiparty2015}. Each process is typed by local type. THe syntax of local types is shwon in \tabref{b:mpst:lt} and an example of local type is shown in \tabref{b:mpst:ltex}. 
 
-The relationship between global types and local types are established by the projection (seen in \ref{b:mpst:proj}) and a type system performs syntactic checks, ensuring that processes are typed by their corresponding local types. Hence, at the compile time, three important properties follows \cite{coppoGentleIntroductionMultiparty2015}. 
+The relationship between global types and local types are established by the projection (seen in the \secref{b:mpst:proj}) and a type system performs syntactic checks, ensuring that processes are typed by their corresponding local types. Hence, at the compile time, three important properties follows \cite{coppoGentleIntroductionMultiparty2015}. 
 \begin{itemize}
   \item \textbf{communication safety}: Mismatches between the types of sent and expected messages, despite the same communication channel is used for excahnging messages of different types, do not exist \cite{coppoGentleIntroductionMultiparty2015}. 
-  \item \textbf{protocol fidelity}: The interfactions that occurs are accounted for by the global type and therefore are allowed by the protocol \cite{coppoGentleIntroductionMultiparty2015}.
+  \item \textbf{protocol fidelity}: The interactions that occurs are accounted for by the global type and therefore are allowed by the protocol \cite{coppoGentleIntroductionMultiparty2015}.
   \item \textbf{progress}: Every message sent is eventually received, and every process waiting for a message eventually receives one \cite{coppoGentleIntroductionMultiparty2015}.
 \end{itemize}
-We will learn that these properties are valuable not only in the distributed system but also in the domain of parallle computing in section \ref{b:mpst:app}.
+We will learn that these properties are valuable not only in the distributed system but also in the domain of parallle computing in \secref{b:mpst:app}.
 % In the theory of multiparty session types, the whole distributed system is described by global types representing the communication protocols from a global viewpoint.  Each process are typed by local types which characterise the same communication protocols as global types but from a perspective of individual participants \cite{coppoGentleIntroductionMultiparty2015}.
 \begin{table}[ht]
 \centering
@@ -257,9 +257,9 @@ We will learn that these properties are valuable not only in the distributed sys
   \label{b:mpst:ltex}
 \end{table}
 \subsubsection{Projection between global types and local types} \label{b:mpst:proj}
-Projection is the formalisation of the relationship between global and local types. It's an operation extracting the local type of each peer from the global type \cite{coppoGentleIntroductionMultiparty2015}. The definition of projection is shown in table \ref{b:mpst:pdef}.
+Projection is the formalisation of the relationship between global and local types. It is an operation extracting the local type of each peer from the global type \cite{coppoGentleIntroductionMultiparty2015}. The definition of projection is shown in \tabref{b:mpst:pdef}.
 
-As an example, a projection of global type in table \ref{b:mpst:gtex} is
+As an example, a projection of global type in \tabref{b:mpst:gtex} is
 $$
   G \upharpoonright 0 = !\langle 1, \text{string} \rangle;?(1, \text{string});\&(1, \{ \text{accept}: ?(1, \text{string});!\langle 2, \text{string} \rangle;?(2, \text{int}), 
   \text{reject}: \text{end} \})
@@ -270,7 +270,7 @@ $$
 \label{b:mpst:pdef}
 \end{table}
 \subsubsection{Duality of session types}
-In binary session types where all protocals are pairwise, duality formalise the relationship between the types of opposite endpoints. For a type $T$, its dual or co type, written $\bar{T}$ is defined inductively as in table \ref{b:mpst:dualdef}.
+In binary session types where all protocals are pairwise, duality formalise the relationship between the types of opposite endpoints. For a type $T$, its dual or co type, written $\bar{T}$ is defined inductively as in \tabref{b:mpst:dualdef}.
 \begin{table}[H]
 \includegraphics[width=\textwidth]{background/image/dual-def.png}
 \caption{Inductive definition of duality}
@@ -293,21 +293,21 @@ In order to apply duality into multiparty session types in which more than two p
 \subsection{Applications in parallel computing} \label{b:mpst:app}
 Multiparty session types not only have rich applications in distributed systems but also value in the domain of parallel computation. 
 
-Existing work\cite{ngSafeMPICode} has shown how to generate MPI\footnote{Message Passing Interface (MPI) is a standardised and portable message-passing standard designed by a group of researchers from academia and industry to function on a wide variety of parallel computing architectures \cite{MessagePassingInterface2018}.} programs using session types. Users describe the communication topology as a skeleton using a protocol language which is type checked by session types. After that, an MPI program is generated by merging the skeleton and user-provided kernels for each peer. The parallel codes obtained in this way is guaranteed to be deadlock-free and progressing. 
+Existing work\cite{ngSafeMPICode} has shown how to generate MPI\footnote{Message Passing Interface (MPI) is a standardised and portable message-passing standard designed by a group of researchers from academia and industry to function on a wide variety of parallel computing architectures \cite{MessagePassingInterface2018}.} programs using session types. Users describe the communication topology as a skeleton using a protocol language which is type checked by session types. After that, an MPI program is generated by merging the skeleton and user-provided kernels for each peer. The parallel code obtained in this way is guaranteed to be deadlock-free and progressing. 
 
 \section{Message passing concurrency}
 This section introduce some interfaces for message passing concurrency from the primitive case: channel to more advanced one: monad for message passing concurrency.
 
-For the simplicity, they're represented in Hasekll but in general most languages can implement similar interfaces. 
+For the simplicity, they are represented in Hasekll but in general most languages can implement similar interfaces. 
 \subsection{Primitives for message-passing concurrency} \label{b:mo:mpc}
-In section \ref{b:mpst}, channels are bi-directional and used for communication between two parties. In Haskell, channel primitives are represented in listing \ref{b:mo:c1}. However, just using these primitives cannot guarantee progress or communication safety. For example, a program that has one thread writing channel once combined with another thread reading channel twice is type-correct but will cause deadlock. Many kinds of research to encode MPST using Haskell's type system are presented in \cite{orchardSessionTypesLinearity} so that an (MPST) type-correct Haskell program assures progress, communication safety and session fidelity.
+In \secref{b:mpst}, channels are bi-directional and used for communication between two parties. In Haskell, channel primitives are represented in \coref{b:mo:c1}. However, just using these primitives cannot guarantee progress or communication safety. For example, a program that has one thread writing channel once combined with another thread reading channel twice is type-correct but will cause deadlock. Many kinds of research to encode MPST using Haskell's type system are presented in \cite{orchardSessionTypesLinearity} so that an (MPST) type-correct Haskell program assures progress, communication safety and session fidelity.
 \begin{listing}[ht]
   \inputminted{haskell}{background/mo-chan.hs}
   \caption{Channel primitives in Haskell}
   \label{b:mo:c1}
 \end{listing}
 \subsection{Concurrency Monads}
-The work done by \cite{claessenFunctionalPearlsPoor1999} constructs a monad to express concurrent computation. The definition is in listing \ref{b:mo:c2}. The idea is using continuation to represent the "future" so that computation can pause and resume as well as expressing sequential computation. Atom wraps the actual computation and Fork is responsible for spawning threads. Monad encapsulates the continuation and makes writing program compositionally in a monadic way.
+The work done by \cite{claessenFunctionalPearlsPoor1999} constructs a monad to express concurrent computation. The definition is in \coref{b:mo:c2}. The idea is using continuation to represent the "future" so that computation can pause and resume as well as expressing sequential computation. Atom wraps the actual computation and Fork is responsible for spawning threads. Monad encapsulates the continuation and makes writing program compositionally in a monadic way.
 
 \begin{code}
   % \inputminted{haskell}{background/mo-cm.hs}
@@ -371,7 +371,7 @@ example = do
 \caption{Example of a program writen in concurrency monad}
 \end{code}
 
-It is worth mentioning that the concurrency monad can be extended to support many features. For example, work done by \cite{marlowMonadDeterministicParallelism} modifies the definition of Action as. well as implements a work-stealing parallel scheduler (seen in listing \ref{b:mo:c3}) to build a monad for parallel computation. 
+It is worth mentioning that the concurrency monad can be extended to support many features. For example, work done by \cite{marlowMonadDeterministicParallelism} modifies the definition of Action as. well as implements a work-stealing parallel scheduler (seen in \coref{b:mo:c3}) to build a monad for parallel computation. 
 
 Besides, Extending the concurrency monad to monad for message-passing concurrency can be done by adding channel primitives like newChan, writeChan and readChan into the Action.. Since channel primitives are possible to represent in this monad, we naturally think of its prospect in connecting with MPST (will be discussed in the later section).
 \begin{code}
@@ -415,9 +415,9 @@ In summary, many techniques and ideas like continuation presented in the impleme
 \section{Free monad} \label{b:fm}
 Free monad \footnote{The mathematical definition of the free monad can be found in \cite{contributorsCatsFreeMonads}} is a concept from category theory.
 % \footnote{Free monad is a construction that is left adjoint to a forgetful functor whose domain is the category of Monads and whose co-domain is the category of Endofunctors \cite{contributorsCatsFreeMonads}. Intuitively, it says any functor can construct a monad}. 
-Functional programming language exploits this concept because of its applications in domain specific language, especially in interpreters (section \ref{b:fm:a}).
+Functional programming language exploits this concept because of its applications in domain specific language, especially in interpreters (\secref{b:fm:a}).
 \subsection{Definition}
-In practice, a free monad in Haskell can be defined as an algebraic data type(ADT). As promised in category theory, it is an instance of monad type class given f is a functor (shown in listing \ref{b:fm:c1}). Many useful helper functions are derived from the simple definition of the free monad (shown in listing \ref{b:fm:c2}).
+In practice, a free monad in Haskell can be defined as an algebraic data type(ADT). As promised in category theory, it is an instance of monad type class given f is a functor (shown in \coref{b:fm:c1}). Many useful helper functions are derived from the simple definition of the free monad (shown in \coref{b:fm:c2}).
 \begin{code}
   \inputminted{haskell}{background/fm-construction.hs}
   \caption{Free monad in Haskell}
@@ -482,7 +482,7 @@ goodMorningInterpreter = interpret helper
 \end{minted} 
 Finally, execute the program.
 \begin{minted}{bash}
-ghci:> goodMorningInterpreter exampleProgram
+ghci:> goodMorningInterpreter examplePrograe
 Tom
 Good morning Tom
 Mary
@@ -495,7 +495,7 @@ Good morning Mary
 % \end{code}
 
 \subsection{Applications} \label{b:fm:a}
-As illustrated by the example (section \ref{b:fm:e}), free monad decouple the abstract syntax tree of domain specific language (DSL) and the interpreter. Interpreters with different purposes can be implemented without changing the syntax.
+As illustrated by the example (\secref{b:fm:e}), free monad decouple the abstract syntax tree of domain specific language (DSL) and the interpreter. Interpreters with different purposes can be implemented without changing the syntax.
 
 In the project, we apply free monad to the intermediate language so not only we make the languages monadic for free but also benefits from decoupling the interpreter and the syntax to implement different interpreters, e.g. Simulator, code generators to different platforms easily.
 \section{Summary}

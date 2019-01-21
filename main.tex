@@ -52,7 +52,6 @@
  {\end{tabular}}
 
 %% Placeholder picture
-% \usepackage{todonotes}
 \usepackage{mwe}
 
 %% Format Paragraph
@@ -72,6 +71,13 @@
 \usepackage{subcaption}
 \usepackage[colorinlistoftodos]{todonotes}
 \usepackage[colorlinks=true, allcolors=black]{hyperref}
+
+%% Reference for figure, section and source code
+\newcommand*{\tabref}[1]{\tablename~\ref{#1}}
+\newcommand*{\figref}[1]{\figurename~\ref{#1}}
+\newcommand*{\coref}[1]{\lstlistingname~\ref{#1}}
+\newcommand*{\secref}[1]{Section~\ref{#1}}
+
 
 \title{TBD}
 \author{Shuhao Zhang}
