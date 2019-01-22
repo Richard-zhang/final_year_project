@@ -1,0 +1,37 @@
+\chapter{Project plan} \label{plan}
+This section is the proposed plan for the project. It is organised into milestones with the corresponding deadlines attached.
+\begin{enumerate}
+\item Week 5 - 6: Specification of the intermediate language.
+\begin{enumerate}
+    \item Week 5 - Jan 31st: Define the syntax.  
+    \item Week 6 - Feb 8th: Define the operation semantics
+\end{enumerate}
+\item Week 7 - 8: A simulator that reflects the operation semantics of the language
+\begin{enumerate}
+    \item Week 8 - Feb 22nd: Implement a simulator that gathers all possible traces of execution of programs
+\end{enumerate}
+\item Week 9: Session typing the language
+\begin{enumerate}
+    \item Week 9 - Mar 1st: Use session type to type check the language. There're two possible approaches
+    \begin{itemize}
+        \item Encode session type into the Haskell type system to type check 
+        \item Write our own typechecker to type check the programs
+    \end{itemize} 
+\end{enumerate}
+\item Week 10: Translation rule 
+\begin{enumerate}
+    \item Week 10- Mar 8th: Adapt a translation rule from a high-level language in parallel framework PAL to the language
+\end{enumerate}
+\item Week 11 - 18: Code generation in C
+\begin{enumerate}
+    \item Week 13- Mar 29th: Specify the target language constructors (a subset of C)
+    \item Week 16- Apr 19th: Translation scheme to the target language
+    \item Week 18- May 3rd: Refine the implementations and debug
+\end{enumerate}
+\item Week 19 - 23: Evaluation
+\begin{enumerate}
+    \item Week 20- May 17th: Implement example algorithms for benchmarking
+    \item Week 22- May 31st: Benchmark the performance of the generated code
+    \item Week 23- Jun 7th: Benchmark the toolchain performance like compile time or size of generated code
+\end{enumerate}
+\end{enumerate}
