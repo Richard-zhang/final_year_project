@@ -13,14 +13,15 @@ With the help of this intermediate languages, the implementation complexity is r
 In addition, it couples with multiparty session type (MPST) \cite{coppoGentleIntroductionMultiparty2015}. It takes advantages of properties of MPST to enable aggressive optimisation but ensuring code correctness and allow more meaningful static analysis; \eg cost modelling for parallel programming. % (TODO add more examples of possible kinds of static analysis and reference paper).
 
 \section{Objectives}
-(TODO Need refinement and adding concrete details)
+% (TODO Need refinement and adding concrete details)
 \begin{enumerate}
 \item \textbf{Design}: Design the intermediate languages, argue its generanality and build its connection with MPST. 
-\item \textbf{Tranlsation}: Give an example of how to translate high level languages to our languages. 
+\item \textbf{Tranlsation}: Define a translate rule from the language in a high level parallel frameworks to our language. 
 \item \textbf{Simulator}: Build a simulator to prove the correctness of code generation and act as a playground for experiments.
 \item \textbf{Code generation}: Generate parallel code in C.
-\item \textbf{Static Analysis}: Give an example of how MPST can be used in improving the generated code.
+\item \textbf{Static Analysis}: Session typing the language to obtain properties guaranteed by session types% Cost modelling for parallel programming using MPST as an example of how MPST can be used to improve the generated code.
+% TODO performance code gnerated => measured by different algorithms
+% TODO performance of tool chain => meassured in the same way
+% TODO size of generated code => compact
 \end{enumerate}
-\section{Challenges}
-TODO
-% \section{Contributions}
+More details of the objectives will be explained in the project planning at \secref{plan}

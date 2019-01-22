@@ -86,32 +86,38 @@
 \usepackage{xspace}
 \newcommand*{\eg}{e.g.\@\xspace}
 
-\title{TBD}
+%% Nested list
+\usepackage{enumitem}
+\setlist[enumerate]{label*=\arabic*.}
+
+\title{The Interim Report}
 \author{Shuhao Zhang}
 % Update supervisor and other title stuff in title/title.tex
 
 \begin{document}
 \input{title/title.tex}
 
-\begin{abstract}
-TBD
-\end{abstract}
+% TODO
+% \begin{abstract}
+% TBD
+% \end{abstract}
 
-\renewcommand{\abstractname}{Acknowledgements}
-\begin{abstract}
-TBD
-\end{abstract}
+% \renewcommand{\abstractname}{Acknowledgements}
+% \begin{abstract}
+% TBD
+% \end{abstract}
 
 \tableofcontents
-\listoffigures
-\listoftables
+% \listoffigures
+% \listoftables
 
 \input{introduction/introduction.tex}
 \input{background/background.tex}
-\input{project/project.tex}
+% \input{project/project.tex}
+\input{plan/plan.tex}
 \input{evaluation/evaluation.tex}
-\input{conclusion/conclusion.tex}
-\input{appendix/appendix.tex}
+% \input{conclusion/conclusion.tex}
+% \input{appendix/appendix.tex}
 
 \bibliographystyle{ieeetr}
 \bibliography{bibs/main}

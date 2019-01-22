@@ -1,30 +1,31 @@
 \chapter{Background} \label{b}
 % This section is an overview of arrows, multiparty session types (MPST) and free monad. Arrow is an interface of implicit data flow, and MPST can be used to describe explicit data flow. Free monad is a technique to convert normal DSL to a monadic DSL. 
 % As mentioned in the \secref{i:m}, this section is an overview of a high-level language (\secref{b:arrows} and \secref{b:pal}), from which a translation rule will be proposed to our intermediate languages, multiparty session types (\secref{b:mpst}), the theoretical backbone giving rich features of the intermediate languages, and the free monad (\secref{b:fm}), a technique in designing the intermediate languages.
-TODO rewrite introduction
+This section is an overview of techniques that influence the design choices of our monadic language for parallel computation. First of all, we give an overview of techniques applied in the high-level parallel programming framework: arrows (\secref{b:arrows}) and recursion schemes (\secref{b:rs}). We then introduce several techniques for message-passing concurrency: multiparty session types (\secref{b:mpst}) and monadic languages for concurrency (\secref{b:mo}). In the end, we introduce free monads (\secref{b:fm}), a technique valuable in implementing embedded domain-specific languages (EDSL).
 
 \section{Arrows} \label{b:arrows}
-Arrows is a general interface to describe computation.
+Arrows is a general interface to describe computation. It can ease the process of writing structured code suitable for parallelising. It also demos a common feature of the frameworks: parallelizability is empowered by underlying implicit but precise data-flow. On the other hand, converting to low-level message-passing code, which requires programmers to define communication using message-passing function and primitives, makes the data-flow explicit.
 \subsection{Definition}
-\coref{b:ar:c1} shows the Arrow definition in Haskell. Intuitively, an arrow 'y a b' can be regarded (TODO). In Haskell, (TODO explain each arr, first, second, blah)
+\coref{b:ar:c1} shows the Arrow definition in Haskell. Intuitively, an arrow type 'y a b'(that is, the application of the parameterised type 'y' to the two parameter type 'b' and 'c') can be regarded as a computation with input of type 'b' and output of type 'b'\cite{hughesGeneralisingMonadsArrows2000}. Visually, arrows are like pipelines (shown in \figref{b:ar:p1}). In Haskell, an arrow 'y' is a type that implements the following interface (type classes in Haskell are roughly interfaces). 'arr' converts an arbitrary function into an arrow. '>>>' sequences two arrows. Taking two input,  'first' apply the arrow to the first input while keeping the second untouched. Conversely, 'second' modifies the second input and keeps the first one unchanged.
+% TODO add reference to arrow visualization
 
-Intuitively, an arrow (y a b) can be regarded as computation from parameterised input a to parameterised output b. The simplest instance of arrow class is the basic function (shown in \coref{b:ar:c2}). Visually, arrows are like pipelines of computation with at least two inputs and at least two outputs (shown in \figref{b:ar:p1}).
+The simplest instance of arrow class is the function type (shown in \coref{b:ar:c2}). 
 \begin{code}
   % \inputminted{haskell}{background/ar-def.hs}
   \begin{minted}{haskell}
-    class Arrow y where #\clabel{ar-def:1}#
+    class Arrow y where 
       arr :: (a -> b) -> y a b
       first :: y a b -> y (a, c) (b, c)
       second :: y a b -> y (c, a) (c, b)
       (***) :: y a c -> y b d -> y (a, b) (c, d)
       (&&&) :: y a b -> y a c -> y a (b, c)
-      (|||) :: y a c -> y b c -> y (Either a b) c  
   \end{minted}
-  \ccaption{Arrow class in Haskell}{
-    \begin{itemize}
-      \item[\cref{ar-def:1}] Types of arrow functions 
-    \end{itemize}
-  }
+  \caption{Arrow class in Haskell}
+  % \ccaption{Arrow class in Haskell}{
+    % \begin{itemize}
+      % \item[\cref{ar-def:1}] Types of arrow functions 
+    % \end{itemize}
+  % }
   \label{b:ar:c1}
 \end{code}
 \begin{code}
@@ -47,6 +48,7 @@ Intuitively, an arrow (y a b) can be regarded as computation from parameterised 
       \centering
       \includegraphics[width=\textwidth]{background/image/ArrowsConveyors_first2.png}
       % \caption{{\small Network 1}}    
+      \label{}
       \label{fig:mean and std of net14}
   \end{subfigure}
   \hfill
@@ -112,8 +114,8 @@ Above program can be visualized in \figref{b:ar:p2}.
 The simple example demos that arrows combinatorcis make writing point-free programs easier. Arrows union the implementation of algorithm and data-flow in the algorithm. 
 
 \subsection{Application in parallel computation}
-From the previous example, the data flow of programs written regarding arrow combinators can be easily visualised. It is intuitive to recognise that the clean separation between the flow of data and computation will be useful in generating parallel code. Indeed, arrow describes data flow implicitly, and it is an example of the so-called algebraic pattern. Many works (\cite{braunArrowsParallelComputation2018}, \cite{elliottGenericFunctionalParallel2017b} and \cite{authorAlgebraicMultipartyProtocol2018}) has been done to generate parallel code from algebraic patterns.
-In patricular, details of \cite{authorAlgebraicMultipartyProtocol2018} are introduced in \secref{b:pal}.
+From the previous example, the data flow of programs written regarding arrow combinators can be easily visualised. It is intuitive to recognise that the clean separation between the flow of data and actual computation will be useful in generating parallel code. Indeed, arrow describes data flow implicitly, and it is an example of the so-called algebraic pattern. Many works \cite{braunArrowsParallelComputation2018, elliottGenericFunctionalParallel2017b, AlgebraicMultipartyProtocol} has been done to generate parallel code from algebraic patterns.
+In particular, details of \cite{AlgebraicMultipartyProtocol} are introduced in later section. % TODO
 
 \section{Recursion Schemes} \label{b:rs}
 Recursion schemes are patterns for expressing general computation. In particular, they are like high order function abstracting recursion so that programmer can express any kind of recursion by data structures combined with recursion schemes instead of explicit recursive functions.
@@ -139,6 +141,7 @@ Anamorphisms takes a function from a to f a (called the co-algebra) and a value 
 Catamorphisms are the reverse of anamorphisms, folding a data structure to a single value bottom-up. It takes a function from f a to a (called the algebra) and Fix f to fold and return a single value a. Catamorphisms and anamorphisms describe the process globally (from a to Fix f and from Fix f to a) while co-algebra and algebra capture what happened locally. The elegant part is while co-algebra and algebra do not involve with any recursion data structure (TreeF is not recursive), catamorphisms and anamorphism can build or consume recursive data structures.
 
 Hylomorphisms is applying anamorphism followed by catamorphisms. It is the most common pattern to use. We will use an example to illustrate its usefulness. 
+% TODO add Divided and conquer analogy
 \begin{code}
 \begin{minted}{haskell}
 ana :: Functor f => (a -> f a) -> a -> Fix f
@@ -195,15 +198,6 @@ We will learn that these properties are valuable not only in the distributed sys
   \text{bool} \mid \text{nat} \mid \text{string} \\
   \dots\\
 \end{grammar}
-% \begin{grammar}{T\Coloneqq}{Session types/local types}
-%   ! \langle p, S \rangle . T & Send value\\
-%   ! \langle p, T \rangle . T & Send channel\\
-%   ? ( p, T ) . T & Channel Receive\\
-%   ? ( p, S ) . T & Sorts Receive\\
-%   \oplus \langle p, \{ l_i : T_i \}_{i \in I} \rangle & Selection \\
-%   \&(p, \{l_i : T_i \}_{i \in I}) & Bracnhing \\
-%   \mu \mathbf{t}.T  \mid \mathbf{t} \mid \text{end} & Recursion/End
-% \end{grammar}
 \hfill
 \begin{grammar}{T\Coloneqq}{Session types/local types}
   ! \langle p, S \rangle . T & Send value\\
@@ -215,8 +209,8 @@ We will learn that these properties are valuable not only in the distributed sys
   \mu \mathbf{t}.T  \mid \mathbf{t} \mid \text{end} & Recursion/End
 \end{grammar}
 \caption{Session types/local types} \label{b:mpst:lt}
-\end{table}[ht]
-\begin{table}
+\end{table}
+\begin{table}[ht]
   \begin{minipage}{0.45\textwidth}
     \begin{enumerate}
       \item Customer(0) sends an order number to Agency(1), and Agency sends back a quote to the customer.
@@ -299,7 +293,7 @@ Multiparty session types not only have rich applications in distributed systems 
 
 Existing work\cite{ngSafeMPICode} has shown how to generate MPI\footnote{Message Passing Interface (MPI) is a standardised and portable message-passing standard designed by a group of researchers from academia and industry to function on a wide variety of parallel computing architectures \cite{MessagePassingInterface2018}.} programs using session types. Users describe the communication topology as a skeleton using a protocol language which is type checked by session types. After that, an MPI program is generated by merging the skeleton and user-provided kernels for each peer. The parallel code obtained in this way is guaranteed to be deadlock-free and progressing. 
 
-\section{Message passing concurrency}
+\section{Message passing concurrency} \label{b:mo}
 This section introduces some interfaces for message passing concurrency from the primitive case: channel to more advanced one: monad for message passing concurrency.
 
 For simplicity, they are represented in Haskell, but in general, most languages can implement similar interfaces. 
@@ -417,6 +411,7 @@ Besides, extending the concurrency monad to monad for message-passing concurrenc
 
 In summary, many techniques and ideas like continuation presented in the implementation of this monad afford us inspirations in designing the intermediate language.
 \section{Free monad} \label{b:fm}
+% TODO add reference to the concurrency monad, show that monad C is not necessary
 Free monad\cite{contributorsCatsFreeMonads} is a concept from category theory. Intuitively, a free monad as a programming abstraction is a technique for implementing EDSLs, where a Functor represents basic actions of the EDSL and the free monad of this Functor provides a way to sequence and compose actions. Speaking of the advantages, we are particularly interested in its benefits in flexible interpretations which will be illustrated by an example (\secref{b:fm:e}) and discussed further (\secref{b:fm:a}).
 \subsection{Definition}
 In practice, a free monad in Haskell can be defined as an algebraic data type(ADT). As promised in category theory, it is an instance of monad type class given f is a functor (shown in \coref{b:fm:c1}). Many useful helper functions are derived from the simple definition of the free monad (shown in \coref{b:fm:c2}).
@@ -500,4 +495,3 @@ Good morning Mary
 As illustrated by the example (\secref{b:fm:e}), free monad decouple the abstract syntax tree of domain specific language (DSL) and the interpreter. Interpreters with different purposes can be implemented without changing the syntax.
 
 In the project, we apply free monad to the intermediate language so not only we make the languages monadic for free but also benefits from decoupling the interpreter and the syntax to implement different interpreters, e.g. Simulator, code generators to different platforms easily.
-\section{Summary}
