@@ -4,12 +4,12 @@
 This section is an overview of techniques that influence the design choices of our monadic language for parallel computation. First of all, we give an overview of techniques applied in the high-level parallel programming framework: arrows (\secref{b:arrows}) and recursion schemes (\secref{b:rs}). We then introduce several techniques for message-passing concurrency: multiparty session types (\secref{b:mpst}) and monadic languages for concurrency (\secref{b:mo}). In the end, we introduce free monads (\secref{b:fm}), a technique valuable in implementing embedded domain-specific languages (EDSL).
 
 \section{Arrows} \label{b:arrows}
-Arrows is a general interface to describe computation. It can ease the process of writing structured code suitable for parallelising. It also demos a common feature of the frameworks: parallelizability is empowered by underlying implicit but precise data-flow. On the other hand, converting to low-level message-passing code, which requires programmers to define communication using message-passing function and primitives, makes the data-flow explicit.
+Arrow is a general interface to describe computation. It can ease the process of writing structured code suitable for parallelising. It also demos a common feature of the frameworks: parallelizability is empowered by underlying implicit but precise data-flow. On the other hand, converting to low-level message-passing code, which requires programmers to define communication using message-passing function and primitives, makes the data-flow explicit.
 \subsection{Definition}
-\coref{b:ar:c1} shows the Arrow definition in Haskell. Intuitively, an arrow type 'y a b'(that is, the application of the parameterised type 'y' to the two parameter type 'b' and 'c') can be regarded as a computation with input of type 'b' and output of type 'b'\cite{hughesGeneralisingMonadsArrows2000}. Visually, arrows are like pipelines (shown in \figref{b:ar:p1}). In Haskell, an arrow 'y' is a type that implements the following interface (type classes in Haskell are roughly interfaces). 'arr' converts an arbitrary function into an arrow. '>>>' sequences two arrows. Taking two input,  'first' apply the arrow to the first input while keeping the second untouched. Conversely, 'second' modifies the second input and keeps the first one unchanged.
+\coref{b:ar:c1} shows the Arrow definition in Haskell. Intuitively, an arrow type \hask{y a b}(that is, the application of the parameterised type \hask{y} to the two parameter types \hask{b} and \hask{c}) can be regarded as a computation with input of type \hask{b} and output of type \hask{b}\cite{hughesGeneralisingMonadsArrows2000}. Visually, arrows are like pipelines (shown in \figref{b:ar:p1}). In Haskell, an arrow \hask{y} is a type that implements the following interface (type classes in Haskell are roughly interfaces). \hask{arr} converts an arbitrary function into an arrow. \hask{>>>} sequences two arrows (illustrated in \figref{b:ar:seq}). Taking two input,  \hask{first} apply the arrow to the first input while keeping the second untouched (\figref{b:ar:first}). Conversely, \hask{second} modifies the second input and keeps the first one unchanged. \hask{***} applies two arrows to two input side by side (\figref{b:ar:par}). \hask{&&&} takes one input and applies two separate arrows to the input and its duplications (\figref{b:ar:dup}).
 % TODO add reference to arrow visualization
 
-The simplest instance of arrow class is the function type (shown in \coref{b:ar:c2}). 
+The simplest instance of arrow class is the function type (shown in \coref{b:ar:c2}). It is worth noticing that only \hask{arr} and \hask{***} need to be implemented. The reset of function in the arrow type class can be defined in terms of the two functions. For example, \mintinline{haskell}{f &&& g = (f *** g) . arr (\b -> (b, b))}.
 \begin{code}
   % \inputminted{haskell}{background/ar-def.hs}
   \begin{minted}{haskell}
@@ -31,15 +31,11 @@ The simplest instance of arrow class is the function type (shown in \coref{b:ar:
 \begin{code}
   % \inputminted{haskell}{background/ar-func.hs}
   \begin{minted}{haskell}
-    instance Arrow (->) where #\clabel{ar-func:1}#
+    instance Arrow (->) where
       arr f = f
       (***) f g ~(x,y) = (f x, g y)
   \end{minted}
-  \ccaption{$(\rightarrow)$ instance of Arrow class}{
-    \begin{itemize}
-      \item[\cref{ar-func:1}] Minimal implementation of arrow class are arr and ***
-    \end{itemize}
-  }
+  \caption{$(\rightarrow)$ instance of Arrow class}
   \label{b:ar:c2}
 \end{code}
 \begin{figure*}
@@ -47,51 +43,46 @@ The simplest instance of arrow class is the function type (shown in \coref{b:ar:
   \begin{subfigure}[b]{0.475\textwidth}
       \centering
       \includegraphics[width=\textwidth]{background/image/ArrowsConveyors_first2.png}
-      % \caption{{\small Network 1}}    
-      \label{}
-      \label{fig:mean and std of net14}
+      \caption{\hask{first}}
+      \label{b:ar:first}
   \end{subfigure}
   \hfill
   \begin{subfigure}[b]{0.475\textwidth}  
       \centering 
       \includegraphics[width=\textwidth]{background/image/ArrowsConveyors_bind2.png}
-      % \caption{{\small Network 2}}    
-      \label{fig:mean and std of net24}
+      \caption{\hask{>>>}}
+      \label{b:ar:seq}
   \end{subfigure}
   \vskip\baselineskip
   \begin{subfigure}[b]{0.475\textwidth}   
       \centering 
       \includegraphics[width=\textwidth]{background/image/ArrowsConveyors_ampersand2.png}
-      % \caption{{\small Network 3}}    
-      \label{fig:mean and std of net34}
+      \caption{\hask{&&&}}
+      \label{b:ar:dup}
   \end{subfigure}
   \quad
   \begin{subfigure}[b]{0.475\textwidth}   
       \centering 
       \includegraphics[width=\textwidth]{background/image/ArrowsConveyors_star2.png}
-      % \caption{{\small Network 4}}    
-      \label{fig:mean and std of net44}
+      \caption{\hask{***}}
+      \label{b:ar:par}
   \end{subfigure}
   \caption
-  {\small The visual representations of arrow combinatorcis\cite{HaskellUnderstandingArrows}}
+  {\small The visual representations of arrow combinators\cite{HaskellUnderstandingArrows}}
   \label{b:ar:p1}
 \end{figure*}
 \subsection{Example: Calculate the mean}
-Consider the a function to calculate the mean from a list of floating number, we will compare the usual, arrows and point-free implementations. Point-free style is ...(TODO add defition of point free programming)
+Consider the a function to calculate the mean from a list of floating number, we will compare the usual, arrows implementations. Implementation using arrows can be regarded as point-free programming. Point-free programming is programming paradigm where function definitions only involve combinators and function composition without mentioning variables\cite{TacitProgramming2019}. 
+
 \begin{minted}{haskell}
 mean :: [Float] -> Float
 mean xs = sum xs / (fromIntegral . length) xs
 
 mean' :: [Float] -> Float
 mean' = (sum &&& (length >>> fromIntegral)) >>> uncurry (/)
-
-mean'' :: [Float] -> Float
-mean'' = liftM2 (/) sum (fromIntegral . length)
 \end{minted}
-% mean'' :: [Float] -> Float
-% mean'' = liftM2 (/) sum (fromIntegral . length)
-Above program can be visualized in \figref{b:ar:p2}.
-\begin{figure}[ht]
+The arrows implementation can be visualised in \figref{b:ar:p2}.
+\begin{figure}[!ht]
   \centering
   % \includegraphics[width=8cm]{example-image} 
   \begin{tikzpicture}[xscale=1.5]
@@ -111,16 +102,22 @@ Above program can be visualized in \figref{b:ar:p2}.
   \end{tikzpicture}
   \caption{Visualization of mean'}\label{b:ar:p2}
 \end{figure}
-The simple example demos that arrows combinatorcis make writing point-free programs easier. Arrows union the implementation of algorithm and data-flow in the algorithm. 
+\begin{minted}{haskell}
+mean'' :: [Float] -> Float
+mean'' = liftM2 (/) sum (fromIntegral . length)
+\end{minted}
+Arrows are not the only way to form point-free programs. The above code snippet is the more traditional approach form of point-free mean function in Haskell. We can argue this form of point-free function is more difficult to understand compared to arrows because it involves knowledge of monads (\hask{liftM2}) and does not map to intuitive data-flow.
+
+The simple example demos that arrows combinators make writing point-free programs easier. Arrows union the implementation of algorithm and data-flow in the algorithm. 
 
 \subsection{Application in parallel computation}
-From the previous example, the data flow of programs written regarding arrow combinators can be easily visualised. It is intuitive to recognise that the clean separation between the flow of data and actual computation will be useful in generating parallel code. Indeed, arrow describes data flow implicitly, and it is an example of the so-called algebraic pattern. Many works \cite{braunArrowsParallelComputation2018, elliottGenericFunctionalParallel2017b, AlgebraicMultipartyProtocol} has been done to generate parallel code from algebraic patterns.
+From the previous example, the data flow of programs written regarding arrow combinators can be easily visualised (shown in \figref{b:ar:p1}). It is intuitive to recognise that the clean separation between the flow of data and actual computation will be useful in generating parallel code. Indeed, arrow describes data flow implicitly, and it is an example of the so-called algebraic pattern. Many works \cite{braunArrowsParallelComputation2018, elliottGenericFunctionalParallel2017b, AlgebraicMultipartyProtocol} has been done to generate parallel code from algebraic patterns.
 In particular, details of \cite{AlgebraicMultipartyProtocol} are introduced in later section. % TODO
 
 \section{Recursion Schemes} \label{b:rs}
-Recursion schemes are patterns for expressing general computation. In particular, they are like high order function abstracting recursion so that programmer can express any kind of recursion by data structures combined with recursion schemes instead of explicit recursive functions.
+Recursion schemes are patterns for expressing general computation. In particular, they are like high order function abstracting recursion so that programmer can express any kind of recursion by data structures combined with recursion schemes instead of writing explicit recursive functions.
 \subsection{Definition}
-We will introduce three typical recursion shcemes: catamorphisms, anamorphisms and hylomorphisms (seen in \coref{p:pal:c3}). As mentioned before, recursion schemes express recursion with the help of data structures, in particular, the fixed point of data structures (seen in \coref{p:pal:c2})
+We will introduce three typical recursion schemes: catamorphisms, anamorphisms and hylomorphisms (seen in \coref{p:pal:c3}). As mentioned before, recursion schemes express recursion with the help of data structures, in particular, the fixed point of data structures (seen in \coref{p:pal:c2})
 \begin{code}
 \begin{minted}{haskell}
 newtype Fix f = Fix { unfix :: f (Fix f) }
@@ -138,9 +135,9 @@ type Tree = Fix TreeF
 
 Anamorphisms takes a function from a to f a (called the co-algebra) and a value a and return the Fix f. Used Tree as an example, anamorphisms takes a single value a and applies the co-algebra to the value. It continues to apply itself to the branches of the TreeF recursively and finally expands a single value to a complete tree. Intuitively, anamorphism unfolds a single value to a complicated data structure top-down.
 
-Catamorphisms are the reverse of anamorphisms, folding a data structure to a single value bottom-up. It takes a function from f a to a (called the algebra) and Fix f to fold and return a single value a. Catamorphisms and anamorphisms describe the process globally (from a to Fix f and from Fix f to a) while co-algebra and algebra capture what happened locally. The elegant part is while co-algebra and algebra do not involve with any recursion data structure (TreeF is not recursive), catamorphisms and anamorphism can build or consume recursive data structures.
+Catamorphisms is the reverse of anamorphisms, folding a data structure to a single value bottom-up. It takes a function from f a to a (called the algebra) and Fix f to fold and return a single value a. Catamorphisms and anamorphisms describe the process globally (from a to Fix f and from Fix f to a) while co-algebra and algebra capture what happened locally. The elegant part is while co-algebra and algebra do not involve with any recursion data structure (TreeF is not recursive), catamorphisms consumes recursive data structure while anamorphism builds them.
 
-Hylomorphisms is applying anamorphism followed by catamorphisms. It is the most common pattern to use. We will use an example to illustrate its usefulness. 
+Hylomorphisms applies anamorphism followed by catamorphisms. It is the most common pattern to use. We will use an example to illustrate its usefulness. It can be thought of as an abstract divide and conquer algorithm.
 % TODO add Divided and conquer analogy
 \begin{code}
 \begin{minted}{haskell}
@@ -151,7 +148,7 @@ cata :: Functor f => (f a -> a) -> Fix f -> a
 cata alg = alg . fmap (cata alg) . unfix
 
 hylo :: (f b -> b) -> (a -> f a) -> b -> a 
-hylo g f = cata g . ana f 
+hylo g f = f . fmap (hylo f g) . g
 \end{minted}
 \caption{Recursion schemes in haskell} \label{p:pal:c3}
 \end{code}
@@ -412,9 +409,9 @@ Besides, extending the concurrency monad to monad for message-passing concurrenc
 In summary, many techniques and ideas like continuation presented in the implementation of this monad afford us inspirations in designing the intermediate language.
 \section{Free monad} \label{b:fm}
 % TODO add reference to the concurrency monad, show that monad C is not necessary
-Free monad\cite{contributorsCatsFreeMonads} is a concept from category theory. Intuitively, a free monad as a programming abstraction is a technique for implementing EDSLs, where a Functor represents basic actions of the EDSL and the free monad of this Functor provides a way to sequence and compose actions. Speaking of the advantages, we are particularly interested in its benefits in flexible interpretations which will be illustrated by an example (\secref{b:fm:e}) and discussed further (\secref{b:fm:a}).
+Free monad\cite{contributorsCatsFreeMonads} is a concept from category theory. Intuitively, a free monad as a programming abstraction is a technique for implementing EDSLs, where a functor represents basic actions of the EDSL and the free monad of this Functor provides a way to sequence and compose actions. Speaking of the advantages, we are particularly interested in its benefits in flexible interpretations which will be illustrated by an example (\secref{b:fm:e}) and discussed further (\secref{b:fm:a}).
 \subsection{Definition}
-In practice, a free monad in Haskell can be defined as an algebraic data type(ADT). As promised in category theory, it is an instance of monad type class given f is a functor (shown in \coref{b:fm:c1}). Many useful helper functions are derived from the simple definition of the free monad (shown in \coref{b:fm:c2}).
+In practice, a free monad in Haskell can be defined as an algebraic data type(ADT) (shown in \coref{b:fm:c1}). \hask{Free f} is the monad produced given a functor \hask{f}. \hask{Free} has two type constructors: \hask{Pure} and \hask{Free}. \hask{Monad (Free f)} is the Haskell implementation of the Monad interface for \hask{Free f}. Many useful helper functions are derived from the simple definition of the free monad (shown in \coref{b:fm:c2}). \hask{liftF} lift the functor to its free monad representations. \hask{freeM} maps a natural transformation of functor (\hask{f a -> g a}) to the natural transformation of their free monad versions. Given \hask{m} is a monad, \hask{freeM} is a special case of interpreting \hask{Free m a}: to the \hask{m} monad itself. Finally, \hask{interpret} shows the power of free monad. We can interpret the free monad version of a functor \hask{f} to any monad \hask{m} given a natural transformation from \hask{f} to \hask{m}.
 \begin{code}
   \inputminted{haskell}{background/fm-construction.hs}
   \caption{Free monad in Haskell}
@@ -435,7 +432,7 @@ Free monad is useful in interpreting an abstract syntax tree (AST). In order to 
   \item Build interpreters for Free ADT by interpreting
   \item Interpret the program by the interpreter.
 \end{enumerate}
-We will demo the above procedure by a made-up example. First of all, we create a simple AST in ADT. 
+We will demo the above procedure by a made-up example. We would like to build a simple EDSL for getting customers' name and greeting customers. First of all, we build a functor \hask{GreetingF} to represent the basic operations: getting the name and greeting. Then we wrap the functor with \hask{Free} constructor so that a program written in our EDSL can be regarded as a Haskell expression with type \hask{Free GreetingF a}.
 \begin{code}
 \begin{minted}{haskell}
 data GreetingF next
@@ -455,7 +452,7 @@ type Greeting = Free GreetingF
 %  \end{minipage}
 %  }
 \end{code}
-Then we create helper constructors of Greeting using liftF.
+Then we create helper functions of Greeting using liftF.
 \begin{minted}{haskell}
 getName = liftF $ Getname id
 greet str = liftF $ Greet str ()
