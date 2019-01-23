@@ -2,7 +2,7 @@
 \section{Motivation} \label{i:m}
 Writing parallel software is not a trivial task. Parallel code is hard to write because it is usually written in low level languages with verbose and non-idiomatic decorations, hard to debug because machines, where code is written, are usually different from machines where code is intended to run and hard to maintain and reuse because even though the underlying algorithms are not changed, multiple version of parallel code is needed to tackle various platform and evolution of architectures.
 
-There are many on-going pieces of research aimed at helping programmers write correct parallel programs smoothly. A common approach is to develop a higher level language and compiles programmes in this language to required parallel code. There are many high-level frameworks for parallel programming (\eg algorithmic skeletons\cite{coleAlgorithmicSkeletonsStructured}, domain specific languages for parallelism\cite{brownHeterogeneousParallelFramework2011} or famous MapReduce parallel model\cite{liMapReduceParallelProgramming2016}). An example is to use arrow terms (\secref{b:arrows}) to describe data flow implicitly and hence generate parallel code.
+There are many on-going pieces of research aimed at helping programmers write correct parallel programs smoothly. A common approach is to develop a higher level language and compiles programmes in this language to required parallel code. There are many high-level frameworks for parallel programming (\eg algorithmic skeletons\cite{coleAlgorithmicSkeletonsStructured}, domain-specific languages for parallelism\cite{brownHeterogeneousParallelFramework2011} or famous MapReduce parallel model\cite{liMapReduceParallelProgramming2016}). An example is to use arrow terms (\secref{b:arrows}) to describe data flow implicitly and hence generate parallel code.
 
 The workflow of writing parallel code has evolved from writing it directly in the target platform to writing software in a high-level language designed for parallel computation and then compiling to the target platform. In this project, we present a method to improve the backend of parallel code generation by introducing a monadic domain-specific language to act as a bridge between high-level and target low-level parallel languages.
 
@@ -15,13 +15,13 @@ In addition, it couples with multiparty session type (MPST) \cite{coppoGentleInt
 \section{Objectives}
 % (TODO Need refinement and adding concrete details)
 \begin{enumerate}
-\item \textbf{Design}: Design the intermediate languages, argue its generanality and build its connection with MPST. 
-\item \textbf{Tranlsation}: Define a translate rule from the language in a high level parallel frameworks to our language. 
+\item \textbf{Design}: Design the intermediate languages, argue its generality and build its connection with MPST. 
+\item \textbf{Tranlsation}: Define a translate rule from the language in a high-level parallel framework to our language. 
 \item \textbf{Simulator}: Build a simulator to prove the correctness of code generation and act as a playground for experiments.
 \item \textbf{Code generation}: Generate parallel code in C.
 \item \textbf{Static Analysis}: Session typing the language to obtain properties guaranteed by session types% Cost modelling for parallel programming using MPST as an example of how MPST can be used to improve the generated code.
-% TODO performance code gnerated => measured by different algorithms
-% TODO performance of tool chain => meassured in the same way
+% TODO performance code generated => measured by different algorithms
+% TODO performance of tool chain => measured in the same way
 % TODO size of generated code => compact
 \end{enumerate}
 More details of the objectives will be explained in the project planning at \secref{plan}

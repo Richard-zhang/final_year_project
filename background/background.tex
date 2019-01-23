@@ -351,7 +351,7 @@ example = do
   atom $ putStrLn name
   \end{minted}
 \end{code}
-We can easily define a round-robin scheduler for programmes in this monad. We can regards a list of action as a queue of threads that are running concurrently. \hask{schedule} will pattern match on the head of the list. If it is an Atom then the scheduler will run the computation (seen \hask{a <- ioa} at \cref{mo-cm:1}) and pause its remaining computation and put it at the end of the thread queue (seen at \cref{mo-cm:2}). If it is a Fork then the scheduler will spawn the thread and put the new thread and the current thread to the bottom of the queue (seen at \cref{mo-cm:3}). Finally, If it s Stop then it means this thread has finished and scheduler will resume with the reset of threads in the queue. For example, to run the above example, we call \hask{schedule [action example]}.
+We can easily define a round-robin scheduler for programmes in this monad. We can regard a list of action as a queue of threads that are running concurrently. \hask{schedule} will pattern match on the head of the list. If it is \hask{Atom} then the scheduler will run the computation (seen \hask{a <- ioa} at \cref{mo-cm:1}) and pause its remaining computation and put it at the end of the thread queue (seen at \cref{mo-cm:2}). If it is \hask{Fork} then the scheduler will spawn the thread and put the new thread and the current thread to the bottom of the queue (seen at \cref{mo-cm:3}). Finally, If it is \hask{Stop} then it means this thread has finished and the scheduler will resume with the rest of threads in the queue. For example, to run the above example, we call \hask{schedule [action example]}.
 \begin{code}
   \begin{minted}{haskell}
 schedule :: [Action] -> IO () 
