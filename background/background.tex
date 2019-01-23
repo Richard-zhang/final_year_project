@@ -9,7 +9,7 @@ Arrow is a general interface to describe computation. It can ease the process of
 \coref{b:ar:c1} shows the Arrow definition in Haskell. Intuitively, an arrow type \hask{y a b}(that is, the application of the parameterised type \hask{y} to the two parameter types \hask{b} and \hask{c}) can be regarded as a computation with input of type \hask{b} and output of type \hask{b}\cite{hughesGeneralisingMonadsArrows2000}. Visually, arrows are like pipelines (shown in \figref{b:ar:p1}). In Haskell, an arrow \hask{y} is a type that implements the following interface (type classes in Haskell are roughly interfaces). \hask{arr} converts an arbitrary function into an arrow. \hask{>>>} sequences two arrows (illustrated in \figref{b:ar:seq}). Taking two input,  \hask{first} apply the arrow to the first input while keeping the second untouched (\figref{b:ar:first}). Conversely, \hask{second} modifies the second input and keeps the first one unchanged. \hask{***} applies two arrows to two input side by side (\figref{b:ar:par}). \hask{&&&} takes one input and applies two separate arrows to the input and its duplications (\figref{b:ar:dup}).
 % TODO add reference to arrow visualization
 
-The simplest instance of arrow class is the function type (shown in \coref{b:ar:c2}). It is worth noticing that only \hask{arr} and \hask{***} need to be implemented. The reset of function in the arrow type class can be defined in terms of the two functions. For example, \mintinline{haskell}{f &&& g = (f *** g) . arr (\b -> (b, b))}.
+The simplest instance of arrow class is the function type (shown in \coref{b:ar:c2}). It is worth noticing that only \hask{arr} and \hask{***} need to be implemented. The reset of function in the arrow type class can be defined in terms of the two functions. For example, \mintinline{text}{f &&& g = (f *** g) . arr (\b -> (b, b))} and \mintinline{text}{first = (*** id)}
 \begin{code}
   % \inputminted{haskell}{background/ar-def.hs}
   \begin{minted}{haskell}
@@ -302,68 +302,69 @@ In \secref{b:mpst}, channels are bi-directional and used for communication betwe
   \label{b:mo:c1}
 \end{listing}
 \subsection{Concurrency Monads}
-The work done by \cite{claessenFunctionalPearlsPoor1999} constructs a monad to express concurrent computation. The definition is in \coref{b:mo:c2}. The idea is using continuation to represent the "future" so that computation can pause and resume as well as expressing sequential computation. Atom wraps the actual computation and Fork is responsible for spawning threads. Monad encapsulates the continuation and makes writing programmes compositionally in a monadic way.
-
+The work done by \cite{claessenFunctionalPearlsPoor1999} constructs a monad to express concurrent computation. The definition is in \coref{b:mo:def}. \hask{Action} is the algebraic datatype representing basic concurrency primitives. \hask{Atom}, the atomic unit of computation, is a computation (wrapped in the \hask{IO} monad) followed by an action. \hask{Fork} is two parallel action. \hask{Stop} is the termination of an action. type \hask{C} is a special case of the continuation monad. The continuation monad is an encapsulation of computations in continuation-passing style (CPS)\footnote{In continuation-passing style function result is not returned, but instead is passed to another function, received as a parameter (continuation)\cite{ControlMonadCont}}. SO \hask{C a} is a CPS computation that produces an intermediate result of type \hask{a} within a CPS computation whose final result type is \hask{Action}. With the help of the monad \hask{C}, sequencing and composing actions can use monadic bind.
 \begin{code}
-  % \inputminted{haskell}{background/mo-cm.hs}
   \begin{minted}{haskell}
-    data Action =          #\clabel{mo-cm:1}#
-        Atom (IO Action)   #\clabel{mo-cm:2}# 
-      | Fork Action Action #\clabel{mo-cm:3}# 
-      | Stop               #\clabel{mo-cm:4}# 
+data Action =
+    Atom (IO Action)
+  | Fork Action Action
+  | Stop
+
+newtype C a = C { runC :: (a -> Action) -> Action } #\clabel{mo-cm:5}#
     
-    newtype C a = C { runC :: (a -> Action) -> Action } #\clabel{mo-cm:5}#
-    
-    instance Monad C where
-        (>>=) :: C a -> (a -> C b) -> C b #\clabel{mo-cm:6}#
-        m >>= f  = C $ \k -> runC m (\v -> runC (f v) k)
-        return :: a -> C a
-        return x = C $ \k -> k x
-    
-    schedule :: [Action] -> IO () #\clabel{mo-cm:7}#
-    schedule [] = return ()
-    schedule (a:as) = sched as a
-    
-    sched :: [Action] -> Action -> IO ()
-    sched as (Atom ioa) = do
-        a <- ioa
-        schedule $ as ++ [a] 
-    sched as (Fork a1 a2) = schedule $ as ++ [a2, a1]
-    sched as Stop = schedule as
-    
-    atom :: IO a -> C a #\clabel{mo-cm:8}#
-    atom m = C $ \k -> Atom $ do
-        r <- m
-        return $ k r
-    
-    fork :: C () -> C ()
-    fork m = C $ \k -> Fork (runC m (const Stop)) (k ())
+instance Monad C where
+    (>>=) :: C a -> (a -> C b) -> C b #\clabel{mo-cm:6}#
+    m >>= f  = C $ \k -> runC m (\v -> runC (f v) k)
+    return :: a -> C a
+    return x = C $ \k -> k x
   \end{minted}
-  \ccaption{Concurrency Monads and sequential scheduler}{
-    \begin{itemize}
-      \item[\cref{mo-cm:1}] Basic unit of computation : Action. A program is the composition of Actions.
-      \item[\cref{mo-cm:2}] Atom is a IO computation followed by an action.
-      \item[\cref{mo-cm:3}] Fork is two 'parallel' action.
-      \item[\cref{mo-cm:4}] Stop is the termination of an action.
-      \item[\cref{mo-cm:5}] Using a monad C to encapsulates continuation
-      \item[\cref{mo-cm:6}] Monad bind is used to represent sequence of Actions.
-      \item[\cref{mo-cm:7}] An implementation of a sequential scheduler. sched is the helper function.
-      \item[\cref{mo-cm:8}] atom and fork are combinators to compose programs.
-    \end{itemize}      
-  }
-  \label{b:mo:c2}
+  \caption{The definition of concurrency monad}
+  \label{b:mo:def}
 \end{code}
 
+
+The idea is using continuation to represent the "future" so that computation can pause and resume as well as expressing sequential computation. Atom wraps the actual computation and Fork is responsible for spawning threads. In addition, in order to write programmes in a monadic way easier, some helper functions are defined (shown in \coref{b:mo:helper}). \hask{atom} lifts an IO computation to \hask{C}. And \hask{fork} takes a computation in \hask{C} and return a \hask{C} which involves the \hask{Fork} action. Given a \hask{C a}, \hask{action} gives the result of running the CPS computation. We use \hask{\_. Stop} to represent the final continuation (\hask{Stop} action is the last action). 
 \begin{code}
 \begin{minted}{haskell}
+atom :: IO a -> C a
+atom m = C $ \k -> Atom $ do
+    r <- m
+    return $ k r
+
+fork :: C () -> C ()
+fork m = C $ \k -> Fork (runC m (const Stop)) (k ())
+
+action :: C a -> Action
+action m = m (\_. Stop)
+\end{minted}
+\caption{Helper functions}
+\label{b:mo:helper}
+\end{code}
+An example of programme written in the concurrency monad is shown below.
+\begin{code}
+  \begin{minted}{haskell}
 example :: C ()
 example = do 
-    atom $ putStrLn "Hello" 
-    name <- atom getLine 
-    fork $ atom $ putStrLn "World"
-    atom $ putStrLn name
-\end{minted}
-\caption{Example of a program writen in concurrency monad}
+  atom $ putStrLn "Hello" 
+  name <- atom getLine 
+  fork $ atom $ putStrLn "World"
+  atom $ putStrLn name
+  \end{minted}
+\end{code}
+We can easily define a round-robin scheduler for programmes in this monad. We can regards a list of action as a queue of threads that are running concurrently. \hask{schedule} will pattern match on the head of the list. If it is an Atom then the scheduler will run the computation (seen \hask{a <- ioa} at \cref{mo-cm:1}) and pause its remaining computation and put it at the end of the thread queue (seen at \cref{mo-cm:2}). If it is a Fork then the scheduler will spawn the thread and put the new thread and the current thread to the bottom of the queue (seen at \cref{mo-cm:3}). Finally, If it s Stop then it means this thread has finished and scheduler will resume with the reset of threads in the queue. For example, to run the above example, we call \hask{schedule [action example]}.
+\begin{code}
+  \begin{minted}{haskell}
+schedule :: [Action] -> IO () 
+schedule [] = return ()
+schedule (a:as) = sched as a
+    
+sched :: [Action] -> Action -> IO ()
+sched as (Atom ioa) = do
+    a <- ioa #\clabel{mo-cm:1}#
+    schedule $ as ++ [a] #\clabel{mo-cm:2}#
+sched as (Fork a1 a2) = schedule $ as ++ [a2, a1] #\clabel{mo-cm:3}#
+sched as Stop = schedule as
+  \end{minted}
 \end{code}
 
 The concurrency monad can be extended to support many features. For example, work done by \cite{marlowMonadDeterministicParallelism} modifies the definition of Action as well as implements a work-stealing parallel scheduler (seen in \coref{b:mo:c3}) to build a monad for parallel computation. 
@@ -372,30 +373,16 @@ Besides, extending the concurrency monad to monad for message-passing concurrenc
 \begin{code}
   % \inputminted{haskell}{background/mo-par.hs}
   \begin{minted}{haskell}
-    newtype IVar a = IVar (IORef (IVarContents a)) #\clabel{po:ivar}#
-    data IVarContents a = Full a | Blocked [a -> Action.]
+newtype IVar a = IVar (IORef (IVarContents a)) #\clabel{po:ivar}#
+data IVarContents a = Full a | Blocked [a -> Action.]
     
-    data Action .=
-        Fork Action Action
-      | Stop
-      | forall a . Get (IVar a) (a -> Action) #\clabel{po:get}#
-      | forall a . Put (IVar a) a Action #\clabel{po:put}#
-      | forall a . New (IVar a -> Action)
+data Action .=
+    Fork Action Action
+  | Stop
+  | forall a . Get (IVar a) (a -> Action) #\clabel{po:get}#
+  | forall a . Put (IVar a) a Action #\clabel{po:put}#
+  | forall a . New (IVar a -> Action)
   \end{minted}
-%   \caption[.]{
-%   \begin{minipage}{\linewidth}
-%     Par Monad
-%     \begin{itemize}
-%       \item[\cref{mylin2} :] hello 
-%       \item[\cref{mylin2} :] hello 
-%     \end{itemize}
-%     % \begin{align*}
-%       % x &= y\\ 
-%       % x &= x + 1\\ 
-%       % x &= 0\\
-%     % \end{align*}
-%  \end{minipage}
-%  }
   \ccaption{Par Monad}{
     \begin{itemize}
       \item[\cref{po:ivar}] Parent threads and child threads communicate data via IVar
@@ -406,7 +393,7 @@ Besides, extending the concurrency monad to monad for message-passing concurrenc
   \label{b:mo:c3}
 \end{code}
 
-In summary, many techniques and ideas like continuation presented in the implementation of this monad afford us inspirations in designing the intermediate language.
+In summary, many techniques and ideas like continuation presented in the implementation of this monad afford us inspirations in designing our intermediate language.
 \section{Free monad} \label{b:fm}
 % TODO add reference to the concurrency monad, show that monad C is not necessary
 Free monad\cite{contributorsCatsFreeMonads} is a concept from category theory. Intuitively, a free monad as a programming abstraction is a technique for implementing EDSLs, where a functor represents basic actions of the EDSL and the free monad of this Functor provides a way to sequence and compose actions. Speaking of the advantages, we are particularly interested in its benefits in flexible interpretations which will be illustrated by an example (\secref{b:fm:e}) and discussed further (\secref{b:fm:a}).
