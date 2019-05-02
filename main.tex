@@ -93,7 +93,7 @@
 %% Haskell 
 \newcommand*{\hask}[1]{\mintinline{text}{#1}}
 
-\title{The Interim Report}
+\title{TODO}
 \author{Shuhao Zhang}
 % Update supervisor and other title stuff in title/title.tex
 
@@ -117,8 +117,75 @@
 \input{introduction/introduction.tex}
 \input{background/background.tex}
 % \input{project/project.tex}
-\input{plan/plan.tex}
-\input{evaluation/evaluation.tex}
+% \input{plan/plan.tex}
+\chapter{ParAlg: An overview}
+\section{Overview}
+\section{Syntax}
+\section{Example: Parallel merge sort}
+\section{Global type and Proto}
+\chapter{SPar: Design}
+\section{Overview}
+\section{Core: EDSL for computation}
+\subsection{Syntax}
+\subsection{Representation of recursive data structures}
+\subsection{Semantics}
+\section{Proc: EDSL for communication}
+\subsection{Syntax}
+\subsection{Representation in Haskell}
+\subsection{Semantics}
+\subsection{Session typing}
+
+\chapter{SPar: Implementation}
+\section{Session typing}
+\subsection{Session types in Haskell}
+\subsection{Type-indexed Free Monad}
+\subsection{Type-level duality check}
+\subsection{Value-level duality check}
+\section{Haskell interpreter}
+
+\chapter{ArrowPipe}
+\section{Overview}
+\section{Design and Implementation}
+\section{Satisfaction of arrow rules}
+\section{Usages}
+\subsection{Hassle-free Compilation from ParAlg to ArrowPipe} %Hassle-free
+\subsection{An interface of Arrow programs with automatic parallelization}
+\section{Role allocation}
+\section{Optimizations}
+\subsection{Fusion}
+\subsection{Upper bound of the number of roles}
+\section{Parallel patterns}
+\subsection{Divide and conquer}
+\section{Power of arrow and EDSL: expressibility and composability}
+\subsection{Make use of host language: Haskell}
+
+\chapter{SPar: Type-safe code generation}
+\section{Overview}
+\section{Instr: Low-level language-neutral EDSL}
+\subsection{Definition}
+\subsection{Reified type}
+\section{Compilation from SPar to Instr}
+\subsection{Separation of two phase of code generation}
+\subsection{Type preservation}
+\subsection{Channel allocation}
+\section{Code generation to C: from Instr to C}
+\subsection{Represent Core in C}
+\subsubsection{Data type in C}
+\subsection{Optimize representation of recursive data type in C}
+
+% \input{evaluation/evaluation.tex}
+\chapter{Parallel Algorithms and Evaluation}
+\section{Benchmarks}
+\subsection{A list of algorithms}
+\subsection{Benchmarks against generated Haskell code}
+\subsection{Benchmarks against C implementation}
+\section{Evaluation}
+
+\chapter{Conclusion}
+\section{Visualization of the compilation process}
+\section{Design choice}
+\subsection{Why Haskell?}
+\section{Future work}
 % \input{conclusion/conclusion.tex}
 % \input{appendix/appendix.tex}
 
