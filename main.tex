@@ -118,46 +118,55 @@
 \input{background/background.tex}
 % \input{project/project.tex}
 % \input{plan/plan.tex}
-\chapter{ParAlg: An overview}
-\section{Overview}
+\chapter{Alg and ParAlg: An overview}
 \section{Syntax}
+\section{Compilation from Alg to ParAlg}
+\section{Multiparty session types for ParAlg}
+\section{Global types and protocols}
 \section{Example: Parallel merge sort}
-\section{Global type and Proto}
+
 \chapter{SPar: Design}
 \section{Overview}
-\section{Core: EDSL for computation}
+% \section{Core: EDSL for computation}
+\section{Computation: The Core EDSL}
 \subsection{Syntax}
 \subsection{Representation of recursive data structures}
 \subsection{Semantics}
-\section{Proc: EDSL for communication}
+% \section{Proc: EDSL for communication}
+\section{Communication: The Proc EDSL}
 \subsection{Syntax}
 \subsection{Representation in Haskell}
 \subsection{Semantics}
 \subsection{Session typing}
+\section{Parallel computation: A group of Procs}
+\subsection{Duality check}
 
 \chapter{SPar: Implementation}
-\section{Session typing}
-\subsection{Session types in Haskell}
+\section{Session type}
+\subsection{Representations of session types in Haskell}
 \subsection{Type-indexed Free Monad}
 \subsection{Type-level duality check}
 \subsection{Value-level duality check}
 \section{Haskell interpreter}
 
 \chapter{ArrowPipe}
-\section{Overview}
 \section{Design and Implementation}
 \section{Satisfaction of arrow rules}
-\section{Usages}
-\subsection{Hassle-free Compilation from ParAlg to ArrowPipe} %Hassle-free
-\subsection{An interface of Arrow programs with automatic parallelization}
 \section{Role allocation}
+\subsection{Strategies for role allocation}
 \section{Optimizations}
 \subsection{Fusion}
 \subsection{Upper bound of the number of roles}
-\section{Parallel patterns}
-\subsection{Divide and conquer}
+\section{Parallel programming patterns}
+\subsection{Serial control patterns}
+\subsection{Fork-join pattern for Divide and conquer}
+\subsection{Reduce}
+\section{Applications}
+\subsection{Hassle-free Compilation from ParAlg to ArrowPipe} %Hassle-free
+\subsection{An interface of Arrow programs with automatic parallelization}
 \section{Power of arrow and EDSL: expressibility and composability}
-\subsection{Make use of host language: Haskell}
+\subsection{Arrow interface}
+\subsection{Haskell as the host language}
 
 \chapter{SPar: Type-safe code generation}
 \section{Overview}
@@ -171,10 +180,11 @@
 \section{Code generation to C: from Instr to C}
 \subsection{Represent Core in C}
 \subsubsection{Data type in C}
-\subsection{Optimize representation of recursive data type in C}
+\subsection{Optimization for common recursive data types in C}
+\subsection{Memory management}
 
 % \input{evaluation/evaluation.tex}
-\chapter{Parallel Algorithms and Evaluation}
+\chapter{Parallel algorithms and evaluation}
 \section{Benchmarks}
 \subsection{A list of algorithms}
 \subsection{Benchmarks against generated Haskell code}
@@ -183,7 +193,7 @@
 
 \chapter{Conclusion}
 \section{Visualization of the compilation process}
-\section{Design choice}
+\section{Design choices}
 \subsection{Why Haskell?}
 \section{Future work}
 % \input{conclusion/conclusion.tex}
