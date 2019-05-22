@@ -7,5 +7,7 @@ data Pipe a b = Pipe
   
 type ArrowPipe a b = Nat -> Pipe a b
 
-instance Arrow ArrowPipe where 
+instance Arrow ArrowPipe where
+    -- implementation omit
+instance ArrowChoice ArrowPipe where
     -- implementation omit
