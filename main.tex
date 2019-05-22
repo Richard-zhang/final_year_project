@@ -125,8 +125,7 @@
 \section{Global types and protocols}
 \section{Example: Parallel merge sort}
 
-\chapter{SPar: Design}
-\section{Overview}
+\chapter{SPar: A session typed free monad EDSL for concurrency}
 % \section{Core: EDSL for computation}
 \section{Computation: The Core EDSL}
 \subsection{Syntax}
@@ -147,54 +146,28 @@
 \subsection{Type-indexed Free Monad}
 \subsection{Type-level duality check}
 \subsection{Value-level duality check}
-\section{Haskell interpreter}
+\section{SPar interpreter}
+\subsection{Overview}
+\subsection{Implementation}
 
-\chapter{ArrowPipe}
-\section{Design and Implementation}
-\section{Satisfaction of arrow rules}
-\section{Role allocation}
-\subsection{Strategies for role allocation}
-\section{Optimizations}
-\subsection{Fusion}
-\subsection{Upper bound of the number of roles}
-\section{Parallel programming patterns}
-\subsection{Serial control patterns}
-\subsection{Fork-join pattern for Divide and conquer}
-\subsection{Reduce}
-\section{Applications}
-\subsection{Hassle-free Compilation from ParAlg to ArrowPipe} %Hassle-free
-\subsection{An interface of Arrow programs with automatic parallelization}
-\section{Power of arrow and EDSL: expressibility and composability}
-\subsection{Arrow interface}
-\subsection{Haskell as the host language}
-
-\chapter{SPar: Type-safe code generation}
-\section{Overview}
-\section{Instr: Low-level language-neutral EDSL}
-\subsection{Definition}
-\subsection{Reified type}
-\section{Compilation from SPar to Instr}
-\subsection{Separation of two phase of code generation}
-\subsection{Type preservation}
-\subsection{Channel allocation}
-\section{Code generation to C: from Instr to C}
-\subsection{Represent Core in C}
-\subsubsection{Data type in C}
-\subsection{Optimization for common recursive data types in C}
-\subsection{Memory management}
+\input{arrow/arrow.tex}
+\input{codegen/codegen.tex}
 
 % \input{evaluation/evaluation.tex}
 \chapter{Parallel algorithms and evaluation}
+\section{Parallelized algorithms}
+\subsection{Merge sort}
+\subsection{Quick sort}
 \section{Benchmarks}
-\subsection{A list of algorithms}
 \subsection{Benchmarks against generated Haskell code}
 \subsection{Benchmarks against C implementation}
 \section{Evaluation}
+\subsection{Design choices: Why Haskell?}
 
-\chapter{Conclusion}
-\section{Visualization of the compilation process}
-\section{Design choices}
-\subsection{Why Haskell?}
+\chapter{Conclusions and future work}
+% \section{Visualization of the compilation process}
+% \section{Design choices}
+% \subsection{Why Haskell?}
 \section{Future work}
 % \input{conclusion/conclusion.tex}
 % \input{appendix/appendix.tex}

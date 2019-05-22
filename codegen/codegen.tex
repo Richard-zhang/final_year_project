@@ -1,0 +1,16 @@
+\chapter{Type-safe code generation from SPar}
+SPar has two components: Core representing the unit of computation and Proc as a skeleton of the computation, describing the communication patterns. Naturally, the process of code generation from SPar should be divided into two parts correspondingly. We choose to make two parts independent of each other so that it's possible to swap the code generation strategy of one component without modifying another one.
+
+The procedure of code generation is the standard method: tree transformation. The SPar expression are converted to a low-level EDSL which is then transformed to an abstract syntax tree (AST) of C (TODO cite the package). The generated code is obtained by pretty printing the AST.
+\section{Instr: A low-level EDSL of channel communication}
+\subsection{Syntax}
+\subsection{Reified type}
+\section{Compilation from SPar to Instr}
+% \subsection{Two stages of compilation}
+\subsection{Strategies for channel allocation}
+\subsection{Type preservation}
+\section{Code generation to C: from Instr to C}
+\subsection{Representations of Core data type in C}
+% \subsubsection{Data type in C}
+% \subsection{Optimization for common recursive data types in C}
+% \subsection{Memory management}

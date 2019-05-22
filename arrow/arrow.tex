@@ -1,0 +1,36 @@
+\chapter{ArrowPipe: An arrow interface for writing SPar expressions}
+When trying to express more complicated and interesting parallel patterns, e.g map or reduce, We realize SPar is too low-level so that it is difficult to express simple computation because of overheads of expressing communication patterns by hand. In addition, compilation from Par-Alg to SPar is hard since they are very different domain specific languages. 
+
+To solve both issues, we draw inspirations from the Arrow interface (in particular, work done by \cite{braunArrowsParallelComputation2018} where they use arrow interface to express parallel computation) and introduce ArrowPipe.
+
+ArrowPipe is an arrow interface for writing SPar expressions. Withe the help from ArrowPipe, Users can use canonical arrow combinators to write algorithms in Arrow without writing any explicit communication and gain parallelized algorithms for free. Similarly, ArrowPipe makes hassle-free compilation from Par-Alg to SPar possible because Par-Alg Proto is also an arrow expression and simply interpreting arrow combinators by the ArrowPipe implementations fills the gap between Par-Alg and SPar. 
+
+\section{Syntax}
+\begin{listing}[ht]
+\inputminted{Haskell}{arrow/def.hs}
+\caption{Definition of ArrowPipe}
+\label{arrowPipe:def}
+\end{listing}
+The simplified syntax of ArrowPipe can be found in \coref{arrowPipe:def}. ArrowPipe is a type synonym of \hask{Nat -> Pipe a b}. It consumes \hask{Nat} which means the identifier of a process and output \hask{Pipe a b}. The reson why we use \hask{Nat} as the only parameter is to ensuring no duplication of processes name since in most of the time, duplication is bad for parallelization. It will be explained more thoroughly in \secref{arrowPipe:roleAllc}.
+
+\hask{Pipe a b} data structures is the essential component of ArrowPipe. It regards computation as a pipe where data with type \hask{a} goes into the pipe and data with type \hask{b} get out of the pipe. Internally, it's a record type of four fields. \hask{start} field identifies the process where the input data is received. \hask{cont} field has the type \hask{a -> Proc} which is a continuation waiting for the input data produced by the last pipe. \hask{env} represents a group of Procs interacting inside the pipe to produce the output data, in other words, it is the parallel computation. \hask{end} indicates the process that produces the output data in the end. We can retrieve the corresponding process by a look up on the env with the key \hask{end}. The returned Proc returns a data with type \hask{b}.
+\subsection{Arrow interface}
+
+\subsection{Example: Parallel programming patterns}
+\section{Implementation}
+\section{Strategies for optimized role allocation} \label{arrowPipe:roleAllc}
+\section{Satisfaction of arrow laws}
+% \section{Optimizations}
+% \subsection{Fusion}
+% \subsection{Upper bound of the number of roles}
+% \section{Parallel programming patterns}
+% \subsection{Serial control patterns}
+% \subsection{Fork-join pattern for Divide and conquer}
+% \subsection{Reduce}
+\section{Conclusions}
+% \section{Applications}
+% \subsection{Hassle-free compilation from ParAlg to ArrowPipe} %Hassle-free
+% \subsection{An interface for arrow computation with automatic parallelization}
+% \section{Power of arrow and EDSL: expressibility and composability}
+% \subsection{Arrow interface}
+% \subsection{Haskell as the host language}
