@@ -76,6 +76,16 @@ The implementation demos the power of implementing ArrowPipe as a domain specifi
 
 More examples of algorithms formed by ArrowPipe, e.g. dot product or merge sort are shown in the \secref{eval}.
 \section{Implementation of arrow combinators} \label{arrowPipe:impl}
+In this chapter, we will present naive implementation and optimized solution is introduced in next section.
+
+The essential issue when implementing arrow combinators is how to connect one Pipe by another Pipe. The first problem we need to address is how to deal with the \hask{cont} in the tail Pipe. We know that only one \hask{cont} field exists in the resulting Pipe and it must be that from the head Pipe. Hence the only option is to convert it to a Proc expression and store the converted expression in the updated env in the resulting Pipe. A right way to do it bind the cont with the action: receive from end in the first Pipe. Also, extend the proc related to the end in the head Porc with action: send to start in the second Pipe. Besides addition of the converted \hask{cont} expression, the new env is formed by merging the env from the head Pipe and the env from the tail Pipe. Merging two envs is trivial. When there are duplication, we simply use monadic bind to combine them so that the actions belonging to head Pipe followed by the actions belonging to the tail Pipe. The \hask{start} field in the resulting Pipe is the same as that from the head Pipe and the \hask{end} field will be set the same as that from the tail Pipe.
+\begin{listing}
+\inputminted{Haskell}{arrow/impl.hs}
+\caption{The simplified implementation of \hask{>>>}}
+\label{arrowPipe:code:impl}
+\end{listing}
+We can apply the Pipe composing function to implement arrow combinators for ArrowPipe. The implementation is just apply the first ArrowPipe with the input role (don't forget ArrowPipe is a function) to get the Pipe and apply the second ArrowPipe with a new role to get the second Pipe (usually in order to avoid duplication of roles, the new role is set to be maximum role in the first Pipe + 1) and finally apply the Pipe composing functions to both Pipe. A simplified code explanation can be seen in \coref{arrowPipe:code:impl}. The rest of combinators can be implemented in a similar fashion.
+
 \section{Strategies for optimized role allocations} \label{arrowPipe:roleAllc}
 From the last section, we know the number of roles in the system is directly related to the number of processes in the final generated code. Hence, role allocating is an essential part in generating efficient parallel programs. 
 
@@ -113,12 +123,16 @@ For the purpose of illustration, we use inference rules to explain our proposed 
 \begin{displaymath}
     \inference[arrow: \hask{&&&}]{e1: \text{ArrowPipe a b}, x \Rightarrow y, \quad e2: \text{ArrowPipe a c}, (y+1) \Rightarrow z}{e1 \;\hask{&&&}\; e2 : \text{ArrowPipe a (b, c)}, x \Rightarrow z}
 \end{displaymath}
+\vskip\baselineskip
+\begin{displaymath}
+    \inference[arrow: \hask{***}]{e1: \text{ArrowPipe a b}, x \Rightarrow y, \quad e2: \text{ArrowPipe a' c}, (y+1) \Rightarrow z}{e1 \;\hask{***}\; e2 : \text{ArrowPipe (a, a') (b, c)}, x \Rightarrow z}
+\end{displaymath}
 % TODO If I don't have enough pages complete inferences rules for all combinators 
 \caption{Rules fo role allocations of different combinators}
 \label{arrowPipe:ra:rule}
 \end{listing}
 
-The rule for the rest of combinators are shown in \coref{arrowPipe:ra:rule}. Notice that for compose, id, arr and ArrowChoice we do not introduce any new roles, in other words, there is no parallelization for these combinators. Reader may find it strange that we do not intent to parallelize arr combinator which lifts a sequential computation represented by Core (a $\rightarrow$ b) into ArrowPipe. It makes sense to introduce a new role to execute the computation and hence parallelize computational heavy tasks. We use this strategy in the first place but later we found a more suitable strategy exists which will be introduced in the later paragraph. .% o introduce new roles when encounter \hask{&&&}. In this way, we do not sacrifice any degree of parallelization but keep the number of roles in the system at the minimum. 
+The rule for the rest of combinators are shown in \coref{arrowPipe:ra:rule}. Notice that for compose, id, arr and ArrowChoice we do not introduce any new roles, in other words, there is no parallelization for these combinators. Reader may find it strange that we do not intent to parallelize arr combinator which lifts a sequential computation represented by Core (a $\rightarrow$ b) into ArrowPipe. It makes sense to introduce a new role to execute the computation and hence parallelize computational heavy tasks. We use this strategy in the first place but later we found a more suitable strategy exists which will be introduced in the later paragraph. Also, another reason not to introduce new role when encountering arr combinators is that we gained function fusion for free. Simple function i.e. fst, inject left or snd are automatically fused into more complicated user defined functions. Introducing new roles for these simple functions will damage performance. % o introduce new roles when encounter \hask{&&&}. In this way, we do not sacrifice any degree of parallelization but keep the number of roles in the system at the minimum. 
 
 For the class of combinators belonging to arrow choice, we do not introduce any new role. The expressions at the lhs and at the rhs starts with the same role $x$ because when only one code path will be executed as the name choice suggested so we should not use separate roles for two expressions that will never be executed simultaneously. In the end, we decided the computation end in the role max$(y,z)$. Max guarantees that there will not be role duplications when we compose expressions formed by ArrowChoice combinators with other combinators. For the implementation, all process in both left and right ArrowPipe expression are wrapped inside a branch operation separately. Assume max$(y, z) = y$, the process at the role $y$ will be extended with actions that receive data from min$(y, z) = z$ role at its right branch. Finally, applying inject left and inject right at left and right branches gives us Either type as the output.
 
