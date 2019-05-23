@@ -94,34 +94,35 @@ If we only consider the second goal, naive strategies used in the previous secti
 
 For the purpose of illustration, we use inference rules to explain our proposed strategies for optimized role allocations when composing ArrowPipes. Please see \coref{arrowPipe:ra:example} as an example. $x \Rightarrow x$ means the computation start with role $x$ and end with role $x$.
 \begin{listing}[ht]
-\begin{minipage}{.45\textwidth}
 \begin{displaymath} 
-    \inference[id]{x: \text{Role}, \quad a: \text{Type}}{id : \text{ArrowPipe a a}, x \Rightarrow x}
+    \inference[compose]{e1 : \text{ArrowPipe a b}, x \Rightarrow y, \quad e2: \text{ArrowPipe b c}, y \Rightarrow z}{e1 \; \hask{>>>} \; e2 : \text{ArrowPipe a c}, x \Rightarrow z}
 \end{displaymath}
-\end{minipage}
-\hfill
-\begin{minipage}{.45\textwidth}
-\begin{displaymath} 
-    \inference[id]{x: \text{Role}, \quad a: \text{Type}}{id : \text{ArrowPipe a a}, x \Rightarrow x}
-\end{displaymath}
-\end{minipage}
 \vskip\baselineskip
-\begin{minipage}{0.45\textwidth}
 \begin{displaymath} 
-    \inference[id]{x: \text{Role}, \quad a: \text{Type}}{id : \text{ArrowPipe a a}, x \Rightarrow x}
+    \inference[arr]{f : \text{Core (a} \rightarrow \text{b)}, \quad x: \text{Role}}{\text{arr } f: \text{ArrowPipe a b}, x \Rightarrow x}
 \end{displaymath}
-\end{minipage}
-\hfill
-\begin{minipage}{0.45\textwidth}
-\begin{displaymath} 
-    \inference[id]{x: \text{Role}, \quad a: \text{Type}}{id : \text{ArrowPipe a a}, x \Rightarrow x}
+\vskip\baselineskip
+\begin{displaymath}
+    \inference[arrow choice: \hask{|||}]{e1: \text{ArrowPipe a c}, x \Rightarrow y, \quad e2: \text{ArrowPipe b c}, x \Rightarrow z}{e1 \; \hask{|||}\; e2 : \text{ArrowPipe (Either a b) c}, x \Rightarrow \text{max}(y, z)}
 \end{displaymath}
-\end{minipage}
+\vskip\baselineskip
+\begin{displaymath}
+    \inference[arrow choice: \hask{+++}]{e1: \text{ArrowPipe a c}, x \Rightarrow y, \quad e2: \text{ArrowPipe b d}, x \Rightarrow z}{e1 \;\hask{+++}\; e2 : \text{ArrowPipe (Either a b) (Either c d)}, x \Rightarrow \text{max}(y, z)}
+\end{displaymath}
+\vskip\baselineskip
+\begin{displaymath}
+    \inference[arrow: \hask{&&&}]{e1: \text{ArrowPipe a b}, x \Rightarrow y, \quad e2: \text{ArrowPipe a c}, (y+1) \Rightarrow z}{e1 \;\hask{&&&}\; e2 : \text{ArrowPipe a (b, c)}, x \Rightarrow z}
+\end{displaymath}
+% TODO If I don't have enough pages complete inferences rules for all combinators 
 \caption{Rules fo role allocations of different combinators}
 \label{arrowPipe:ra:rule}
 \end{listing}
-The rule for the rest of combinators are shown in \coref{arrowPipe:ra:rule}.  
 
+The rule for the rest of combinators are shown in \coref{arrowPipe:ra:rule}. Notice that for compose, id, arr and ArrowChoice we do not introduce any new roles, in other words, there is no parallelization for these combinators. Reader may find it strange that we do not intent to parallelize arr combinator which lifts a sequential computation represented by Core (a $\rightarrow$ b) into ArrowPipe. It makes sense to introduce a new role to execute the computation and hence parallelize computational heavy tasks. We use this strategy in the first place but later we found a more suitable strategy exists which will be introduced in the later paragraph. .% o introduce new roles when encounter \hask{&&&}. In this way, we do not sacrifice any degree of parallelization but keep the number of roles in the system at the minimum. 
+
+For the class of combinators belonging to arrow choice, we do not introduce any new role. The expressions at the lhs and at the rhs starts with the same role $x$ because when only one code path will be executed as the name choice suggested so we should not use separate roles for two expressions that will never be executed simultaneously. In the end, we decided the computation end in the role max$(y,z)$. Max guarantees that there will not be role duplications when we compose expressions formed by ArrowChoice combinators with other combinators. For the implementation, all process in both left and right ArrowPipe expression are wrapped inside a branch operation separately. Assume max$(y, z) = y$, the process at the role $y$ will be extended with actions that receive data from min$(y, z) = z$ role at its right branch. Finally, applying inject left and inject right at left and right branches gives us Either type as the output.
+
+Finally, we discovered the right place to allocate new roles is \hask{&&&} combinator. As shown in type signature, product types mean computation at both branches will both be executed and they are independent. In order to make sure both computation are executed simultaneously, we constraint that the right ArrowPipe expression must start with a role greater than the end role of the left ArrowPipe expression. This ensures no role duplications hence maximize parallelism. The combined expression ends in the end role of the right ArrowPipe expression instead of introducing a unnecessary new role. For the implementations, the process corresponded to end role $z$ are extended with actions that receive data from the end role $y$ of the left process and store the computation of ArrowPipe expression at the right side and finally output a pair.
 
 In conclusions, even though from the implementation point of view, arrowPipe composition with the optimized role allocations is ad-hoc and less elegant to implement because we need to consider composition by send-and-receive and composition by local monadic bind and more edge cases to be dealt with compared to the naive solution in the last section where composition is done solely by send-and-receive and role allocations is mindless. We believe the effort is worthy because for a n-level divided-and-conquer algorithms, the optimized role allocation strategies allocate $2^n$ roles in total which is the same as the number of way of parallelization in theory. All the roles are used to maximize parallelism instead of wasting the valuable resources to create roles that merely transmit data.
 \section{Satisfaction of arrow laws}
