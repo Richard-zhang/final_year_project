@@ -76,7 +76,14 @@ The implementation demos the power of implementing ArrowPipe as a domain specifi
 
 More examples of algorithms formed by ArrowPipe, e.g. dot product or merge sort are shown in the \secref{eval}.
 \section{Implementation of arrow combinators} \label{arrowPipe:impl}
-\section{Strategies for optimized role allocation} \label{arrowPipe:roleAllc}
+\section{Strategies for optimized role allocations} \label{arrowPipe:roleAllc}
+In this section, we propose strategies for optimizing role allocations. We have two goals in mind when optimizing; The first one is we would like to reduce the number of roles (processes) in the computation since the overhead of thread creation and data transmission has negative impact on performance. The second one is we do not want roles duplication when we try to compose ArrowPipes since role duplications means the different computation must be merged in the same role and computations in the same thread is sequential hence role duplications has negative impact on degree of parallelization. 
+
+If we only put the first goal in mind, an easy solution will be setup an upper bound of the number roles, and then we cycle through a fixed bound when allocating new roles. Processes corresponding to duplicated roles can be simply merged using binds since Proc is a monadic DSL and duality check ensures binding will not cause deadlocks. However, this strategies is not ideal since duplications of roles will decrease the degree of parallelization in the system.
+
+If we only consider the second goal, naive strategies used in the previous section will satisfy the goal. However, the number of channels required and the number of roles in the system will grow exponentially. In a divided-and-conquer algorithm, the number of channels increases from 10 to 120 and the number of roles increases from 6 to 36 when the level is increased from 1 to 3.
+
+In conclusions, even though from the implementation point of view, arrowPipe composition with the optimized role allocations is ad-hoc and less elegant to implement because we need to consider composition by send-and-receive and composition by local monadic bind and more edge cases to consider compared to the naive solution in the last section where composition is done solely by send-and-receive and role allocations is mindless. We believe the effort is worthy because for a n-level divided-and-conquer algorithms, the optimized role allocation strategies allocate $2^n$ roles in total which is the same as the number of way of parallelization in theory. All the roles are used to maximize parallelism instead of wasting the valuable resources to create roles that merely transmit data.
 \section{Satisfaction of arrow laws}
 % \section{Optimizations}
 % \subsection{Fusion}
