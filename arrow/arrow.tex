@@ -65,18 +65,51 @@ First of all, the select pattern illustrated by \figref{arrowPipe:fig:select} is
 \end{figure*}
 Secondly, the fundamental building block of parallel pattern, the fork-join pattern illustrated by \figref{arrowPipe:fig:fork} can be expressed by \hask{&&&} combinator. The arrowPipe produced by \hask{&&&} has the two-ary tuple as the output type collecting the computation result of the main thread and the forked thread and also acts as a synchronization point.
 
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.5\textwidth]{arrow/pmap.png} 
+    \caption{Visualization of parallel map \cite{mccoolStructuredParallelPrograming2012}}
+    \label{arrow:fig:pmap}
+\end{figure}
+\begin{listing}[ht]
+    \inputminted{Haskell}{arrow/pmap.hs}
+    \caption{Parallel map in ArrowPipe}
+    \label{arrow:code:pmap}
+\end{listing}
+Thirdly, the familiar parallel map pattern illustrated in \figref{arrow:fig:pmap} is also a candidate to be expressed in ArrowPipe. The code sample is in \coref{arrow:code:pmap}. \hask{pmap} splits the input \hask{a} into 4 chunks using the splitting function \hask{s}, applied the elemental function \hask{f} and the arrow combinator \hask{***} in parallel and finally use the collecting function \hask{c} to collect the results. Usually, the input \hask{a} is a list and \hask{s} splits the list into 4 equal chunks. The number of function \hask{f} applied decides the number of ways of parallelism. We will describe a possible solution to make \hask{pmap} more generic so that we do not need write a new functions for every number of ways of parallelism. (TODO).
+
+\begin{figure}[ht]
+    \centering 
+    \includegraphics{arrow/preduc.png}
+    \caption{Visualization of parallel reduce in ArrowPipe}
+    \label{arrow:fig:preduc}
+\end{figure}
+\begin{listing}[ht]
+    \inputminted{Haskell}{arrow/preduc.hs} 
+    \caption{Parallel reduce in ArrowPipe}
+    \label{arrow:code:preduc}
+\end{listing}
+Fourthly, we can apply the similar logic to express parallel reduce pattern shown in \figref{arrow:fig:preduc}. The code sample is in \coref{arrow:code:preduc}. The result of parallel reduce has similar type signature as the collecting function in \hask{pmap} so it is often used with the \hask{pmap} function. We use nested tuple \hask{(a, (a, (a,a)))} to represent a sized array of data. The \hask{helper} function transforms the array representation of data into a form so that we apply the reduce function \hask{r} to the elements pair-wise and parallel.
+
 \begin{listing}[ht]
     \inputminted{Haskell}{arrow/dq.hs}
     \caption{2-ways and 3-levels divided-and-conquer algorithm in arrowPipe}
     \label{arrowPipe:dq}
 \end{listing}
-In the end, more complicated pattern can be expressed compositely from simpler pattern expressed in ArrowPipe. We can use a typical divide-and-conquer algorithms implemented with fork-join as an example. \figref{arrowPipe:fig:dq} shows a divide-and-conquer algorithms with 2-ways and 3-levels of fork-join. The algorithm can be expressed in arrowPipe shown in \coref{arrowPipe:dq}. The divide-and-conquer pattern can be built recursively in Haskell. For the base case, we simply apply the basic computation. Otherwise, we first call split and then call the function recursively with the level decremented by one and, in the end, call the merge to combine the results. Every expressions in the function definition are connected using arrow combinators. A 3-level divided-and-conquer algorithm is constructed by passing 3 to the function resulting a algorithm with $2^3 = 8$-way parallelism.
+Finally, more complicated pattern can be expressed compositely from simpler pattern expressed in ArrowPipe. We can use a typical divide-and-conquer algorithms implemented with fork-join as an example. \figref{arrowPipe:fig:dq} shows a divide-and-conquer algorithms with 2-ways and 3-levels of fork-join. The algorithm can be expressed in arrowPipe shown in \coref{arrowPipe:dq}. The divide-and-conquer pattern can be built recursively in Haskell. For the base case, we simply apply the basic computation. Otherwise, we first call split and then call the function recursively with the level decremented by one and, in the end, call the merge to combine the results. Every expressions in the function definition are connected using arrow combinators. A 3-level divided-and-conquer algorithm is constructed by passing 3 to the function resulting a algorithm with $2^3 = 8$-way parallelism.
 
 The implementation demos the power of implementing ArrowPipe as a domain specific language embedded in Haskell. We make full use of Haskell features, i.e high order functions and polymorphic functions to construct expressive, composable and generic computation patterns.
 
 More examples of algorithms formed by ArrowPipe, e.g. dot product or merge sort are shown in the \secref{eval}.
 \section{Implementation of arrow combinators} \label{arrowPipe:impl}
-In this chapter, we will present naive implementation and optimized solution is introduced in next section.
+In this chapter, we will present naive implementation and the optimized solution is introduced in the next section.
+
+\begin{listing}[ht]
+    \inputminted{Haskell}{arrow/kleisli.hs} 
+    \caption{The implementation of arrow instance for Kleisli arrow of a monad}
+    \label{arrow:code:kleisli}
+\end{listing}
+The intuition why ArrowPipe is an instance of Arrow comes from the Kleisli arrow of a monad is an instance of Arrow class (shown in \coref{arrow:code:kleisli}). The \hask{cont} field in the Pipe has similar type signatures as the \hask{runKleisli} field in the Kleisli arrow. From the previous section, we shown that Proc is a monad so Pipe is just an extended version of Kleisli arrow where computations in Pipe usually finish in one of the process stored in \hask{env} instead of finishing at \hask{cont} like Kleisli arrow. Intuitively, ArrowPipe, a function from the role to the Pipe, should be an instance of Arrow since Pipe looks like an arrow instance and functions are composite.
 
 The essential issue when implementing arrow combinators is how to connect one Pipe by another Pipe. The first problem we need to address is how to deal with the \hask{cont} in the tail Pipe. We know that only one \hask{cont} field exists in the resulting Pipe and it must be that from the head Pipe. Hence the only option is to convert it to a Proc expression and store the converted expression in the updated env in the resulting Pipe. A right way to do it bind the cont with the action: receive from end in the first Pipe. Also, extend the proc related to the end in the head Porc with action: send to start in the second Pipe. Besides addition of the converted \hask{cont} expression, the new env is formed by merging the env from the head Pipe and the env from the tail Pipe. Merging two envs is trivial. When there are duplication, we simply use monadic bind to combine them so that the actions belonging to head Pipe followed by the actions belonging to the tail Pipe. The \hask{start} field in the resulting Pipe is the same as that from the head Pipe and the \hask{end} field will be set the same as that from the tail Pipe.
 \begin{listing}
@@ -150,7 +183,8 @@ In conclusions, even though from the implementation point of view, arrowPipe com
 \section{Conclusions}
 Arrow interface is the perfect interface to express general computation for this project because not only is it intuitive to understand and visualize but also its combinators \hask{***} and \hask{&&&} has built-in parallel natural.
 
-So far, we've used ArrowPipe to help us compile Par-Alg to SPar. The remained challenge is the code generation from SPar to the target platform which will be illustrated in the next chapter.
+So far, we've used ArrowPipe to help us compile Par-Alg to SPar. The remained challenge is the code generation from SPar to a target platform. In the next chapter, we will introduce our methods for code generation and specifically code generation to C. Once we achieved this, every computation in ArrowPipe can be transformed into parallel C code in one step.
+
 % \section{Applications}
 % \subsection{Hassle-free compilation from ParAlg to ArrowPipe} %Hassle-free
 % \subsection{An interface for arrow computation with automatic parallelization}

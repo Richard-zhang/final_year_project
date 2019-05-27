@@ -258,3 +258,4 @@ TSWLatexianTemp*
 # standalone packages
 *.sta
 *.DS_store
+.vscode/
