@@ -32,6 +32,17 @@ In conclusion, we allow the following type: numerical type like \hask{Float} and
 
 \section{Compilation from SPar to Instr}
 % \subsection{Two stages of compilation}
+\subsection{Transformation from Proc to Instr}
+As described in the previous section, Instr contains a data type called \hask{Exp} which is a wrapper of Core expression. Compiling Core to Instr is hence not difficult. The challenge of compiling Core is mainly how to compile it to a specific target language. This will be discussed in the next subsection.  
+
+In this section, we will explain how we transform operations in Proc to Instr. Generally speaking, each Proc operation is mapped to a sequence of actions in Instr. The transformation algorithm from a Proc expression to a sequence of Instr can be implemented easily by traversing Proc expression, applying the mapping and collecting the results by concatenation. This is an advantage of using free monad technique to build the AST because Proc expression can be treated as a data structures and traversing recursive data structures can be easily done in Haskell. In addition, operations like \hask{Recv} which involves continuation whose type is \hask{Core a -> next} in their constructors are treated differently than those operations whose constructors only have a value type \hask{next}. The latter is easy to implement, we can simply call the traversing function recursively. For the former, we have to pass an expression whose type is \hask{Core a} to the continuation so that we can recursively call the traverse function recursively on the results of applying value to the continuation. The answer to what Core expression should be used is \hask{Var} denoting variable. Passing a unique variable to the continuation gives us \hask{next} inexpensively and we will define where does values of variables comes from for each operations in Proc. 
+
+We have introduced the general principle to the readers. Now let us dig into details of translation rules for each operations. 
+
+\begin{itemize}
+    \item     
+\end{itemize}
+
 \subsection{Strategies for channel allocation}
 \subsection{Type preservation}
 \section{Code generation to C: from Instr to C}
