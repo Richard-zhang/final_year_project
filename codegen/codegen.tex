@@ -67,10 +67,37 @@ From the last two subsections, we need to maintain a number of states during the
 \section{Code generation to C: from Instr to C}
 The last piece of jigsaw is compilation from a sequence of Instr to C. This process is rather simple but trivial. This is simply done by transforming the sequence of Instr to a C AST. We used an open source library: language-c \cite{LanguagecAnalysisGeneration} to represent C AST in Haskell and pretty printing the C AST gives us the generated code. This method can be generalized to any target language. As for the implementation of channel communication in C, we used another open source library: chan \cite{treatPureImplementationGo2019} whose internal is based on shared memory. In the following subsections, we will present some design choices during this final step.
 \subsection{Representations of Core data type in C}
-\subsection{Compiling Core to C}
+\begin{listing}[ht]
+    \inputminted{C}{codegen/data.c} 
+    \caption{Compound data type in C}
+    \label{codegen:code:data}
+\end{listing}
+The first challenge we face is how to represent data structure in C. For primitive data type like Int or Float, a simple one-to-one mapping is sufficed. It is hard to deal with compound data type in C. First of all, C does not support polymorphic type. Hence, we choose to generate specific data type for every different compound data type even though they have the same structure. We have a way to name the generated data type to avoid name duplication. The naming simply reflects the structure of the data types with its elemental type. For example, \hask{(Int, (Int, ()))} is converted to Prod\_Int\_Prod\_Int\_Unit and \hask{Either (Either () (Int, Int)) (Int, Int)} is convert to Sum\_Sum\_unit\_Prod\_int\_int\_Prod\_int\_int. In this project, all compound types are formed by sum type and product type. The product type will be converted to a struct with two field in C. The sum type is represented by the tagged union type. Tagged union is a struct with two field. The value of the first field indicates whether it is a left value or right value and the value of second field is a union type containing either the left value or right value. We also implement a sorting algorithm based on the depth of compound type so that all necessary data types have been defined before the definition of the compound types. An example of what \hask{Either Int (Int, Int)} will be converted to is shown in \coref{codegen:code:data}.
+
+Another challenge is representation of the recursive type. From the type theory, we learn that a list of int can be expressed as $\mu a. () + \text{Int} \times a$. We might reuse the idea from the last paragraph to generated recursive type in terms of sum and product type. Hence a list of Int will look like the code below.
+\begin{minted}{C}
+typedef struct Sum_unit_Prod_int_a {
+    Label label;
+    union {
+        int left;
+        Sum_unit_Prod_int_a *right;
+    } value;
+} Sum_unit_Prod_int_a
+\end{minted}
+However, we believe expressing typical recursive data structures like list of int in this way is bad for performances. Obviously, C has a more efficient way to represent list of int using an array. So we decided to has two ways to represent recursive data structures. For a set of specific recursive data structure, users can write their own representation to exploit the advantages of the target language. For example, a list of int are encoded in C using a wrapper of pointer type (shown in \coref{codegen:code:list}). This way is not very generic but friendly for performances. For other types of recursive data structures where user do not specify their optimized versions in C, we simply apply the method in the last paragraph to encode them in C. This way is generic but not efficient.
+\begin{code}
+\begin{minted}{C}
+typedef struct List_int {
+        size_t size; int * value;
+    } List_int;
+\end{minted}
+\caption{Optimized represent of List in C}
+\label{codegen:code:list}
+\end{code}
+\subsection{Compiling from Core to C}
 \subsection{The structure of generated code}
 \section{Conclusion}
-With the completion of code generation, we deliver the results we promised in the introduction section. We have implemented a end-to-end process that will generate low-level parallel code from a high-level languages embedded with a flexible backend that can target multiple languages with ease. Now, it is time to evaluate the performances of our achievement with quantitative measurements.   
+With the completion of code generation, we deliver the results we promised in the introduction section. We have implemented a end-to-end process that will generate low-level deadlock-free parallel code from an expressive high-level languages embedded with a flexible backend that can target multiple languages with ease. Now, it is time to evaluate the performances of our achievement with quantitative measurements.
 % \subsubsection{Data type in C}
 % \subsection{Optimization for common recursive data types in C}
 % \subsection{Memory management}
