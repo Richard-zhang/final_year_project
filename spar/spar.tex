@@ -3,8 +3,42 @@ In order to generate parallel code from ParAlg, we first introduce the syntax of
 \section{Computation: The Core EDSL}
 Core is the elemental computation. The syntax of Core is mostly inspired by Alg \cite{AlgebraicMultipartyProtocol} and FunC, a demo DSL defined in the work done by \cite{svenningssonCombiningDeepShallow2015}. For this project, we choose to implement Core syntax as small as possible without sacrificing expressibility.
 \subsection{Syntax}
+\begin{listing}[ht]
+    \inputminted{Haskell}{spar/core.hs}
+    \caption{The syntax of Core}
+    \label{spar:code:core}
+\end{listing}
+The syntax of Core is shown in \coref{spar:code:core}. Inl and Inr are for the construction of sum type. Pair is responsible for constructing value of product type while Fst and Snd extract value from product type. Supporting sum type, product type and inductive type (see next section) is enough to express any data structure in any computation. In addition to these actions manipulating basic data structure, we have Lit which is used in the Haskell interpreter (see \secref{impl:sec:interp}) and benchmarking (see \secref{eval}) and Var, a constructor which is useful when what we do not actually evaluation the Core expression but inspect its static structure. It is used in the code generation (see \secref{codegen:sec:core}) and session typing (see \secref{impl:sec:session}). Id is similar to identity function and Const is similar to the const function in Haskell. Prim representing user defined functions takes two field name and the haskell implementation. The first field will be useful in the code generation (see \secref{codegen:sec:core}) when applying user-defined function calls. The second field will be used in the interpreter implementation.   
+
 \subsection{Representation of recursive data structures}
-\subsection{Semantics}
+Core has primitives to operate on sum and product types. Representing recursive type like $\mu \text{list}. () + \text{Int} \times \text{list}$ will be covered in this section. The method are taken from the implementation of Alg language in \cite{AlgebraicMultipartyProtocol}. First of all, we extend the core with the following two operation. \hask{In} represents the fold operation on iso-recursive types and \hask{Out} represents the unfold operation on iso-recursive types. Consider a recursive type $\mu \alpha. \tau$, the type parameter \hask{t} is equivalent to $\alpha$, \hask{f :@: t} is equivalent to $\tau$ and the typeclass \hask{Data f t} associate two types which is equivalent to $\mu \alpha. \tau$. \hask{:@:} is a type family which is a function acting on types instead of values. \hask{:@:} converts \hask{f} to sum and product type in Haskell which are \hask{(,)} and \hask{Either}.
+\begin{minted}{Haskell}
+data Core a where
+    -- omit other constructors
+    In   :: Data f t => Core (f :@: t -> t)
+    Out  :: Data f t => Core (t -> f :@: t)
+
+type family (:@:) (a :: Poly Type) (b :: Type) :: Type where
+    'PId :@: x = x
+    'PK y :@: _ = y
+    'PProd f g :@: x = (f :@: x, g :@: x)
+    'PSum f g :@: x = Either (f :@: x) (g :@: x)
+
+class Data (f :: Poly Type) t | t -> f where
+    roll :: f :@: t -> t
+    unroll :: t -> f :@: t
+\end{minted}
+A concrete example is a list shown below. We know a list has recursive type: $\mu \alpha. () + a \times \alpha$. So the \hask{f} is \hask{('PSum ('PK ())  ('PProd ('PK a) 'PId))} and we use haskell list type \hask{[a]} to present $\alpha$ (equivalent to \hask{t} in  \hask{f :@: t}). \hask{f :@: t} is evaluated to the type \hask{Either () (a, [a])}.
+\begin{minted}{Haskell}
+instance Data ('PSum ('PK ())  ('PProd ('PK a) 'PId)) [a] where
+    roll (Left _) = []
+    roll (Right (a, b)) = a : b
+  
+    unroll [] = Left ()
+    unroll (x:xs) = Right (x,xs)
+\end{minted}
+
+However, even though this way of representing recursive types is very smart but later we found out they are seldomly used in the code generation of parallel algorithms. Because functions processing complicated recursive data structure is usually represented by the Prim constructor hiding the implementation details so In and Out are too low-level operations and hence user are difficult to write complicated function by them. So in the conclusion, Core provides basic functionality, i.e Fst or Inl to process data and more importantly, Prim, a black box constructor hiding the implementation details of the sequential computation. Prim turn out to be a very useful abstraction in terms of code generation. More details will be discussed in the \secref{codegen:sec:core}.
 \section{Communication: The Proc EDSL}
 \subsection{Syntax}
 \subsection{Representation in Haskell}
