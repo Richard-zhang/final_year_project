@@ -40,9 +40,16 @@ instance Data ('PSum ('PK ())  ('PProd ('PK a) 'PId)) [a] where
 
 However, even though this way of representing recursive types is very smart but later we found out they are seldomly used in the code generation of parallel algorithms. Because functions processing complicated recursive data structure is usually represented by the Prim constructor hiding the implementation details so In and Out are too low-level operations and hence user are difficult to write complicated function by them. So in the conclusion, Core provides basic functionality, i.e Fst or Inl to process data and more importantly, Prim, a black box constructor hiding the implementation details of the sequential computation. Prim turn out to be a very useful abstraction in terms of code generation. More details will be discussed in the \secref{codegen:sec:core}.
 \section{Communication: The Proc EDSL}
-\subsection{Syntax}
-\subsection{Representation in Haskell}
-\subsection{Semantics}
+\subsection{Syntax and semantics}
+\begin{listing}[ht]
+    \inputminted{Haskell}{spar/procf.hs}
+    \caption{The algebra for message-passing}
+    \label{spar:code:procf}
+\end{listing}
+Proc will be a free monad EDSL for message passing. As introduced in the free monad section in the background, the first thing to do it to define the algebra of message-passing concurrency: \hask{ProcF} and \hask{Proc} is defined using free monad constructor and \hask{ProcF}. The definition is shown in the \coref{spar:code:procf}. Careful reader might notice that \hask{Proc} and \hask{ProcF} are defined mutually with each others in \hask{Branch}, \hask{Select} and \hask{Broadcast}. The reason will by covered in the explanation of semantics.
+
+\hask{Send} takes 
+
 \subsection{Session typing}
 \section{Parallel computation: A group of Proc}
 \subsection{Duality check}
