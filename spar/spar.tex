@@ -48,11 +48,16 @@ However, even though this way of representing recursive types is very smart but 
 \end{listing}
 Proc will be a free monad EDSL for message passing. As introduced in the free monad section in the background, the first thing to do it to define the algebra of message-passing concurrency: \hask{ProcF} and \hask{Proc} is defined using free monad constructor and \hask{ProcF}. The definition is shown in the \coref{spar:code:procf}. Careful reader might notice that \hask{Proc} and \hask{ProcF} are defined mutually with each others in \hask{Branch}, \hask{Select} and \hask{Broadcast}. The reason will by covered in the explanation of semantics.
 
-\hask{Send} takes 
+\hask{Send} takes
 
 \subsection{Session typing}
-\section{Parallel computation: A group of Proc}
-\subsection{Duality check}
+\section{Concurrent computation: A group of Proc}
+We have introduced syntax for computation and communication. We also know that a single Proc expression is meaningless since there does not exist another party to interact with this Proc hence the computation has no progress. Naturally, we use a group of Proc to represent concurrent computations. To be more precise, a collection of Proc with their own role identifiers can be treated as a system of roles executing their own programs concurrently. In most of the cases, in order to make the group of Proc meaningful, we will allocate a start role in the system acting as the original data provider and a end role whose Proc program will receive data from others, process and output the final computation which is wrapped by the Pure constructor at the end of the Proc program. 
+
+Readers might find it easy to visualize the group of Proc as a computation graph. The start role is the source node and the end role is the sink node. A pair of nodes are connected if they communicate data with each others.
+
+\subsection{Duality checks}
+From the previous section, we reason that a Proc program can be typed  by multiparty session types. In order to utilize this property, we should check the duality of the each pair of Proc in the group. In short, duality check examine whether any pair of Proc in the system are complement with each other. If the duality properties is satisfied, the computation is guaranteed to be deadlock-free. The work done by \cite{coppoGentleIntroductionMultiparty2015} constructed the theoretic foundation of algorithms for checking dualities and we will give an overview of the implementation in the \secref{impl:sec:session}.
 \section{Conclusions}
 In this section, we have introduced our intermediate language. It is friendly to use thanks to the monadic interface. In addition, communication and computation are independent in SPar. We can make Proc to parameterized by the type represent sequential computation so users can simply use their construction for sequential computation if they found Core is limited. More importantly, our strategy for parallelism is clear now. In a nutshell, we achieve parallelism by message-passing concurrency: spawning a group of threads on a multi-core CPU where each thread executes its corresponding Proc program.
 
