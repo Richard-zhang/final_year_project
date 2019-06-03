@@ -1,0 +1,20 @@
+\chapter{Parallel algorithms and evaluation} \label{eval}
+What we have implemented so far not only can be used as a backend for compiling ParAlg but also a stand-alone tool to express parallel algorithms. In this section, we will give an overview of how to use SPar for parallel algorithms, benchmarking the performance of the generated code for various computation and analyzing the design choices of the project.
+\section{Parallel algorithms}
+The biggest advantage of writing parallel programs in SPar is that user can express the computation similar to the sequential one without worrying about any low-level primitives for parallel computations. We will give a recommended recipe of expressing computation in SPar to follow and two concrete examples for the explanation.
+
+\subsection{Four steps to write parallel algorithms in SPar}
+Usually, divide-and-conquer algorithms are the best candidates for SPar to parallelize. The recipe is below:
+\begin{enumerate}
+    \item Understand the algorithm: We recommend programmers to express the algorithms in the recursion schemes (see \secref{b:rs}) Recursion schemes is recommended because it separates the split function, the merge function and the structure of divide-and-conquer from each others so it helps you familiar with the building blocks of the divide-and-conquer algorithms, i.e, the data structures involved, the type signature of the split function, the type signature of merge functions and their implementations.
+    \item Systematic parallelization: In the first iteration, we can express the split, merge functions and other necessary helper functions in terms of the ArrowPipe by combing \hask{arr} constructor and \hask{Prim} constructor. Every computation wrapped by \hask{arr} with \hask{Prim} is consider to be sequential. We will substitute them into high-level parallel patterns provided by SPar. For example, divide-and-conquer algorithms can be parallelized by \hask{divConquer} (see \coref{arrowPipe:dq}) helper functions. Notice that the parameter for number of ways of parallelized divide-and-conquer algorithms should be set accordingly by the number of cores of the execution machine.
+    \item Specific parallelization: The above step is generic and can be applied to any divide-and-conquer algorithm. In this stage, what will be done is determined by the specific implementations. Programmer should inspect the implementation of these function wrapped by \hask{arr} with \hask{Prim} to see whether there are any parallelism to exploit. If so, programmer should rewrite these functions by the parallel patterns provided by SPar or arrow combinators. For example, the split function of the Quickhull \cite{Quickhull2019} to solve convex hull problems will use a for-loop to find the point whose distance to the line is at the maximum. This step can be expressed by the parallel map-and-reduce pattern (see \coref{arrow:code:preduc}). Programmers can apply this step iteratively until all possible parallelisms are exploited or programmers think it is enough. All the sequential computation are left in the form: \hask{arr} with \hask{Prim}.
+    \item Wrap up: Before the code generation, programmer need to implement all the \hask{Prim} functions in terms of the target language. In the scope of this project, programmer will write them in C and create a header file. The generated code will include the header file and from then on, programmers obtain the parallelized version of the algorithm that is guaranteed to be deadlock-free.
+\end{enumerate}
+\subsection{Example: Merge sort}
+\subsection{Example: Word count}
+\section{Benchmarks}
+\subsection{Benchmarks against generated Haskell code}
+\subsection{Benchmarks against C implementation}
+\section{Evaluation}
+\subsection{Design choices: Why Haskell?}
