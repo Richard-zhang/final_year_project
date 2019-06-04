@@ -16,7 +16,7 @@ data ProcF next where
               -> Core (Either a b)
               -> (Core a -> Proc c)
               -> (Core b -> Proc c)
-              -> (Core c -> next)
+              -> next
               -> ProcF next
 
 type Proc a = Free ProcF (Core a)

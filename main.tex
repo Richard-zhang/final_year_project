@@ -103,6 +103,10 @@
 
 %% https://tex.stackexchange.com/questions/375992/bad-mathchar-with-semantic-package
 \usepackage{semantic}
+\newcommand*{\Par}
+{
+    \: | \:
+}
 
 \title{TODO}
 \author{Shuhao Zhang}
@@ -137,20 +141,9 @@
 \section{Example: Parallel merge sort}
 
 \input{spar/spar.tex}
-
-\chapter{SPar: Implementation}
-\section{Session type} \label{impl:sec:session}
-\subsection{Representations of session types in Haskell}
-\subsection{Type-indexed Free Monad}
-\subsection{Type-level duality check}
-\subsection{Value-level duality check}
-\section{SPar interpreter} \label{impl:sec:interp}
-\subsection{Overview}
-\subsection{Implementation}
-
+\input{impl/impl.tex}
 \input{arrow/arrow.tex}
 \input{codegen/codegen.tex}
-
 \input{eval/eval.tex}
 % \chapter{Parallel algorithms and evaluation} \label{eval}
 % \section{Parallelized algorithms}

@@ -40,24 +40,57 @@ instance Data ('PSum ('PK ())  ('PProd ('PK a) 'PId)) [a] where
 
 However, even though this way of representing recursive types is very smart but later we found out they are seldomly used in the code generation of parallel algorithms. Because functions processing complicated recursive data structure is usually represented by the Prim constructor hiding the implementation details so In and Out are too low-level operations and hence user are difficult to write complicated function by them. So in the conclusion, Core provides basic functionality, i.e Fst or Inl to process data and more importantly, Prim, a black box constructor hiding the implementation details of the sequential computation. Prim turn out to be a very useful abstraction in terms of code generation. More details will be discussed in the \secref{codegen:sec:core}.
 \section{Communication: The Proc EDSL}
-\subsection{Syntax and semantics}
 \begin{listing}[ht]
     \inputminted{Haskell}{spar/procf.hs}
     \caption{The algebra for message-passing}
     \label{spar:code:procf}
 \end{listing}
-Proc will be a free monad EDSL for message passing. As introduced in the free monad section in the background, the first thing to do it to define the algebra of message-passing concurrency: \hask{ProcF} and \hask{Proc} is defined using free monad constructor and \hask{ProcF}. The definition is shown in the \coref{spar:code:procf}. Careful reader might notice that \hask{Proc} and \hask{ProcF} are defined mutually with each others in \hask{Branch}, \hask{Select} and \hask{Broadcast}. The reason will by covered in the explanation of semantics.
+Proc will be a free monad EDSL for message passing. As introduced in the free monad section in the background, the first thing to do it to define the algebra of message-passing concurrency: \hask{ProcF} and \hask{Proc} is defined using free monad constructor and \hask{ProcF}. The definition is shown in the \coref{spar:code:procf}. Careful reader might notice that \hask{Proc} and \hask{ProcF} are defined mutually with each others in \hask{Branch}, \hask{Select} and \hask{Broadcast}.
 
-\hask{Send} takes
+The semantics will be defined in the next subsection in terms of a group of Proc programs. A single Proc program is either sequential or deadlock. Operational semantics is only worth discussing when given a group of Proc programs interacting with each others.
 
-\subsection{Session typing}
 \section{Concurrent computation: A group of Proc}
 We have introduced syntax for computation and communication. We also know that a single Proc expression is meaningless since there does not exist another party to interact with this Proc hence the computation has no progress. Naturally, we use a group of Proc to represent concurrent computations. To be more precise, a collection of Proc with their own role identifiers can be treated as a system of roles executing their own programs concurrently. In most of the cases, in order to make the group of Proc meaningful, we will allocate a start role in the system acting as the original data provider and a end role whose Proc program will receive data from others, process and output the final computation which is wrapped by the Pure constructor at the end of the Proc program. 
 
 Readers might find it easy to visualize the group of Proc as a computation graph. The start role is the source node and the end role is the sink node. A pair of nodes are connected if they communicate data with each others.
+\subsection{Operational semantics}
+\begin{table}[ht]
+\begin{align*}
+    &(P_1, r_1) \Par (P_2, r_2) \Par \ldots \Par (P_n, r_n) \rightarrow \tag{Init}\\ 
+    &(P_1, r_1) \Par (P_2, r_2) \Par \ldots \Par (P_n, r_n) \Par \emptyset \notag\\ 
+    &(\text{Free (Send $r_j$ $e$ next)}, r_i) \Par \ldots \Par h \rightarrow  \tag{Send}\\ 
+    &(\text{next} , r_i) \Par \ldots \Par h \cdot (r_i, r_j, v) \qquad (e \downarrow v) \notag\\ 
+    &(\text{Free (Recv $r_i$ cont)}, r_j) \Par \ldots \Par (r_i, r_j, v) \cdot h \rightarrow  \tag{Recv}\\ 
+    &(p, r_j) \Par \ldots \Par h \qquad (\text{cont $v$} \downarrow p)\notag\\ 
+    &(\text{Free (Select $r_j$ $e$ cont1 cont2 next)}, r_i) \Par \ldots \Par h \rightarrow  \tag{Sel-Left}\\ 
+    &(\text{cont1 $v$} \gg \text{next}, r_i) \Par \ldots \Par h \cdot (r_i, r_j, \text{L}) \qquad (e \downarrow v, \text{label}(v) \downarrow \text{L}) \notag\\ 
+    &(\text{Free (Select $r_j$ $e$ cont1 cont2 next)}, r_i) \Par \ldots \Par h \rightarrow  \tag{Sel-Right}\\ 
+    &(\text{cont2 $v$} \gg \text{next}, r_i) \Par \ldots \Par h \cdot (r_i, r_j, \text{R}) \qquad (e \downarrow v, \text{label}(v) \downarrow \text{R}) \notag\\ 
+    &(\text{Free (Branch $r_i$ next1 next2 cont)}, r_j) \Par \ldots \Par (r_i, r_j, \text{L}) \cdot h \rightarrow  \tag{Branch-Left}\\ 
+    &(\text{next1} >\!\!>\!\!= \text{cont}, r_j) \Par \ldots \Par h \notag\\ 
+    &(\text{Free (Branch $r_i$ next1 next2 cont)}, r_j) \Par \ldots \Par (r_i, r_j, \text{R}) \cdot h \rightarrow  \tag{Branch-Right}\\ 
+    &(\text{next2} >\!\!>\!\!= \text{cont}, r_j) \Par \ldots \Par h \notag\\ 
+    &(\text{Free (Broadcast [$r_{k_1}$, $\ldots$, $r_{k_n}$] $e$ cont1 cont2 next)}, r_i) \Par \ldots \Par h \rightarrow  \tag{Broadcast-Left}\\ 
+    &(\text{cont1 $v_l$} \gg \text{next}, r_i) \Par \ldots \Par h \cdot (r_i, r_{k_1}, \text{L}) \cdot \ldots \cdot (r_i, r_{k_n}, \text{L}) \notag\\
+    & \qquad \text{where} \; (e \downarrow v, \text{label}(v) \downarrow \text{L}, (\text{Left $v_l$}) == v) \notag\\ 
+    &(\text{Free (Broadcast [$r_{k_1}$, $\ldots$, $r_{k_n}$] $e$ cont1 cont2 next)}, r_i) \Par \ldots \Par h \rightarrow  \tag{Broadcast-Right}\\ 
+    &(\text{cont2 $v_r$} \gg \text{next}, r_i) \Par \ldots \Par h \cdot (r_i, r_{k_1}, \text{R}) \cdot \ldots \cdot (r_i, r_{k_n}, \text{R}) \notag\\
+    & \qquad \text{where} \;(e \downarrow v, \text{label}(v) \downarrow \text{R}, (\text{Right $v_r$}) == v) \notag\\ 
+\end{align*}
+\caption{Small step semantics for Proc}
+\label{spar:sstep}
+\end{table}
+Due to the similarities between Proc and multiparty session calculus introduced in \cite{coppoGentleIntroductionMultiparty2015}. We borrow some syntax and operational semantics rule from multiparty session calculus to define the operational semantics of Proc. $P, Q$ denote Proc programs. A message queue is $h$ which contains messages $(q, p, v)$ meaning that the sender $q$ sends the receiver $p$ with value $v$. $h \cdot m$ is a message queue whose bottom element is message $m$. $h$ are runtime syntax to model the asynchronous message communication where the order of the messages are retained \cite{coppoGentleIntroductionMultiparty2015}. $e \downarrow v$ means the evaluation of the Core expression to the value v.
 
-\subsection{Duality checks}
-From the previous section, we reason that a Proc program can be typed  by multiparty session types. In order to utilize this property, we should check the duality of the each pair of Proc in the group. In short, duality check examine whether any pair of Proc in the system are complement with each other. If the duality properties is satisfied, the computation is guaranteed to be deadlock-free. The work done by \cite{coppoGentleIntroductionMultiparty2015} constructed the theoretic foundation of algorithms for checking dualities and we will give an overview of the implementation in the \secref{impl:sec:session}.
+\tabref{spar:sstep} shows the small step semantics for Proc. Rule (Init) describes the initialization of a group of Proc programs with an empty message queue at the beginning. Rule (Send) append the value to the message queue. Its complementary rule: (Recv) will recv the value at the top of the message queue. Rule (Branch) is also the complementary rule of the rule (Sel) and (Broadcast). Rule (Broadcast) multicasts the label to a group of receivers, adding a set of messages containing the label into the queue.
+
+\subsection{Session types and duality checking}
+Immediately, we notice that a Proc program can be typed by session types. \hask{Send} operation in ProcF corresponds to the type !$\langle$p, S$\rangle$.T, \hask{Select} corresponds to $\oplus \langle \text{p}, \{ l_i : T_i \}_{i \in I} \rangle$ and so on. One exception is the \hask{broadcast} operation which does not mapped to any type of the session types. We will discuss how to handle \hask{Broadcast} in \secref{impl:sec:session}. 
+
+We have argued that a Proc program can be typed by multi-party session types. In order to utilize this property, we should check the duality of the each pair of Proc in the group. In short, duality check examines whether any pair of Proc in the system are complement with each other. If the duality properties is satisfied, the computation is guaranteed to be deadlock-free. This safety guarantee is useful and powerful in the application of parallel code generation. In this domain, SPar is considered to be the intermediate languages. Passing duality check for the intermediate representation means that as long as we preserve types and communication pattern carefully in later stages of code generation pipeline, the generated code obtained will share the same non-trivial properties: communication safety, protocol fidelity and deadlock-free.
+
+The work done by \cite{coppoGentleIntroductionMultiparty2015} constructed the theoretic foundation of algorithms for checking dualities and we will give an overview of the implementation in the \secref{impl:sec:session}.
+
 \section{Conclusions}
 In this section, we have introduced our intermediate language. It is friendly to use thanks to the monadic interface. In addition, communication and computation are independent in SPar. We can make Proc to parameterized by the type represent sequential computation so users can simply use their construction for sequential computation if they found Core is limited. More importantly, our strategy for parallelism is clear now. In a nutshell, we achieve parallelism by message-passing concurrency: spawning a group of threads on a multi-core CPU where each thread executes its corresponding Proc program.
 
