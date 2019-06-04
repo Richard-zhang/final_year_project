@@ -6,5 +6,10 @@ data CodeGenState = CodeGenState
     dataStructCollect :: Set AReprType
   }
 
-newtype CodeGen m a = CodeGen { runCodeGen :: StateT CodeGenState m a }
-    deriving (Functor, Applicative, Monad, MonadState CodeGenState, MonadIO)
+newtype CodeGen m a = 
+  CodeGen { runCodeGen :: StateT CodeGenState m a }
+    deriving (Functor, 
+              Applicative, 
+              Monad, 
+              MonadState CodeGenState, 
+              MonadIO)
