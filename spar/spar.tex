@@ -76,6 +76,7 @@ Readers might find it easy to visualize the group of Proc as a computation graph
     &(\text{Free (Broadcast [$r_{k_1}$, $\ldots$, $r_{k_n}$] $e$ cont1 cont2 next)}, r_i) \Par \ldots \Par h \rightarrow  \tag{Broadcast-Right}\\ 
     &(\text{cont2 $v_r$} \gg \text{next}, r_i) \Par \ldots \Par h \cdot (r_i, r_{k_1}, \text{R}) \cdot \ldots \cdot (r_i, r_{k_n}, \text{R}) \notag\\
     & \qquad \text{where} \;(e \downarrow v, \text{label}(v) \downarrow \text{R}, (\text{Right $v_r$}) == v) \notag\\ 
+    &(\text{Pure $v$}, r_i) \Par (P_i, r_i) \Par \ldots \Par (P_j, r_j) \Par h \rightarrow (P_i, r_i) \Par \ldots \Par (P_j, r_j) \Par h \tag{Pure}\\ 
 \end{align*}
 \caption{Small step semantics for Proc}
 \label{spar:sstep}
@@ -86,6 +87,26 @@ Due to the similarities between Proc and multiparty session calculus introduced 
 
 \subsection{Session types and duality checking}
 Immediately, we notice that a Proc program can be typed by session types. \hask{Send} operation in ProcF corresponds to the type !$\langle$p, S$\rangle$.T, \hask{Select} corresponds to $\oplus \langle \text{p}, \{ l_i : T_i \}_{i \in I} \rangle$ and so on. One exception is the \hask{broadcast} operation which does not mapped to any type of the session types. We will discuss how to handle \hask{Broadcast} in \secref{impl:sec:session}. 
+
+\begin{table}[ht]
+    \[
+        \inference[Inst]{\Gamma \vdash e : \forall l. \text{Proc} \; L \; a}{\Gamma \vdash e : \text{Proc} \; ([\text{end}/l]L) \; a}
+    \]
+    \[
+        \inference[Gen]{\Gamma \vdash e : \forall l. \text{Proc} \; L \; a, \quad \text{fresh} \; l}{\Gamma \vdash e : \text{Proc} \; ([l/\text{end}]L) \; a}
+    \]
+    \[
+        \inference[Ret]{\Gamma |- v : a}{\Gamma |- \text{Pure $v$} : \forall l. \text{Proc} \; l \; a}
+    \]
+    \[
+        \inference[Abs]{\Gamma, x : a |- e : \forall l. \text{Proc} \; L \; b}{\Gamma |- \lambda x. e : a \rightarrow \forall l. \text{Proc} \; L \; b}
+    \]
+    \[\inference[Bind]{\Gamma |- m : \forall l_1. \Mp{L_1}{a}, \quad \Gamma |- f : a \rightarrow \forall l_2. \Mp{L_2}{b}}{\Gamma |- m >\!\!>\!\!= f : \forall l_2. \Mp{[L_2/L_1]L_1}{b}}\]
+    \caption{Typing rules for Proc expressions}
+    \label{spar:styperule}
+\end{table}
+
+The \tabref{spar:styperule} shows the session typing rule for a Proc expression. We borrowed some notation from the work done \cite{AlgebraicMultipartyProtocol}. $\Gamma \vdash e : \text{Proc} \; L \; a$ is the type of a Proc expression that follows protocol $L$ and returns a value of type $a$. The types are parameterized by a variable $l$ representing the continuation of a local type $L$.
 
 We have argued that a Proc program can be typed by multi-party session types. In order to utilize this property, we should check the duality of the each pair of Proc in the group. In short, duality check examines whether any pair of Proc in the system are complement with each other. If the duality properties is satisfied, the computation is guaranteed to be deadlock-free. This safety guarantee is useful and powerful in the application of parallel code generation. In this domain, SPar is considered to be the intermediate languages. Passing duality check for the intermediate representation means that as long as we preserve types and communication pattern carefully in later stages of code generation pipeline, the generated code obtained will share the same non-trivial properties: communication safety, protocol fidelity and deadlock-free.
 
