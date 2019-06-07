@@ -102,6 +102,9 @@ Immediately, we notice that a Proc program can be typed by session types. \hask{
         \inference[Abs]{\Gamma, x : a |- e : \forall l. \text{Proc} \; L \; b}{\Gamma |- \lambda x. e : a \rightarrow \forall l. \text{Proc} \; L \; b}
     \]
     \[\inference[Bind]{\Gamma |- m : \forall l_1. \Mp{L_1}{a}, \quad \Gamma |- f : a \rightarrow \forall l_2. \Mp{L_2}{b}}{\Gamma |- m >\!\!>\!\!= f : \forall l_2. \Mp{[L_2/L_1]L_1}{b}}\]
+    \[\inference[Send]{\Gamma |- v : a}{\Gamma |- \text{Free (Send $r$ $v$ (Pure $()$))} : \forall l. \Mp{(r!\langle a \rangle.l)}{()}}\]
+    \[\inference[Recv]{}{\Gamma |- \text{Free (Recv $r$ $(\backslash v -> \text{Pure} \; v)$)} : \forall l. \Mp{(r?(a).l)}{a}}\]
+    \[\inference[Select]{\Gamma |- v : a + b, \quad \Gamma |- f_1 : a \rightarrow \forall l_1 \Mp{L_1}{c}, \quad \Gamma |- f_2 : b \rightarrow \forall l_2. \Mp{L_2}{c}}{\Gamma |- \text{Free (Select $r$ $v$ $f_1$ $f_2$ (Pure $()$))} : \forall l. \Mp{r \oplus \{ L : [l/l_1]L_1, R: [l/l_2]L_2\}}{()}}\]
     \caption{Typing rules for Proc expressions}
     \label{spar:styperule}
 \end{table}
