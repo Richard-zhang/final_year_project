@@ -1,0 +1,19 @@
+par_fun msp
+    : (Rec L)@r0 -> (Rec L)@r0
+    = id@r0
+       . (merge@r3
+           . (inj[0]
+               ||| (inj[1]
+                     . (((merge
+                         . (inj[0]
+                         ||| (inj[1]
+                         . ((ms. proj[0])&&& (ms. proj[1, 2]))))
+                         . split)@r2
+                          . proj[0]@r1)
+                         &&& ((merge
+                              . (inj[0]
+                              ||| (inj[1]
+                              . ((ms. proj[0])&&& (ms. proj[1]))))
+                              . split)@r3
+                               . proj[1]@r1))))
+           . split@r1)
