@@ -70,12 +70,17 @@ Readers might find it easy to visualize the group of Proc as a computation graph
     &(\text{next1} >\!\!>\!\!= \text{cont}, r_j) \Par \ldots \Par h \notag\\ 
     &(\text{Free (Branch $r_i$ next1 next2 cont)}, r_j) \Par \ldots \Par (r_i, r_j, \text{R}) \cdot h \rightarrow  \tag{Branch-Right}\\ 
     &(\text{next2} >\!\!>\!\!= \text{cont}, r_j) \Par \ldots \Par h \notag\\ 
-    &(\text{Free (Broadcast [$r_{k_1}$, $\ldots$, $r_{k_n}$] $e$ cont1 cont2 next)}, r_i) \Par \ldots \Par h \rightarrow  \tag{Broadcast-Left}\\ 
-    &(\text{cont1 $v_l$} \gg \text{next}, r_i) \Par \ldots \Par h \cdot (r_i, r_{k_1}, \text{L}) \cdot \ldots \cdot (r_i, r_{k_n}, \text{L}) \notag\\
-    & \qquad \text{where} \; (e \downarrow v, \text{label}(v) \downarrow \text{L}, (\text{Left $v_l$}) == v) \notag\\ 
-    &(\text{Free (Broadcast [$r_{k_1}$, $\ldots$, $r_{k_n}$] $e$ cont1 cont2 next)}, r_i) \Par \ldots \Par h \rightarrow  \tag{Broadcast-Right}\\ 
-    &(\text{cont2 $v_r$} \gg \text{next}, r_i) \Par \ldots \Par h \cdot (r_i, r_{k_1}, \text{R}) \cdot \ldots \cdot (r_i, r_{k_n}, \text{R}) \notag\\
-    & \qquad \text{where} \;(e \downarrow v, \text{label}(v) \downarrow \text{R}, (\text{Right $v_r$}) == v) \notag\\ 
+    &(\text{Free (Broadcast [$r_{k_1}$, $\ldots$, $r_{k_n}$] $e$ cont1 cont2 next)}, r_i) \Par \ldots \Par h \rightarrow  \tag{Broadcast-1}\\ 
+    &(\text{Free (Select $r_{k_1}$ $v$ c c (Pure ()))}, r_i) \Par \ldots \Par h \notag\\ 
+    & \qquad \text{where} \;(e \downarrow v, \text{c = Free (Broadcast [$r_{k_2}$, $\ldots$, $r_{k_n}$] cont1 cont2 next)}) \notag\\ 
+    &(\text{Free (Broadcast [$r_{k_1}$] $e$ cont1 cont2 next)}, r_i) \Par \ldots \Par h \rightarrow  \tag{Broadcast-1}\\ 
+    &(\text{Free (Select $r_{k_1}$ $v$ cont1 cont2 next)}, r_i) \Par \ldots \Par h \qquad (e \downarrow v) \notag\\ 
+    % &(\text{Free (Broadcast [$r_{k_1}$, $\ldots$, $r_{k_n}$] $e$ cont1 cont2 next)}, r_i) \Par \ldots \Par h \rightarrow  \tag{Broadcast-Left}\\ 
+    % &(\text{cont1 $v_l$} \gg \text{next}, r_i) \Par \ldots \Par h \cdot (r_i, r_{k_1}, \text{L}) \cdot \ldots \cdot (r_i, r_{k_n}, \text{L}) \notag\\
+    % & \qquad \text{where} \; (e \downarrow v, \text{label}(v) \downarrow \text{L}, (\text{Left $v_l$}) == v) \notag\\ 
+    % &(\text{Free (Broadcast [$r_{k_1}$, $\ldots$, $r_{k_n}$] $e$ cont1 cont2 next)}, r_i) \Par \ldots \Par h \rightarrow  \tag{Broadcast-Right}\\ 
+    % &(\text{cont2 $v_r$} \gg \text{next}, r_i) \Par \ldots \Par h \cdot (r_i, r_{k_1}, \text{R}) \cdot \ldots \cdot (r_i, r_{k_n}, \text{R}) \notag\\
+    % & \qquad \text{where} \;(e \downarrow v, \text{label}(v) \downarrow \text{R}, (\text{Right $v_r$}) == v) \notag\\ 
     &(\text{Pure $v$}, r_i) \Par (P_i, r_i) \Par \ldots \Par (P_j, r_j) \Par h \rightarrow (P_i, r_i) \Par \ldots \Par (P_j, r_j) \Par h \tag{Pure}\\ 
 \end{align*}
 \caption{Small step semantics for Proc}
@@ -83,7 +88,7 @@ Readers might find it easy to visualize the group of Proc as a computation graph
 \end{table}
 Due to the similarities between Proc and multiparty session calculus introduced in \cite{coppoGentleIntroductionMultiparty2015}. We borrow some syntax and operational semantics rule from multiparty session calculus to define the operational semantics of Proc. $P, Q$ denote Proc programs. A message queue is $h$ which contains messages $(q, p, v)$ meaning that the sender $q$ sends the receiver $p$ with value $v$. $h \cdot m$ is a message queue whose bottom element is message $m$. $h$ are runtime syntax to model the asynchronous message communication where the order of the messages are retained \cite{coppoGentleIntroductionMultiparty2015}. $e \downarrow v$ means the evaluation of the Core expression to the value v.
 
-\tabref{spar:sstep} shows the small step semantics for Proc. Rule (Init) describes the initialization of a group of Proc programs with an empty message queue at the beginning. Rule (Send) append the value to the message queue. Its complementary rule: (Recv) will recv the value at the top of the message queue. Rule (Branch) is also the complementary rule of the rule (Sel) and (Broadcast). Rule (Broadcast) multicasts the label to a group of receivers, adding a set of messages containing the label into the queue.
+\tabref{spar:sstep} shows the small step semantics for Proc. Rule (Init) describes the initialization of a group of Proc programs with an empty message queue at the beginning. Rule (Send) append the value to the message queue. Its complementary rule: (Recv) will recv the value at the top of the message queue. Rule (Branch) is also the complementary rule of the rule (Sel). You might notice that the Rule (Broadcast) is kind of special. Its rule states that Broadcast is expressed in terms of a series of Select operations. This operation broadcasts the label to a group of receivers. Even though its semantics can be expressed in terms of Select, the reason why we still treat broadcast an independent operations in SPar is because 1) this operation is very common in communication, including Broadcast as a primitive operation is beneficial for user to write code 2) In the code generation stages, we can generate more efficient code for Broadcast operation instead of generating a series of Select operations. Broadcast operation can be treated as a syntax sugar in the Proc language. % Rule (Broadcast) multicasts the label to a group of receivers, adding a set of messages containing the label into the queue.
 
 \subsection{Session types and duality checking}
 Immediately, we notice that a Proc program can be typed by session types. \hask{Send} operation in ProcF corresponds to the type !$\langle$p, S$\rangle$.T, \hask{Select} corresponds to $\oplus \langle \text{p}, \{ l_i : T_i \}_{i \in I} \rangle$ and so on. One exception is the \hask{broadcast} operation which does not mapped to any type of the session types. We will discuss how to handle \hask{Broadcast} in \secref{impl:sec:session}. 
@@ -105,11 +110,13 @@ Immediately, we notice that a Proc program can be typed by session types. \hask{
     \[\inference[Send]{\Gamma |- v : a}{\Gamma |- \text{Free (Send $r$ $v$ (Pure $()$))} : \forall l. \Mp{(r!\langle a \rangle.l)}{()}}\]
     \[\inference[Recv]{}{\Gamma |- \text{Free (Recv $r$ $(\backslash v -> \text{Pure} \; v)$)} : \forall l. \Mp{(r?(a).l)}{a}}\]
     \[\inference[Select]{\Gamma |- v : a + b, \quad \Gamma |- f_1 : a \rightarrow \forall l_1 \Mp{L_1}{c}, \quad \Gamma |- f_2 : b \rightarrow \forall l_2. \Mp{L_2}{c}}{\Gamma |- \text{Free (Select $r$ $v$ $f_1$ $f_2$ (Pure $()$))} : \forall l. \Mp{r \oplus \{ L : [l/l_1]L_1, R: [l/l_2]L_2\}}{()}}\]
+    % \[\inference[Broadcast]{\Gamma |- v : a + b, \quad \Gamma |- f_1 : a \rightarrow \forall l_1 \Mp{L_1}{c}, \quad \Gamma |- f_2 : b \rightarrow \forall l_2. \Mp{L_2}{c}}{\Gamma |- \text{Free (Broadcast $\{r_j\}_{\in J}$ $v$ $f_1$ $f_2$ (Pure $()$))} : \forall l. \Mp{\{r_j\}_{\in J} \oplus \{ L : [l/l_1]L_1, R: [l/l_2]L_2\}}{()}}\]
+    \[\inference[Branch]{\Gamma |- \text{next1} : \forall l_1 \Mp{L_1}{c}, \quad \Gamma |- \text{next2} : \forall l_2. \Mp{L_2}{c}}{\Gamma |- \text{Free (Branch $r$ next1 next2 ($\backslash x \rightarrow \text{Pure}\; x$))} : \forall l. \Mp{r \; \& \{ L : [l/l_1]L_1, R: [l/l_2]L_2\}}{()}}\]
     \caption{Typing rules for Proc expressions}
     \label{spar:styperule}
 \end{table}
 
-The \tabref{spar:styperule} shows the session typing rule for a Proc expression. We borrowed some notation from the work done \cite{AlgebraicMultipartyProtocol}. $\Gamma \vdash e : \text{Proc} \; L \; a$ is the type of a Proc expression that follows protocol $L$ and returns a value of type $a$. The types are parameterized by a variable $l$ representing the continuation of a local type $L$.
+The \tabref{spar:styperule} shows the session typing rule for a Proc expression. We borrowed some notation from the work done \cite{AlgebraicMultipartyProtocol}. $\Gamma \vdash e : \text{Proc} \; L \; a$ is the type of a Proc expression that follows protocol $L$ and returns a value of type $a$. The types are parameterized by a variable $l$ representing the continuation of a local type $L$. The typing rules contains all the operations except \hask{Broadcast}. This is because \hask{Broadcast} can be expressed in terms of a series of \hask{Select} as explained in the previous subsection. So its session type $\oplus \{r_j\}_{j \in [1,n]} {L:L_1, R: L_2}$ can be expanded to $r_1 \oplus \{l: r_2 \oplus \{\ldots \oplus\{r_n \ldots\}\},\ldots\}_{l \in [L, R]}$. 
 
 We have argued that a Proc program can be typed by multi-party session types. In order to utilize this property, we should check the duality of the each pair of Proc in the group. In short, duality check examines whether any pair of Proc in the system are complement with each other. If the duality properties is satisfied, the computation is guaranteed to be deadlock-free. This safety guarantee is useful and powerful in the application of parallel code generation. In this domain, SPar is considered to be the intermediate languages. Passing duality check for the intermediate representation means that as long as we preserve types and communication pattern carefully in later stages of code generation pipeline, the generated code obtained will share the same non-trivial properties: communication safety, protocol fidelity and deadlock-free.
 
