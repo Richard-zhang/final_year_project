@@ -2,9 +2,7 @@
 \chapter{Alg: Algebraic Functional Language}
 Algebraic Functional Language (Alg) is an example of the high-level languages to generate parallel code, proposed in the paper \cite{AlgebraicMultipartyProtocol}. The work done by \cite{AlgebraicMultipartyProtocol} also proposes a method to do the code generation. Part of this project is about implementing an alternative code generation backend for the PAL. In the evaluation section, we will compare the speed of generated code of our method against the original method. We will give an overview of the language in this section.  
 \section{Alg}
-This section is an overview of Alg language. 
 \subsection{Syntax}
-Besides primitives type like int, unit and function types, Alg use four functors to form more types hence representing complicated data structures by composing them (seen in table). For example, a list of integer is expressed in \coref{p:pal:c1}.
 \begin{table}[ht]
 \begin{grammar}{F_1, F_2 \Coloneqq}{}
     I & Identity functor\\
@@ -15,42 +13,70 @@ Besides primitives type like int, unit and function types, Alg use four functors
 \hfill
 \begin{grammar}{t_1, t_2 \Coloneqq}{Type}
     () \mid \text{int} \mid \dots & Primitive types\\
+    a \rightarrow b & Function types\\
+    a + b & Sum types \\
+    a \times b & Product types\\
     F \ t_1 & Functor types\\
     \mu .F & Recursive types\\
 \end{grammar}
-\caption{Functor and Type definitions}
+\vskip\baselineskip
+\begin{grammar}{e_1, e_2 \Coloneqq}{Expression}
+    f \mid v \mid \text{const $e$} \mid e_1 \circ e_2 \mid \pi_i \mid e_1 \vartriangle e_2 \mid e_1 \triangledown e_2 \mid l_i \mid F \; e \mid \text{in}_F \mid \text{out}_F \mid \text{rec}_F \; e_1 \; e_2
+\end{grammar}
+\caption{Syntax of Alg language}
+\label{project:syntax}
 \end{table}
-\begin{code}
+\begin{listing}[ht]
 \begin{lstlisting}{language=Haskell}
     newtype L = K () + K Int * I
     type List = Rec L
 \end{lstlisting}
 \caption{Type of integer list in PAL}
 \label{p:pal:c1}
-\end{code}
+\end{listing}
+The syntax of Alg is shown in \tabref{project:syntax}. In terms of the syntax of expressions, $f$ represents atomic functions which are functions of which we only know their types \cite{AlgebraicMultipartyProtocol}. The presence of atomic function is important in the code generation which we will discuss in the later chapter. $v$ is the primitive value like integer 1.$F$ represents functor and $a, b$ are types. Besides primitives type, function types and recursive type constructor $\mu$, Alg use four functors to form more types hence representing complicated data structures by composing them. For example, a list of integer is expressed in \coref{p:pal:c1}. One thing we should learn from the syntax is that the Alg and its combinators avoid mentioning variables explicitly and hence Alg programs are known as point-free programs. 
+\begin{table}[ht]
+    \[\inference{f : a -> b \in \Gamma}{|- f : a -> b}\]
+    \[\inference{|- e : a}{|- \text{cons} \; e : b -> a}\]
+    \[\inference{}{|- \text{id} : a -> a}\]
+    \[\inference{}{|- \text{in}_F : F \; \mu F -> \mu F}\]
+    \[\inference{}{|- \text{out}_F : \mu F -> F \; \mu F}\]
+    \[\inference{|- e_1 : b -> c, \quad |- e_2 : a -> b}{e_1 \circ e_2: a -> b}\]
+    \[\inference{i \in [1,2]}{\pi_i : a_1 \times a_2 -> a_i}\]
+    \[\inference{i \in [1,2]}{l_i : a_i -> a_1 + a_2}\]
+    \[\inference{|- e_1 : a -> b, \quad |- e_2 : a -> b}{e_1 \vartriangle e_2: a -> b \times c}\]
+    \[\inference{|- e_1 : a -> c, \quad |- e_2 : b -> c}{e_1 \triangledown e_2: a + b -> c}\]
+    \[\inference{|- e : a -> b}{F \; e : F \; a -> F \; b}\]
+    \[\inference{|- e_1 : F \; b -> b, \quad |- e_2 : a -> F \; a}{\text{rec}_F \; e_1 \; e_2: a -> b}\]
+    \caption{Typing rules for Alg}
+    \label{project:typing}
+\end{table}
+\begin{table}[ht]
+    \includegraphics[width=\textwidth]{project/semantics.png}
+    \caption{Semantics of Alg expression} 
+    \label{project:Semantics}
+\end{table}
 
-An important feature of Alg is the lack of usual control flow like if branch or while loop, instead, it uses data structures to replace control flow. Data structures in PAL not only store data but also serves as control structures. It uses the idea of recursion schemes (seen in \secref{b:rs}) to build sophisticated algorithms. 
+The typing rule for alg is expressed in \tabref{project:typing} and the semantic for alg is shown in \tabref{project:Semantics}. 
 
-To summary, algorithms in Alg are represented as a series of transformations of data, making it easy to transform the Alg programs to programs in arrows mechanically since arrows also express flow of data and their transformations naturally. This property allows us to generate parallel code without burners.
+An important feature of Alg is the lack of usual control flow like if branch or while loop to build algorithms, instead, it uses the flow of transformation of data structures to replace conventional control flow. For example, $\triangledown$ combinator is the case operation whose types is $a + b \rightarrow c$. It can be seen as analogy of if branch in normal programming languages. $\vartriangle$ combinator represents split operation. More importantly, the combinator $\text{rec}_F$ uses the idea of recursion schemes (explained in \secref{b:rs}) to build divided-and-conquer algorithms. 
+
+To summary, algorithms in Alg are represented as a series of transformations of data, making it easy to transform the Alg programs to programs in arrows mechanically since arrows also express flow of data and their transformations naturally. This property allows us to generate parallel code without burdens.
 
 \subsection{Example: Merge sort}
-
-Like the merge sort example in \secref{b:rs:ex}, PAL make these recursion schemes built-in and hence express computation. A merge sort in PAL is shown in \coref{p:pal:c5}
 \begin{listing}[ht]
-\begin{lstlisting}[language=haskell]
-poly T = K (() + int) + I * I;
-poly L = K () + K int * I;
-
-atom split : Rec L -> T Rec L;
-
-atom merge : T Rec L -> Rec L;
-
-fun ms : Rec L -> Rec L
-  = rec [T] merge split;
-\end{lstlisting}
+\begin{align*}
+\mathbf{ms} &= \text{rec}_T \; \text{mrg} \; \text{spl} = \text{mrg} \circ T \; (\text{rec}_T \; \text{mrg} \; \text{spl}) \circ \text{spl} \\
+& = \text{mrg} \circ (\text{id} + \text{id} + (\text{rec}_T \; \text{mrg} \; \text{spl}) \times (\text{rec}_T \; \text{mrg} \; \text{spl})) \circ \text{spl} \\
+& = \text{mrg}  \circ (\text{id} + \text{id} + \mathbf{ms} \times \mathbf{ms}) \circ \text{spl}
+\end{align*}
 \caption{Merge sort in Alg} \label{p:pal:c5}
 \end{listing}
+
+By making the hylomorphism as a built-in combinator $\text{rec}_F$, Alg can express merge sort similarly as the example shown in \secref{b:rs:ex}, We use the functor $T = K () + K a + I \times I $ to be substitute the functor $F$ in $rec_F$ and the type $Ls$ to represent a list of elements whose type is $a$. We also have two atomic function spl : $Ls \rightarrow T \; Ls$ and mrg : $T \; Ls \rightarrow Ls$. Finally we express merge sort as $\mathbf{ms} = \text{rec}_T \; \text{mrg} \; \text{spl}$. It is shown in \coref{p:pal:c5}. From the example, we observe that $\mathbf{ms}$ can expanded infinitely. Later, we will exploit this property to generate parallel code. 
+
 \section{ParAlg: Alg + role annotations}
+% Each of the Alg constructs has an implicit, but precise data-flow. For example, in e1 ◦ e2, we know that the result of e1 must only use the result of e2. In a sense, we can interpret that e2, and only e2 sends a message to e1. In this section, we extend this interpretation to most of Alg constructs, so that Alg expressions represent both functions and protocols. We call this extension Parallel Algebraic Language (ParAlg). We define first the syntax of ParAlg terms and types, which is a subset of that of Alg that introduces role annotations that represent where is the computation performed and the data stored. We then define a typing derivation for ParAlg that captures the role interfaces of a ParAlg expression. In §4, we prove that well-typed Parallel Algebraic Language expressions, i.e. expressions built by composing sub-expressions that agree on their role interfaces, exactly correspond to deadlock-free global types (Lemmas 4.5 and 4.6).
 \subsection{Inferring global types}
 \subsection{Example: Parallel merge sort}
 \section{Conclusion}
