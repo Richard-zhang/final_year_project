@@ -14,8 +14,59 @@ The \coref{impl:code:type} shows the definition in Haskell. \hask{SType} is the 
 For the value-level session types, the type variable \hask{a} is instantiated with type \hask{TypeRep}. TypeRep reifies types to some extent by associating type representations to types \cite{DataTypeable}. Due to session types are represented as value expressions in Haskell, session typing a Proc program is the same as writing an interpreter which can be easily done since a Proc program is based on free monad. 
 
 We traverses Proc programs converting each operation to its corresponding type in \hask{STypeF} and convert the value to its typeRep. For output actions, we recursively call the substructure to build the rest of session types. For input actions like \hask{Recv}, we will apply the continuation with the Core value constructed by\hask{Var} and recursively call the function on the result. The trick to apply \hask{Var} to the continuation make it possible to inspect the static structure of every Proc programs because \hask{b -> Proc a} is not inspectable i.e, we cannot pattern match on i, while \hask{Proc a} can be inspected. We will also use this trick in the code generation which will be introduced in later chapter.
-\subsection{Type-indexed Free Monad}
 \subsection{Type-level duality check}
+The value-level duality check works well in checking duality at runtime but as programmers, we aim to eliminate problems earlier. Hence, we proposed a solution that makes use of Haskell's powerful type systems to check the duality of the system at the compile time. In addition, we will introduce some combinators to helps us build a group of Proc to form parallel computation and this mechanism can act as an extra safety guard to make sure the correctness of these combinators.
+
+The general approach of type-level duality checks can be summarized as the following steps.
+
+\begin{enumerate}
+    \item Create a type-level representation of session types.
+    \item Modify the algebra of Proc to make it indexed by session types so that we can session type a proc while building it at the same time. Unlike the above method, we  can only session type a Proc by interpretation after it has been constructed.
+    \item Gather the indexed session types of each Proc in the system and check the duality pair-wise at the type level.
+\end{enumerate}
+\begin{listing}[ht]
+    \inputminted{Haskell}{impl/typebind.hs}
+    \caption{Implementations of type level bind}
+    \label{impl:code:typebind}
+\end{listing}
+The first step is achieved by reusing the definition in \coref{impl:code:type} and use Haskell DataKind extension to promote data constructors of \hask{STypeF} and data constructors of Free monad to type constructors. At this stage, type parameter \hask{a} has been promoted to kind parameter and it will be instantiated with kind \hask{*} representing the kind of all types that have values i.e. Int, List of float. In addition, we should also create type level function that is equivalent to bind in Free monad to help us compose session types. The implementation of type level bind \hask{>*>} can be seen in \coref{impl:code:typebind}. It is similar to bind in Free monad but defined in type family. 
+\begin{listing}[ht]
+    \inputminted{Haskell}{impl/typeproc.hs}
+    \caption{The algebra of Proc indexed by session types and the definition of indexed Proc}
+    \label{impl:code:typeproc}
+\end{listing}
+
+The second step is challenging since we need to find a way to make the Proc indexed by our free monad. Obviously, the original definition of Free monad and Proc does not provide any extra type parameters to be indexed by session types. Hence we use the indexed free monad. It is indexed by two parameter \hask{i} and \hask{j}. In the context of this project, you can treat \hask{i} as the session type for the current proc  and \hask{j} as the continuation of session types. Accordingly, we will modify the definition of the algebra of Proc as well as Proc (see in \coref{impl:code:typeproc}). The main operations remained unchanged and the main difference is 1) makes the algebra of Proc indexed by its corresponding session type (\hask{i}) and continuation (hask{j}) 2) For the role identifier, we use the type level identifier: the type whose kind is \hask{Nat} instead of values because in the later stage, we have to check duality at the type level. The definition of Proc use Haskell's RankNType and type family \hask{>*>} to extract its corresponding indexed session types \hask{i} from the continuation. By the definition of \hask{>*>}, session type \hask{i} must end with the Pure type constructor which is mapped to end in the session type. The basic helper functions for constructing Proc expression are also indexed by session types. Some example can be in seen in \coref{impl:code:typehelper}. We will omit the implementation for some helpers functions. Observing the function signatures is crucial in understanding how it works.
+\begin{listing}[ht]
+    \inputminted{Haskell}{impl/typehelper.hs}
+    \caption{Implementations of helper functions}
+    \label{impl:code:typehelper}
+\end{listing}
+
+\begin{listing}[ht]
+\begin{minted}{Haskell}
+example = do
+    x :: Core Int <- recv zero 
+    send one x
+\end{minted}
+\begin{minted}{text}
+ghci:> :type example
+example
+  :: Proc
+     ('Free
+        ('R 0 Int
+            ('Free ('S 1 Int (Pure ())))))
+     Int
+\end{minted}
+    \caption{An example of session type}
+    \label{impl:code:typeexample}
+\end{listing}
+
+We will conclude the implementation of second step with an example. After all, dependent types in Haskell is not an easy topic. An example is worth thousand words to build understanding. The example can be seen in \coref{impl:code:typeexample}. The example is a simple proc that receives an int from role zero and send the int to role one. Haskell type system infers its session type is \hask{'Free ('R 0 Int ('Free ('S 1 Int (Pure ()))))} which corresponds to the behavior of the example. Session typing can be done simultaneously and automatically while users are building the Proc processes thanks to Haskell's type inference.
+
+For the third step, 
+
+In conclusion, 
 \section{SPar interpreter} \label{impl:sec:interp}
 \subsection{Overview}
 SPar interpreter is an interpreter that interprets a group of Proc programs in Haskell. It can be considered as the simplest backend for evaluating SPar expressions. It records traces of the executions and the final output values of each Proc programs in the system. 
