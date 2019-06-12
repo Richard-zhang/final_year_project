@@ -1,8 +1,8 @@
 data Core a where
     Lit :: a -> Core a
     Var :: Int -> Core a
-    Prim  :: String -- XXX: name of the "primitive function"
-             -> a -- Semantics in Haskell of the primitive function
+    Prim  :: String
+             -> a
              -> Core a
 
     Ap :: Core (a -> b) -> Core a -> Core b

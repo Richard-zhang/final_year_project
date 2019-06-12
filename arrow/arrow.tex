@@ -7,7 +7,7 @@ ArrowPipe is an arrow interface for writing SPar expressions. Withe the help fro
 
 \section{Syntax}
 \begin{listing}[ht]
-\inputminted{Haskell}{arrow/def.hs}
+\inputminted{Haskell}{arrow/def.hs} % TODO delete comments SArrow
 \caption{Definition of ArrowPipe}
 \label{arrowPipe:def}
 \end{listing}
@@ -19,24 +19,20 @@ The simplified syntax of ArrowPipe can be found in \coref{arrowPipe:def}. ArrowP
 \begin{code}
 \begin{minted}{Haskell}
 (>>>) :: (ArrowPipe a b) -> (ArrowPipe b c) -> (ArrowPipe a c)
--- (>>>) :: a b c -> a c d -> a b d
 arr :: (Core (a -> b)) -> ArrowPipe a b
--- arr :: (b -> c) -> a b c
 (|||) :: (ArrowPipe a c) -> (ArrowPipe b c) -> ArrowPipe (Either a b) c
--- (|||) :: a b d -> a c d -> a (Either b c) d
 (&&&) :: (ArrowPipe b c) -> (ArrowPipe b c') -> ArrowPipe b (c, c')
--- (&&&) :: a b c -> a b c' -> a b (c,c')
 (***) :: (ArrowPipe b c) -> (ArrowPipe b' c') -> ArrowPipe (b, b') (c, c')
--- (***) :: a b c -> a b' c' -> a (b, b') (c, c')
 \end{minted}
-\end{code}
+\end{code} % TODO Prettify the code
 \subsection{Example: Parallel programming patterns}
 As an example, we will illustrate some typical computation patterns used in parallel computing.
 \begin{figure*}[ht]
     \begin{subfigure}[b]{0.475\textwidth}
       \centering
-      \includegraphics[width=0.7\textwidth]{arrow/code.png}
+      \includegraphics[width=0.7\textwidth]{arrow/code.png} % cut this
     \end{subfigure}
+    % TODO change font
     \hfill
     \begin{subfigure}[b]{0.475\textwidth}
       \centering
@@ -64,7 +60,7 @@ First of all, the select pattern illustrated by \figref{arrowPipe:fig:select} is
     \caption{Fork-join pattern and divide-and-conquer algorithms}
 \end{figure*}
 Secondly, the fundamental building block of parallel pattern, the fork-join pattern illustrated by \figref{arrowPipe:fig:fork} can be expressed by \hask{&&&} combinator. The arrowPipe produced by \hask{&&&} has the two-ary tuple as the output type collecting the computation result of the main thread and the forked thread and also acts as a synchronization point.
-
+% TODO branching pattern 
 \begin{figure}[ht]
     \centering
     \includegraphics[width=0.5\textwidth]{arrow/pmap.png} 
@@ -161,6 +157,7 @@ For the purpose of illustration, we use inference rules to explain our proposed 
     \inference[arrow: \hask{***}]{e1: \text{ArrowPipe a b}, x \Rightarrow y, \quad e2: \text{ArrowPipe a' c}, (y+1) \Rightarrow z}{e1 \;\hask{***}\; e2 : \text{ArrowPipe (a, a') (b, c)}, x \Rightarrow z}
 \end{displaymath}
 % TODO If I don't have enough pages complete inferences rules for all combinators 
+% TODO key idea is to define alternative stratgey for role allocations => differnt starategy = differtn code 
 \caption{Rules fo role allocations of different combinators}
 \label{arrowPipe:ra:rule}
 \end{listing}
@@ -173,6 +170,10 @@ Finally, we discovered the right place to allocate new roles is \hask{&&&} combi
 
 In conclusions, even though from the implementation point of view, arrowPipe composition with the optimized role allocations is ad-hoc and less elegant to implement because we need to consider composition by send-and-receive and composition by local monadic bind and more edge cases to be dealt with compared to the naive solution in the last section where composition is done solely by send-and-receive and role allocations is mindless. We believe the effort is worthy because for a n-level divided-and-conquer algorithms, the optimized role allocation strategies allocate $2^n$ roles in total which is the same as the number of way of parallelization in theory. All the roles are used to maximize parallelism instead of wasting the valuable resources to create roles that merely transmit data.
 \section{Satisfaction of arrow laws}
+% TODO copy past the arrow law
+% make an argument of arrow laws 
+% 
+
 % \section{Optimizations}
 % \subsection{Fusion}
 % \subsection{Upper bound of the number of roles}

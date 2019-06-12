@@ -1,4 +1,32 @@
 \chapter{Introduction}
+
+% define the session typed monad language
+% Arrow => seesson typed monadic lagnauge
+% Turning data flow into communication 
+% compile session-typed monadic language to C
+% results => a standalone framework for parallel computation
+% high-level arrow code => 1) abstraction layer on top of settiontype langauge  2) a set of local types to reason so that it's possible reason about the structure of parallel computation 
+% as a use case => compile to c
+% as a use case => backend for ParAlg
+% put the picture in the introduction
+% 
+% title : session-arrow =>  
+
+% Conclusion => 1. framework 2 in chapter ? show ? 3. 
+% Point to highlight => 1. data flow to communication 2. Arrow abstraction on top of session typed langauge => 1. compilation to efficient code 2. provided an abstraction of parallel structure
+
+% Future work
+% anything => 
+
+% Evaluation => 
+% 1. show to code => show 
+% 2. show in haskell code
+% 3. show the function to generate the code (explain the function)
+% 4. how user need complete the definition
+% 5. how to compile it and run it
+% 2. pick a generated code (put eveyrting in appendix if you wnat)
+% 6. haskell merge sort v.s merge sort in arrow (highlight the difference => friendly user interface in haskell apdting exisitn haskell code to adpat it the framework)
+% 3. the collection of local type that we derivived
 \section{Motivation} \label{i:m}
 Writing parallel software is not a trivial task. Parallel code is hard to write because it is usually written in low level languages with verbose and non-idiomatic decorations, hard to debug because machines, where code is written, are usually different from machines where code is intended to run and hard to maintain and reuse because even though the underlying algorithms are not changed, multiple version of parallel code is needed to tackle various platform and evolution of architectures.
 

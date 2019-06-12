@@ -14,7 +14,7 @@ The \coref{impl:code:type} shows the definition in Haskell. \hask{SType} is the 
 For the value-level session types, the type variable \hask{a} is instantiated with type \hask{TypeRep}. TypeRep reifies types to some extent by associating type representations to types \cite{DataTypeable}. Due to session types are represented as value expressions in Haskell, session typing a Proc program is the same as writing an interpreter which can be easily done since a Proc program is based on free monad. 
 
 We traverses Proc programs converting each operation to its corresponding type in \hask{STypeF} and convert the value to its typeRep. For output actions, we recursively call the substructure to build the rest of session types. For input actions like \hask{Recv}, we will apply the continuation with the Core value constructed by\hask{Var} and recursively call the function on the result. The trick to apply \hask{Var} to the continuation make it possible to inspect the static structure of every Proc programs because \hask{b -> Proc a} is not inspectable i.e, we cannot pattern match on i, while \hask{Proc a} can be inspected. We will also use this trick in the code generation which will be introduced in later chapter.
-\subsection{Type-level duality check}
+\subsection{Type-level duality check} % TODO move to end
 The value-level duality check works well in checking duality at runtime but as programmers, we aim to eliminate problems earlier. Hence, we proposed a solution that makes use of Haskell's powerful type systems to check the duality of the system at the compile time. In addition, we will introduce some combinators to helps us build a group of Proc to form parallel computation and this mechanism can act as an extra safety guard to make sure the correctness of these combinators.
 
 The general approach of type-level duality checks can be summarized as the following steps.
@@ -64,9 +64,9 @@ example
 
 We will conclude the implementation of second step with an example. After all, dependent types in Haskell is not an easy topic. An example is worth thousand words to build understanding. The example can be seen in \coref{impl:code:typeexample}. The example is a simple proc that receives an int from role zero and send the int to role one. Haskell type system infers its session type is \hask{'Free ('R 0 Int ('Free ('S 1 Int (Pure ()))))} which corresponds to the behavior of the example. Session typing can be done simultaneously and automatically while users are building the Proc processes thanks to Haskell's type inference.
 
-For the third step, 
+For the third step, we can assume we have already gathered a type level list of session types paired  with its role identifier. The duality check algorithm is still the same. We match different proc pair-wise, and check whether the projection of both session types are complementary. The algorithm is easy to implement as the Haskell function but lifting the computation into type level is tricky. One of the obstacles is that type family does not support higher order type-level functions. We divide the problem into sub-problems. We need to implement 1) a type family that converts a list of Session type to a list of Session type pair 2) a type family that maps a function to list and combine the result 3) a type family that that includes projection, checking whether a pair of session types are complementary.
 
-In conclusion, 
+% In conclusion, 
 \section{SPar interpreter} \label{impl:sec:interp}
 \subsection{Overview}
 SPar interpreter is an interpreter that interprets a group of Proc programs in Haskell. It can be considered as the simplest backend for evaluating SPar expressions. It records traces of the executions and the final output values of each Proc programs in the system. 
@@ -76,8 +76,8 @@ It focused on providing a reference implementation explaining the semantics of S
 The implementation of SPar interpreter is standard. It is similar to the implementation of the scheduler we explained in the free monad section of the background chapter. In essence, it is a round robin scheduler for a group of Proc programs. 
 \begin{listing}[ht]
 \inputminted{Haskell}{impl/interp.hs}
-\caption{Partial implementation of the SPar interpreter}
-\label{impl:code:interp}
+\caption{Partial implementation of the SPar interpreter} 
+\label{impl:code:interp} %TODO cut the implementations
 \end{listing}
 A partial implementation can be seen in \coref{impl:code:interp}. It takes a list of Proc as a parameter and it maintain a state which is the combination of message queue, the trace and the list of output values. For the base case, the list is empty which means all processes has exited, it returns the trace and the list of output values. For the recursive case, it pattern matches on the first process at the beginning of the list. If the operation is Pure, it will update the list of output values, then abandon this process, and call itself recursively on the tail of the list. If the operation is an output action i.e, \hask{Send}, \hask{Select} or \hask{Broadcast}, it will update the message queue with the corresponding message containing the sender, the receiver and the value, then pop the head proc and append its next step to the end of list of Procs, and call the list recursively. If the operation is an input action i.e, \hask{Recv} or \hask{Branch}, it will first examine whether sender and receiver pairs match the pair from the message at the top of the message queue. If so, it applies the continuation with the value in the message, removes the message from the queue, removes the head of list, moves the result of applying continuation to the end of the list and calls the list recursively. If not, it simply moves the head of list to the end of list without changing the value of head process and call the list recursively. Because we have checked the duality of the processes in the system, it guarantee that for any input action, the required message will eventually appear at the head of the message queue in finite steps.
 

@@ -8,13 +8,13 @@ Core is the elemental computation. The syntax of Core is mostly inspired by Alg 
     \caption{The syntax of Core}
     \label{spar:code:core}
 \end{listing}
+% TODO expression in core vs expression in haskell %
 The syntax of Core is shown in \coref{spar:code:core}. Inl and Inr are for the construction of sum type. Pair is responsible for constructing value of product type while Fst and Snd extract value from product type. Supporting sum type, product type and inductive type (see next section) is enough to express any data structure in any computation. In addition to these actions manipulating basic data structure, we have Lit which is used in the Haskell interpreter (see \secref{impl:sec:interp}) and benchmarking (see \secref{eval}) and Var, a constructor which is useful when what we do not actually evaluation the Core expression but inspect its static structure. It is used in the code generation (see \secref{codegen:sec:core}) and session typing (see \secref{impl:sec:session}). Id is similar to identity function and Const is similar to the const function in Haskell. Prim representing user defined functions takes two field name and the haskell implementation. The first field will be useful in the code generation (see \secref{codegen:sec:core}) when applying user-defined function calls. The second field will be used in the interpreter implementation.   
 
 \subsection{Representation of recursive data structures}
 Core has primitives to operate on sum and product types. Representing recursive type like $\mu \text{list}. () + \text{Int} \times \text{list}$ will be covered in this section. The method are taken from the implementation of Alg language in \cite{AlgebraicMultipartyProtocol}. First of all, we extend the core with the following two operation. \hask{In} represents the fold operation on iso-recursive types and \hask{Out} represents the unfold operation on iso-recursive types. Consider a recursive type $\mu \alpha. \tau$, the type parameter \hask{t} is equivalent to $\alpha$, \hask{f :@: t} is equivalent to $\tau$ and the typeclass \hask{Data f t} associate two types which is equivalent to $\mu \alpha. \tau$. \hask{:@:} is a type family which is a function acting on types instead of values. \hask{:@:} converts \hask{f} to sum and product type in Haskell which are \hask{(,)} and \hask{Either}.
 \begin{minted}{Haskell}
 data Core a where
-    -- omit other constructors
     In   :: Data f t => Core (f :@: t -> t)
     Out  :: Data f t => Core (t -> f :@: t)
 
@@ -82,6 +82,7 @@ Readers might find it easy to visualize the group of Proc as a computation graph
     % &(\text{cont2 $v_r$} \gg \text{next}, r_i) \Par \ldots \Par h \cdot (r_i, r_{k_1}, \text{R}) \cdot \ldots \cdot (r_i, r_{k_n}, \text{R}) \notag\\
     % & \qquad \text{where} \;(e \downarrow v, \text{label}(v) \downarrow \text{R}, (\text{Right $v_r$}) == v) \notag\\ 
     &(\text{Pure $v$}, r_i) \Par (P_i, r_i) \Par \ldots \Par (P_j, r_j) \Par h \rightarrow (P_i, r_i) \Par \ldots \Par (P_j, r_j) \Par h \tag{Pure}\\ 
+    % TODO indentation
 \end{align*}
 \caption{Small step semantics for Proc}
 \label{spar:sstep}

@@ -245,7 +245,7 @@ We will learn that these properties are valuable not only in the distributed sys
       & && \text{reject}: \text{end} \} \\
     \end{align*}
   \end{minipage}
-  \caption{An example of a protocal described by global types G}
+  \caption{An example of a protocol described by global types G}
   \label{b:mpst:gtex}
 \end{table}
 \begin{table}[ht]
@@ -267,7 +267,7 @@ We will learn that these properties are valuable not only in the distributed sys
   \label{b:mpst:ltex}
 \end{table}
 \subsubsection{Projection between global types and local types} \label{b:mpst:proj}
-Projection is the formalisation of the relationship between global and local types. It is an operation extracting the local type of each peer from the global type \cite{coppoGentleIntroductionMultiparty2015}. The definition of projection is shown in \tabref{b:mpst:pdef}.
+Projection is the formalization of the relationship between global and local types. It is an operation extracting the local type of each peer from the global type \cite{coppoGentleIntroductionMultiparty2015}. The definition of projection is shown in \tabref{b:mpst:pdef}.
 
 As an example, a projection of global type in \tabref{b:mpst:gtex} is
 $$
@@ -287,7 +287,7 @@ In binary session types where all protocals are pairwise, duality formalises the
 \label{b:mpst:dualdef}
 \end{table}
 
-Duality is essential for checking type compatibility. Compatible types mean that each common channel $k$ is associated with complementary behaviour: this ensures that the interactions on $k$ run without errors. 
+Duality is essential for checking type compatibility. Compatible types mean that each common channel $k$ is associated with complementary behavior: this ensures that the interactions on $k$ run without errors. 
 
 In order to apply duality into multiparty session types in which more than two participants are allowed, the partial projection operation (seen in \cite{coppoGentleIntroductionMultiparty2015}) from multiparty session type to binary session type was introduced to allow reusing the definition of duality after applying the partial projection.
 % \begin{table}[H]
@@ -473,12 +473,14 @@ Then we can easily implement an interpreter for the example program
 goodMorningInterpreter :: Greeting a -> IO a
 goodMorningInterpreter = interpret helper
     where
-        helper (Getname next) = fmap next getLine
-        helper (Greet str next) = putStrLn ("Good morning " ++ str) >> return next  
+        helper (Getname next) = 
+          fmap next getLine
+        helper (Greet str next) =
+          putStrLn ("Good morning " ++ str) >> return next  
 \end{minted} 
 Finally, execute the program.
 \begin{minted}{bash}
-ghci:> goodMorningInterpreter examplePrograe
+ghci:> goodMorningInterpreter exampleProgram
 Tom
 Good morning Tom
 Mary
@@ -494,8 +496,3 @@ Good morning Mary
 As illustrated by the example (\secref{b:fm:e}), free monad decouple the abstract syntax tree of domain specific language (DSL) and the interpreter. Interpreters with different purposes can be implemented without changing the syntax.
 
 In the project, we apply free monad to the intermediate language so not only we make the languages monadic for free but also benefits from decoupling the interpreter and the syntax to implement different interpreters, e.g. Simulator, code generators to different platforms easily.
-\section{Dependent Haskell}
-\subsection{Dependent type}
-\subsection{Preliminaries}
-\subsection{Indexed Free Monad}
-\subsection{Example}
