@@ -5,9 +5,9 @@ data Pipe a b = Pipe
     , end   :: Nat
     }
   
-type ArrowPipe a b = Nat -> Pipe a b
+type SArrow a b = Nat -> Pipe a b
 
-instance Arrow ArrowPipe where
+instance Arrow SArrow where
     -- implementation omit
-instance ArrowChoice ArrowPipe where
+instance ArrowChoice SArrow where
     -- implementation omit

@@ -1,9 +1,9 @@
 divConquer
   :: Int
-  -> ArrowPipe a b
-  -> ArrowPipe a (a, a)
-  -> ArrowPipe (b, b) b
-  -> ArrowPipe a b
+  -> SArrow a b
+  -> SArrow a (a, a)
+  -> SArrow (b, b) b
+  -> SArrow a b
 divConquer 0 baseFunc _split _merge = baseFunc
 divConquer level baseFunc split merge =
   split

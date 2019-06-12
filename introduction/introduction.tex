@@ -1,5 +1,4 @@
 \chapter{Introduction}
-
 % define the session typed monad language
 % Arrow => seesson typed monadic lagnauge
 % Turning data flow into communication 
@@ -12,21 +11,6 @@
 % 
 % title : session-arrow =>  
 
-% Conclusion => 1. framework 2 in chapter ? show ? 3. 
-% Point to highlight => 1. data flow to communication 2. Arrow abstraction on top of session typed langauge => 1. compilation to efficient code 2. provided an abstraction of parallel structure
-
-% Future work
-% anything => 
-
-% Evaluation => 
-% 1. show to code => show 
-% 2. show in haskell code
-% 3. show the function to generate the code (explain the function)
-% 4. how user need complete the definition
-% 5. how to compile it and run it
-% 2. pick a generated code (put eveyrting in appendix if you wnat)
-% 6. haskell merge sort v.s merge sort in arrow (highlight the difference => friendly user interface in haskell apdting exisitn haskell code to adpat it the framework)
-% 3. the collection of local type that we derivived
 \section{Motivation} \label{i:m}
 Writing parallel software is not a trivial task. Parallel code is hard to write because it is usually written in low level languages with verbose and non-idiomatic decorations, hard to debug because machines, where code is written, are usually different from machines where code is intended to run and hard to maintain and reuse because even though the underlying algorithms are not changed, multiple version of parallel code is needed to tackle various platform and evolution of architectures.
 
@@ -34,22 +18,29 @@ There are many on-going pieces of research aimed at helping programmers write co
 
 The workflow of writing parallel code has evolved from writing it directly in the target platform to writing software in a high-level language designed for parallel computation and then compiling to the target platform. In this project, we present a method to improve the backend of parallel code generation by introducing a monadic domain-specific language to act as a bridge between high-level and target low-level parallel languages.
 
-This specific language needs to be general enough so that it supports multiple high-level parallel programming frameworks. It can be used to generate different parallel code, e.g. MPI \footnote{Message Passing Interface (MPI) is a standardised and portable message-passing standard designed by a group of researchers from academia and industry to function on a wide variety of parallel computing architectures \cite{MessagePassingInterface2018}.}, Cuda. Moreover, it can be interpreted with a simulator to aid debugging parallel programs.
+This specific language needs to be general enough so that it supports multiple high-level parallel programming frameworks. It can be used to generate different parallel code, e.g. MPI \footnote{Message Passing Interface (MPI) is a standardized and portable message-passing standard designed by a group of researchers from academia and industry to function on a wide variety of parallel computing architectures \cite{MessagePassingInterface2018}.}, Cuda. Moreover, it can be interpreted with a simulator to aid debugging parallel programs.
 
 With the help of this intermediate languages, the implementation complexity is reduced from $O(M \times N)$, where each of the M high-level languages needs to implement N compilers to generate parallel code in N different platforms, to $O(M + N)$, where each compiler of a high-level language implements a translation rule to the intermediate language which implements one compiler and N backend to generate different target languages.
 
 In addition, it couples with multiparty session type (MPST) \cite{coppoGentleIntroductionMultiparty2015}. It takes advantages of properties of MPST to enable aggressive optimisation but ensuring code correctness and allow more meaningful static analysis; \eg cost modelling for parallel programming. % (TODO add more examples of possible kinds of static analysis and reference paper).
-
-\section{Objectives}
-% (TODO Need refinement and adding concrete details)
-\begin{enumerate}
-\item \textbf{Design}: Design the intermediate languages, argue its generality and build its connection with MPST. 
-\item \textbf{Tranlsation}: Define a translate rule from the language in a high-level parallel framework to our language. 
-\item \textbf{Simulator}: Build a simulator to prove the correctness of code generation and act as a playground for experiments.
-\item \textbf{Code generation}: Generate parallel code in C.
-\item \textbf{Static Analysis}: Session typing the language to obtain properties guaranteed by session types% Cost modelling for parallel programming using MPST as an example of how MPST can be used to improve the generated code.
-% TODO performance code generated => measured by different algorithms
-% TODO performance of tool chain => measured in the same way
-% TODO size of generated code => compact
-\end{enumerate}
-More details of the objectives will be explained in the project planning at \secref{plan}
+\section{Contributions} 
+\begin{figure}[ht]
+    \centering
+    \begin{tikzpicture}[xscale=.5]
+    \tikzstyle{proc}  = [rectangle, rounded corners, minimum width=2cm, minimum height=1cm,text centered, draw=black] 
+    \tikzstyle{proc1} = [circle,  minimum width=1cm, minimum height=1cm,text centered, draw=black] 
+    \tikzstyle{arrow} = [thick,->,>=stealth]
+    \node (a) [proc] at (0, 3)  {SArrow};
+    \node (b) [proc] at (0, 0)  {SPar};
+    \node (c) [proc] at (0, -3) {Low-level parallel code};
+    \node (d)  at (-4, 5) {Users};
+    \node (e) [align=left] at (4, 5) {Front end of \\ other functional  \\ parallel frameworks};
+    \draw[arrow] (a) to (b);
+    \draw[arrow] (b) to (c);
+    \draw[arrow] (d) to (a);
+    \draw[arrow] (e) to (a);
+    \end{tikzpicture}
+    \caption{Visualization of the workflow}
+    \label{intro:fig:workflow}
+\end{figure}   
+\section{Report outline}
