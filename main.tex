@@ -92,6 +92,7 @@
 \usepackage[colorlinks=true, allcolors=black]{hyperref}
 
 %% Reference for figure, section and source code
+\newcommand*{\charef}[1]{\chaptername~\ref{#1}}
 \newcommand*{\tabref}[1]{\tablename~\ref{#1}}
 \newcommand*{\figref}[1]{\figurename~\ref{#1}}
 \newcommand*{\coref}[1]{\lstlistingname~\ref{#1}}
@@ -146,7 +147,6 @@ In order to show the framework is as expressive as usual programming languages, 
 
 \input{introduction/introduction.tex}
 \input{background/background.tex}
-
 \input{project/project.tex}
 \input{spar/spar.tex}
 \input{impl/impl.tex}

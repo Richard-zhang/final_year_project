@@ -1,5 +1,5 @@
 % Conclusion => 1. framework 2 in chapter ? show ? 3. 
-% Point to highlight => 1. data flow to communication 2. Arrow abstraction on top of session typed langauge => 1. compilation to efficient code 2. provided an abstraction of parallel structure
+% Point to highlight => 1. data flow to communication 2. Arrow abstraction on top of session typed language => 1. compilation to efficient code 2. provided an abstraction of parallel structure
 
 % Future work
 % anything => 
@@ -13,7 +13,7 @@
 % 2. pick a generated code (put everything in the appendix if you want)
 % 6. haskell merge sort v.s merge sort in arrow (highlight the difference => friendly user interface in haskell adapting existing haskell code to adapt it the framework)
 % 3. the collection of local type that we derived
-\chapter{Parallel algorithms and evaluation} \label{eval}
+\chapter{Parallel algorithms and evaluation} \label{eval} \label{chap:eval}
 What we have implemented so far not only can be used as a backend for compiling ParAlg but also a stand-alone tool to express parallel algorithms. In this section, we will give an overview of how to use SPar for parallel algorithms, benchmarking the performance of the generated code for various computation and analyzing the design choices of the project.
 \section{Parallel algorithms}
 The biggest advantage of writing parallel programs in SPar is that user can express the computation similar to the sequential one without worrying about any low-level primitives for parallel computations. We will give a recommended recipe of expressing computation in SPar to follow and two concrete examples for the explanation.

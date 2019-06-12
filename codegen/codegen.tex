@@ -1,4 +1,4 @@
-\chapter{Type-safe code generation from SPar}
+\chapter{Type-safe code generation from SPar} \label{chap:cg}
 SPar has two components: Core representing the unit of computation and Proc as a skeleton of the computation, describing the communication patterns. Naturally, the process of code generation from SPar should be divided into two parts correspondingly. We choose to make two parts independent of each other so that it's possible to swap the code generation strategy of one component without modifying another one.
 
 The procedure of code generation is standard: transformation. We start our programs in a high level DSL and run a series of transformation to low-level DSL. SPar expressions are converted to a low-level EDSL which is then transformed to an abstract syntax tree (AST) of C (TODO cite the package). The generated code is obtained by pretty printing the AST.

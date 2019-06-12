@@ -1,4 +1,4 @@
-\chapter{SPar: A session typed free monad EDSL for concurrency}
+\chapter{SPar: A session typed free monad EDSL for concurrency} \label{chap:spar}
 In order to generate parallel code from ParAlg, we first introduce the syntax of our intermediate language, the session-typed free monad EDSL for concurrency hosted in Haskell (SPar). SPar are compromised of two components: Core and Proc. Core is the language expressing sequential computation while Proc is a monadic language with message-passing primitives, communicating Core expression between different roles. We use a group of Proc interacting with each other to represent parallel computations. In addition, session typing the group of Proc ensure the computation is deadlock-free. 
 \section{Computation: The Core EDSL}
 Core is the elemental computation. The syntax of Core is mostly inspired by Alg \cite{AlgebraicMultipartyProtocol} and FunC, a demo DSL defined in the work done by \cite{svenningssonCombiningDeepShallow2015}. For this project, we choose to implement Core syntax as small as possible without sacrificing expressibility.

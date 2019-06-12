@@ -1,4 +1,4 @@
-\chapter{SPar: Implementation}
+\chapter{SPar: Implementation} \label{chap:impl}
 \section{Session types} \label{impl:sec:session}
 Haskell does not have session type natively. Other encodings of session types in Haskell is an overkill to this project since Proc does not support all actions that can be typed by session types i.e. channel delegation. We decide to create our representation of session types in Haskell corresponding to set of actions supported by Proc. We will introduce two method for session typing the group of Proc programs followed by duality checking. One is at the value level and another is at the type level.
 \subsection{Representations of session types in Haskell}
