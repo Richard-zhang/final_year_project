@@ -1,6 +1,10 @@
 \chapter{Conclusions and future works}
 \section{Conclusions}
+At the beginning of this project, our goal was to implement a backend for code generation for Alg parallel language using a session-typed intermediate language. The project evolved when we tried to fill the huge gap between Alg computation and SPar communication. It was then we started to design an interface as an abstraction layer on top of SPar for ease of compilation from the high-level language to it. The interface iterated from simple helper functions to arrow interface capturing general computation. Then we realized SArrow should not be limited as a compiler writer tool that hides from users, and it should be exposed to users to express computation. The application as a backend is just a side-product while the project shines as a stand-alone framework for parallel code generation. 
 
+Iterations of the project lead to the current work: A framework generates parallel C code along with local types describing the communication patterns by interpreting data-flow by communication, from Arrow based high-level expressions that can be easily formed, composed and manipulated by users with the help of the hosting function: Haskell.
+
+In conclusion, with the recent release of AMD's latest generation of consumer CPUs featuring a processor with sixteen physical cores, Moore's law will be replaced by the addition of cores. No need to mention the area of high-performance computing where CPU with 64 cores are common. In contrast, most of the programmers have only written sequential code, and most of the algorithms about which students learn are not parallel. We hope this project can contribute its force on parallelism on CPU, encouraging more and more programmer to take advantages of modern computing architectures.
 \section{Future works}
 There are many interesting future works that we would like to implement. We will select some of them to introduce:
 \begin{itemize}
