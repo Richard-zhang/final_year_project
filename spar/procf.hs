@@ -10,7 +10,11 @@ data ProcF next where
            -> next
            -> ProcF next
 
-    Branch :: Nat -> Proc c -> Proc c -> (Core c -> next) -> ProcF next
+    Branch :: Nat 
+           -> Proc c
+           -> Proc c
+           -> (Core c -> next)
+           -> ProcF next
 
     Broadcast :: [Nat]
               -> Core (Either a b)

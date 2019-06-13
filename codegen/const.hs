@@ -8,4 +8,3 @@ constToCExpr s@(ProductReprType a b) v = defCompoundLit
   [ ([], initExp $ constToCExpr a (fst v))
   , ([], initExp $ constToCExpr b (snd v))
   ]
--- omit other cases

@@ -8,6 +8,4 @@ data Pipe a b = Pipe
 type SArrow a b = Nat -> Pipe a b
 
 instance Arrow SArrow where
-    -- implementation omit
 instance ArrowChoice SArrow where
-    -- implementation omit

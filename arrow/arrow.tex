@@ -7,7 +7,7 @@ SArrow is an arrow interface for writing SPar expressions. Withe the help from S
 
 \section{Syntax}
 \begin{listing}[ht]
-\inputminted{Haskell}{arrow/def.hs} % TODO delete comments SArrow
+\inputminted{Haskell}{arrow/def.hs} 
 \caption{Definition of SArrow}
 \label{SArrow:def}
 \end{listing}
@@ -18,31 +18,23 @@ The simplified syntax of SArrow can be found in \coref{SArrow:def}. SArrow is a 
 \hask{SArrow} is an instance of Arrow typeclass as well as ArrowChoice type class. For example, the type signature of the combinators \hask{>>>}, \hask{|||}, \hask{&&&} and \hask{arr} are shown below. The main difference between their type signatures and the usual arrow interface is that in the \hask{arr}, the function is wrapped with Core. In general, it captures the same meaning as the usual arrow interfaces. Implementation details of these combinators will be explained in \secref{SArrow:impl}.
 \begin{code}
 \begin{minted}{Haskell}
-(>>>) :: (SArrow a b) -> (SArrow b c) -> (SArrow a c)
-arr :: (Core (a -> b)) -> SArrow a b
-(|||) :: (SArrow a c) -> (SArrow b c) -> SArrow (Either a b) c
-(&&&) :: (SArrow b c) -> (SArrow b c') -> SArrow b (c, c')
-(***) :: (SArrow b c) -> (SArrow b' c') -> SArrow (b, b') (c, c')
+(>>>) :: SArrow a b -> SArrow b c -> SArrow a c
+arr :: Core (a -> b) -> SArrow a b
+(|||) :: SArrow a c -> SArrow b c -> SArrow (Either a b) c
+(&&&) :: SArrow b c -> SArrow b c' -> SArrow b (c, c')
+(***) :: SArrow b c -> SArrow b' c' -> SArrow (b, b') (c, c')
 \end{minted}
-\end{code} % TODO Prettify the code
+\end{code}
 \subsection{Example: Parallel programming patterns}
 As an example, we will illustrate some typical computation patterns used in parallel computing.
-\begin{figure*}[ht]
-    \begin{subfigure}[b]{0.475\textwidth}
-      \centering
-      \includegraphics[width=0.7\textwidth]{arrow/code.png} % cut this
-    \end{subfigure}
-    % TODO change font
-    \hfill
-    \begin{subfigure}[b]{0.475\textwidth}
-      \centering
-      \includegraphics[width=0.7\textwidth]{arrow/select.png}
-    \end{subfigure}
-    \caption{Visualization of the select pattern \cite{mccoolStructuredParallelPrograming2012}}
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.4\textwidth]{arrow/select.png}
+    \caption{Visualization of the branching pattern \cite{mccoolStructuredParallelPrograming2012}}
     \label{SArrow:fig:select}
-\end{figure*}
+\end{figure}
 
-First of all, the select pattern illustrated by \figref{SArrow:fig:select} is equivalent to an expression formed by \hask{|||} combinators, where the data constructor \hask{Left} means True and the data constructor \hask{Right} means False for the sum type \hask{Either}.
+First of all, the branching pattern illustrated by \figref{SArrow:fig:select} is equivalent to an expression formed by \hask{|||} combinators, where the data constructor \hask{Left} leads to one computation path and the data constructor \hask{Right} leads to another computation path. It seems to be a simple pattern but it is useful when composed with other complicated patterns. We will use an example to illustrate at the end of this section.
 \begin{figure*}[ht]
     \begin{subfigure}[b]{0.475\textwidth}
        \centering
@@ -60,7 +52,6 @@ First of all, the select pattern illustrated by \figref{SArrow:fig:select} is eq
     \caption{Fork-join pattern and divide-and-conquer algorithms}
 \end{figure*}
 Secondly, the fundamental building block of parallel pattern, the fork-join pattern illustrated by \figref{SArrow:fig:fork} can be expressed by \hask{&&&} combinator. The SArrow produced by \hask{&&&} has the two-ary tuple as the output type collecting the computation result of the main thread and the forked thread and also acts as a synchronization point.
-% TODO branching pattern 
 \begin{figure}[ht]
     \centering
     \includegraphics[width=0.5\textwidth]{arrow/pmap.png} 
@@ -72,7 +63,7 @@ Secondly, the fundamental building block of parallel pattern, the fork-join patt
     \caption{Parallel map in SArrow}
     \label{arrow:code:pmap}
 \end{listing}
-Thirdly, the familiar parallel map pattern illustrated in \figref{arrow:fig:pmap} is also a candidate to be expressed in SArrow. The code sample is in \coref{arrow:code:pmap}. \hask{pmap} splits the input \hask{a} into 4 chunks using the splitting function \hask{s}, applied the elemental function \hask{f} and the arrow combinator \hask{***} in parallel and finally use the collecting function \hask{c} to collect the results. Usually, the input \hask{a} is a list and \hask{s} splits the list into 4 equal chunks. The number of function \hask{f} applied decides the number of ways of parallelism. We will describe a possible solution to make \hask{pmap} more generic so that we do not need write a new functions for every number of ways of parallelism. (TODO).
+Thirdly, the familiar parallel map pattern illustrated in \figref{arrow:fig:pmap} is also a candidate to be expressed in SArrow. The code sample is in \coref{arrow:code:pmap}. \hask{pmap} splits the input \hask{a} into 4 chunks using the splitting function \hask{s}, applied the elemental function \hask{f} and the arrow combinator \hask{***} in parallel and finally use the collecting function \hask{c} to collect the results. Usually, the input \hask{a} is a list and \hask{s} splits the list into 4 equal chunks. The number of times where function is \hask{f} applied decides the number of ways of parallelism. % We will describe a possible solution to make \hask{pmap} more generic so that we do not need write a new functions for every number of ways of parallelism. (TODO).
 
 \begin{figure}[ht]
     \centering 
@@ -93,6 +84,14 @@ Fourthly, we can apply the similar logic to express parallel reduce pattern show
     \label{SArrow:dq}
 \end{listing}
 Finally, more complicated pattern can be expressed compositely from simpler pattern expressed in SArrow. We can use a typical divide-and-conquer algorithms implemented with fork-join as an example. \figref{SArrow:fig:dq} shows a divide-and-conquer algorithms with 2-ways and 3-levels of fork-join. The algorithm can be expressed in SArrow shown in \coref{SArrow:dq}. The divide-and-conquer pattern can be built recursively in Haskell. For the base case, we simply apply the basic computation. Otherwise, we first call split and then call the function recursively with the level decremented by one and, in the end, call the merge to combine the results. Every expressions in the function definition are connected using arrow combinators. A 3-level divided-and-conquer algorithm is constructed by passing 3 to the function resulting a algorithm with $2^3 = 8$-way parallelism.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.5\textwidth]{arrow/dq2.jpeg}
+    \caption{Combination of branching pattern and divide-and-conquer pattern}
+    \label{SArrow:fig:brdv}
+\end{figure}
+In addition, the divide-and-conquer parallel pattern can be optimized when combining with branch pattern. The branch pattern allows us to add shortcuts to the pattern (illustrated in the \figref{SArrow:fig:brdv}, redlines represent the alternative computation path provided by branching patterns). The shortcut give us the ability to decide whether to do local computation or split  into multiple subtasks depending on the input size. When the input size is small, the overhead of the latter usually outweighs its parallelism. Adding the simple branching pattern results in a pattern that is adaptive to various input size with better performance.
 
 The implementation demos the power of implementing SArrow as a domain specific language embedded in Haskell. We make full use of Haskell features, i.e high order functions and polymorphic functions to construct expressive, composable and generic computation patterns.
 
@@ -156,8 +155,6 @@ For the purpose of illustration, we use inference rules to explain our proposed 
 \begin{displaymath}
     \inference[arrow: \hask{***}]{e1: \text{SArrow a b}, x \Rightarrow y, \quad e2: \text{SArrow a' c}, (y+1) \Rightarrow z}{e1 \;\hask{***}\; e2 : \text{SArrow (a, a') (b, c)}, x \Rightarrow z}
 \end{displaymath}
-% TODO If I don't have enough pages complete inferences rules for all combinators 
-% TODO key idea is to define alternative stratgey for role allocations => differnt starategy = differtn code 
 \caption{Rules fo role allocations of different combinators}
 \label{SArrow:ra:rule}
 \end{listing}
@@ -168,7 +165,9 @@ For the class of combinators belonging to arrow choice, we do not introduce any 
 
 Finally, we discovered the right place to allocate new roles is \hask{&&&} combinator. As shown in type signature, product types mean computation at both branches will both be executed and they are independent. In order to make sure both computation are executed simultaneously, we constraint that the right SArrow expression must start with a role greater than the end role of the left SArrow expression. This ensures no role duplications hence maximize parallelism. The combined expression ends in the end role of the right SArrow expression instead of introducing a unnecessary new role. For the implementations, the process corresponded to end role $z$ are extended with actions that receive data from the end role $y$ of the left process and store the computation of SArrow expression at the right side and finally output a pair.
 
-In conclusions, even though from the implementation point of view, SArrow composition with the optimized role allocations is ad-hoc and less elegant to implement because we need to consider composition by send-and-receive and composition by local monadic bind and more edge cases to be dealt with compared to the naive solution in the last section where composition is done solely by send-and-receive and role allocations is mindless. We believe the effort is worthy because for a n-level divided-and-conquer algorithms, the optimized role allocation strategies allocate $2^n$ roles in total which is the same as the number of way of parallelization in theory. All the roles are used to maximize parallelism instead of wasting the valuable resources to create roles that merely transmit data.
+Even though from the implementation point of view, SArrow composition with the optimized role allocations is ad-hoc and less elegant to implement because we need to consider composition by send-and-receive and composition by local monadic bind and more edge cases to be dealt with compared to the naive solution in the last section where composition is done solely by send-and-receive and role allocations is mindless. We believe the effort is worthy because for a n-level divided-and-conquer algorithms, the optimized role allocation strategies allocate $2^n$ roles in total which is the same as the number of way of parallelization in theory. All the roles are used to maximize parallelism instead of wasting the valuable resources to create roles that merely transmit data.
+
+In conclusion, the optimized strategy presented in this chapter is not the only solution. For example, there is a strategy that only introduce new roles into the computation graph when encountering a specific atomic functions. Different strategies result in different communication structures hence different kind of parallelisms. We should choose the right strategy depending on the specific task.
 \section{Satisfaction of arrow laws}
 We have provided the implementation of SArrow combinators that is similar to the arrow interface. However, the implementation is not enough to state that SArrow is an arrow interface. Furthermore, we need to prove that SArrow satisfy the arrow laws. Because of the limited context, we will present justification instead of formal proofs. We will focus on arrow laws. The justification for arrow-choice law can be reasoned in a similar way.
 \begin{table}[ht]

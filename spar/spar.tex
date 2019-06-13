@@ -57,32 +57,26 @@ Readers might find it easy to visualize the group of Proc as a computation graph
 \begin{table}[ht]
 \begin{align*}
     &(P_1, r_1) \Par (P_2, r_2) \Par \ldots \Par (P_n, r_n) \rightarrow \tag{Init}\\ 
-    &(P_1, r_1) \Par (P_2, r_2) \Par \ldots \Par (P_n, r_n) \Par \emptyset \notag\\ 
+    &\qquad \quad (P_1, r_1) \Par (P_2, r_2) \Par \ldots \Par (P_n, r_n) \Par \emptyset \notag\\ 
     &(\text{Free (Send $r_j$ $e$ next)}, r_i) \Par \ldots \Par h \rightarrow  \tag{Send}\\ 
-    &(\text{next} , r_i) \Par \ldots \Par h \cdot (r_i, r_j, v) \qquad (e \downarrow v) \notag\\ 
+    &\qquad \quad (\text{next} , r_i) \Par \ldots \Par h \cdot (r_i, r_j, v) \qquad (e \downarrow v) \notag\\ 
     &(\text{Free (Recv $r_i$ cont)}, r_j) \Par \ldots \Par (r_i, r_j, v) \cdot h \rightarrow  \tag{Recv}\\ 
-    &(p, r_j) \Par \ldots \Par h \qquad (\text{cont $v$} \downarrow p)\notag\\ 
+    &\qquad \quad (p, r_j) \Par \ldots \Par h \qquad (\text{cont $v$} \downarrow p)\notag\\ 
     &(\text{Free (Select $r_j$ $e$ cont1 cont2 next)}, r_i) \Par \ldots \Par h \rightarrow  \tag{Sel-Left}\\ 
-    &(\text{cont1 $v$} \gg \text{next}, r_i) \Par \ldots \Par h \cdot (r_i, r_j, \text{L}) \qquad (e \downarrow v, \text{label}(v) \downarrow \text{L}) \notag\\ 
+    &\qquad \quad (\text{cont1 $v$} \gg \text{next}, r_i) \Par \ldots \Par h \cdot (r_i, r_j, \text{L}) \qquad (e \downarrow v, \text{label}(v) \downarrow \text{L}) \notag\\ 
     &(\text{Free (Select $r_j$ $e$ cont1 cont2 next)}, r_i) \Par \ldots \Par h \rightarrow  \tag{Sel-Right}\\ 
-    &(\text{cont2 $v$} \gg \text{next}, r_i) \Par \ldots \Par h \cdot (r_i, r_j, \text{R}) \qquad (e \downarrow v, \text{label}(v) \downarrow \text{R}) \notag\\ 
+    &\qquad \quad (\text{cont2 $v$} \gg \text{next}, r_i) \Par \ldots \Par h \cdot (r_i, r_j, \text{R}) \qquad (e \downarrow v, \text{label}(v) \downarrow \text{R}) \notag\\ 
     &(\text{Free (Branch $r_i$ next1 next2 cont)}, r_j) \Par \ldots \Par (r_i, r_j, \text{L}) \cdot h \rightarrow  \tag{Branch-Left}\\ 
-    &(\text{next1} >\!\!>\!\!= \text{cont}, r_j) \Par \ldots \Par h \notag\\ 
+    &\qquad \quad (\text{next1} >\!\!>\!\!= \text{cont}, r_j) \Par \ldots \Par h \notag\\ 
     &(\text{Free (Branch $r_i$ next1 next2 cont)}, r_j) \Par \ldots \Par (r_i, r_j, \text{R}) \cdot h \rightarrow  \tag{Branch-Right}\\ 
-    &(\text{next2} >\!\!>\!\!= \text{cont}, r_j) \Par \ldots \Par h \notag\\ 
+    &\qquad \quad (\text{next2} >\!\!>\!\!= \text{cont}, r_j) \Par \ldots \Par h \notag\\ 
     &(\text{Free (Broadcast [$r_{k_1}$, $\ldots$, $r_{k_n}$] $e$ cont1 cont2 next)}, r_i) \Par \ldots \Par h \rightarrow  \tag{Broadcast-1}\\ 
-    &(\text{Free (Select $r_{k_1}$ $v$ c c (Pure ()))}, r_i) \Par \ldots \Par h \notag\\ 
+    &\qquad \quad (\text{Free (Select $r_{k_1}$ $v$ c c (Pure ()))}, r_i) \Par \ldots \Par h \notag\\ 
     & \qquad \text{where} \;(e \downarrow v, \text{c = Free (Broadcast [$r_{k_2}$, $\ldots$, $r_{k_n}$] cont1 cont2 next)}) \notag\\ 
-    &(\text{Free (Broadcast [$r_{k_1}$] $e$ cont1 cont2 next)}, r_i) \Par \ldots \Par h \rightarrow  \tag{Broadcast-1}\\ 
-    &(\text{Free (Select $r_{k_1}$ $v$ cont1 cont2 next)}, r_i) \Par \ldots \Par h \qquad (e \downarrow v) \notag\\ 
-    % &(\text{Free (Broadcast [$r_{k_1}$, $\ldots$, $r_{k_n}$] $e$ cont1 cont2 next)}, r_i) \Par \ldots \Par h \rightarrow  \tag{Broadcast-Left}\\ 
-    % &(\text{cont1 $v_l$} \gg \text{next}, r_i) \Par \ldots \Par h \cdot (r_i, r_{k_1}, \text{L}) \cdot \ldots \cdot (r_i, r_{k_n}, \text{L}) \notag\\
-    % & \qquad \text{where} \; (e \downarrow v, \text{label}(v) \downarrow \text{L}, (\text{Left $v_l$}) == v) \notag\\ 
-    % &(\text{Free (Broadcast [$r_{k_1}$, $\ldots$, $r_{k_n}$] $e$ cont1 cont2 next)}, r_i) \Par \ldots \Par h \rightarrow  \tag{Broadcast-Right}\\ 
-    % &(\text{cont2 $v_r$} \gg \text{next}, r_i) \Par \ldots \Par h \cdot (r_i, r_{k_1}, \text{R}) \cdot \ldots \cdot (r_i, r_{k_n}, \text{R}) \notag\\
-    % & \qquad \text{where} \;(e \downarrow v, \text{label}(v) \downarrow \text{R}, (\text{Right $v_r$}) == v) \notag\\ 
-    &(\text{Pure $v$}, r_i) \Par (P_i, r_i) \Par \ldots \Par (P_j, r_j) \Par h \rightarrow (P_i, r_i) \Par \ldots \Par (P_j, r_j) \Par h \tag{Pure}\\ 
-    % TODO indentation
+    &(\text{Free (Broadcast [$r_{k_1}$] $e$ cont1 cont2 next)}, r_i) \Par \ldots \Par h \rightarrow  \tag{Broadcast-2}\\ 
+    &\qquad \quad (\text{Free (Select $r_{k_1}$ $v$ cont1 cont2 next)}, r_i) \Par \ldots \Par h \qquad (e \downarrow v) \notag\\ 
+    &(\text{Pure $v$}, r_i) \Par (P_i, r_i) \Par \ldots \Par (P_j, r_j) \Par h \rightarrow \tag{Pure}\\
+    & \qquad \quad (P_i, r_i) \Par \ldots \Par (P_j, r_j) \Par h \notag\\ 
 \end{align*}
 \caption{Small step semantics for Proc}
 \label{spar:sstep}
