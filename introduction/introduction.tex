@@ -1,3 +1,20 @@
+\begin{abstract}
+Parallel code is notorious for its difficulties in writing, verification and maintaining. However, with the end of Moore's law, CPUs evolve by including more cores. Modern programmers are expected to utilize the power of multi-core CPUs and face the challenges brought by parallel programs.
+
+This project builds an embedded framework in Haskell to generate parallel code. Combining the power of multiparty session types with parallel computation, it creates a session typed monadic language as the middle layer and use the Arrow interface as an abstraction layer on top of the language. With the help of Arrow interface, we convert the data flow of the computation to communications and generate parallel codes according to the communication pattern. Thanks to the addition of session types, not only the generated code is guaranteed to be deadlock-free but also we gain a set of local types so that it is possible to reason about the communication structure of the parallel computation.
+
+In order to show the framework is as expressive as usual programming languages, we write a few common parallel computation patterns and three algorithms to benchmarks using our framework. Benchmarks show users can express computation similar to traditional sequential code and gain a high-performance parallel code in low-level target languages for free. Also, the use case of the framework is not limited to a standalone tool for parallel computation; we show the framework can act as a code generation backend for other data-flow based high-level parallel languages with an example.
+\end{abstract}
+
+
+% \renewcommand{\abstractname}{Acknowledgements}
+% \begin{abstract}
+% TBD
+% \end{abstract}
+
+\tableofcontents
+% \listoffigures
+% \listoftables
 \chapter{Introduction} \label{chap:intro}
 % define the session typed monad language
 % Arrow => seesson typed monadic lagnauge
