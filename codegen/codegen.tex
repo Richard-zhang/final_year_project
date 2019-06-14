@@ -162,7 +162,7 @@ Core has a concise syntax so it does not require too much work to write a functi
     \item \textbf{Prim:} Prim constructor represents user defined functions. The code generation for function call of Prim is converted to function call by the name of the primitive function. Users can implement those functions in C and include them in the main generated file.
 \end{itemize}
 
-\subsection{The structure of generated C code}
+\subsection{The structure of generated C code} \label{codegen:sec:structure}
 We have covered the code generation algorithm for each process. We will now tackle how the generated code is structured from a group of interacting processes representing a parallel computation. For each process, we will generate its own C functions that take no argument. We decide to generate an addition C function since function is portable and acts like a black box hiding all the execution details so users can interact with generated code by calling the function. This function will take a parameter as input data and return the computation result. Inside, the function, it will spawn the same number of threads as the number of roles in the system. Each thread will execute the code which is generated from their corresponding Proc expression. In addition to that, the function will send the input parameter to the starting role in the group of Proc to kick off the computation using channel and waiting for the the ending role to send back the computation results. After it receive the result and all the threads have returned, it will return the result. We called this function \hask{proc0}.
 \begin{listing}
     \inputminted{C}{codegen/total.c} 

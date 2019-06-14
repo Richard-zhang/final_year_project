@@ -27,7 +27,80 @@ Usually, divide-and-conquer algorithms are the best candidates for SPar to paral
     \item Wrap up: Before the code generation, programmer need to implement all the \hask{Prim} functions in terms of the target language. In the scope of this project, programmer will write them in C and create a header file. The generated code will include the header file and from then on, programmers obtain the parallelized version of the algorithm that is guaranteed to be deadlock-free.
 \end{enumerate}
 \subsection{Example: Merge sort}
-\subsection{Example: Word count}
+
+We will show how to use the framework to generate parallel code by expressing merge sort on a list of integer.
+\begin{enumerate}
+\begin{listing}[ht]
+\begin{minted}{Haskell}
+split :: SArrow [Int] (Either (Either () Int) ([Int], [Int]))
+split = arr $ Prim "split" undefined
+    
+merge :: SArrow (Either (Either () Int) ([Int], [Int])) [Int]
+merge = arr $ Prim "merge" undefined
+    
+sort :: SArrow [Int] [Int]
+sort = arr $ Prim "sort" undefined
+\end{minted}
+\caption{The code for atomic functions}
+\label{eval:code:step1}
+\end{listing}
+    \item The first step is to understand algorithms. The merge sort is a quite famous divide-and-conquer algorithm. It splits the list into two halves, apply the algorithm to sub-lists recursively and finally merge the sub-lists by an order. From the above description, we identify three atomic functions \hask{split}, \hask{merge} and the base function \hask{sort}.  We need to define the type signatures for these functions to understand what data structures are involved. For the \hask{split} function, it will take a list of integers \hask{[Int]} as an input and output a pair of lists of integers \hask{(Int, Int)} as an output. To deal with the case where the input list can not be split i.e when the list is empty or a singleton list, we wrap the output pair with a either type to deal with these situations. So the output type is \hask{Either (Either () Int) ([Int], [Int])} Accordingly, the type signature of \hask{merge} is the reverse of the \hask{split}. \hask{sort} type signature will be the same as the merge sort: \hask{[Int] -> [Int]}. Finally, we wrap them using Prim and arr. The code written for the first step is shown in the \coref{eval:code:step1}.
+\begin{listing}[ht]
+\inputminted{Haskell}{eval/step2.hs}
+\caption{Construction of the algorithm using the parallel pattern and atomic functions}
+\label{eval:code:step2}
+\end{listing}
+    \item The second step is combine these atomic function in the first step in a parallel pattern we define. Since we are using our framework to parallelizing a merge sort, we will use the divide-and-conquer parallel pattern. The result of applying the pattern pattern is an expression whose type is \hask{Int -> SArrow [Int] [Int]} where the first parameter determines the number of level of the divide-and-conquer algorithm. In this case, we will use our refined version of divided-and-conquer parallel pattern that support shortcut. The code written for the second step is shown \coref{eval:code:step2}. For the completeness, we also include the implementation of the parallel pattern. The polymorphic parallel pattern can be used to generate non-polymorphic code. 
+    \item The third step is optimizing the atomic function. Since split and merge are not very intensive computation. We will not modify anything for this step.
+\begin{table}[ht]
+\begin{subtable}{\textwidth}
+\inputminted{C}{eval/data.h}
+\caption{data.h}
+\end{subtable}
+\vskip\baselineskip
+\begin{subtable}{\textwidth}
+    \inputminted{C}{eval/func.h}
+    \caption{func.h}
+\end{subtable}
+\vskip\baselineskip
+\begin{subtable}{\textwidth}
+    \inputminted{C}{eval/code.c}
+    \caption{code.c}
+\end{subtable}
+\caption{The complete structure of the generated c code. Omit the  implementation of code.c} 
+\label{eval:code:step4}
+\end{table}
+    \item Up to this step, we have finished everything we need to do in the Haskell side to express computation. First of all, we will show how to generate C code from a SArrow expression using the framework. Secondly, we will talk about how to complete the implementation for the atomic functions. In the library, we have defined a function \hask{codeGen} that takes an SArrow expression as an input and generates three files in the specified path. The first file is called func.h which contains declarations of all atomic functions. The second file is data.h which includes the definition of data structures involved in C. The third file is code.c which includes all the necessary headers like standard library and channel library and generated code. The structure is similar to what we described in \secref{codegen:sec:structure}. The last job to do is to complete the implementation of the functions declared in the func.h. After that, we use the generated code in whatever way we want. The structures are shown in \tabref{eval:code:step4}.
+\end{enumerate}
 \section{Benchmarks}
+
+\begin{listing}[ht]
+\begin{minted}{C}
+int main()
+{
+    int * tmp = randomList(1048576);
+    List_int a = (List_int) {1048576, tmp};
+    double start = get_time();
+    proc0(a);
+    double end = get_time();
+    printf("%lf\n", end - start);
+    return 0;
+}
+\end{minted}
+    \caption{The main function for benchmark}
+    \label{eval:code:main}
+\end{listing}
+We have defined a specific code generation function for benchmarking the parallel algorithms. The main difference from the normal generated code is the main function. The main function will create a random source data by the specified input size, record the execution time and output the execution time. The main file is shown in \coref{eval:code:main}. 
+
+For each benchmark of a divide-and-conquer SArrow, we will generate the code for a range of size and for different number of unroll representing the level of the algorithms. We will record the execution time on normal laptop as well as high performance computer.
+
+The compiler we used is gcc (version 9.1.0) with the default optimization. The two platform we run our benchmarks on 1) Intel i5-8259u with 4 physical core 2) 32 cores high throughput computing machine provided by Imperial College London ICT services \footnote{http://www.imperial.ac.uk/admin-services/ict/self-service/research-support/rcs/computing/high-throughput-computing/}.
+
+We have implemented three benchmarks to run.
+\begin{enumerate}
+    \item \textbf{Merge sort. }
+    \item \textbf{Dot product. }
+    \item \textbf{Int counting. }
+\end{enumerate}    
 \subsection{Benchmarks against generated Haskell code}
 \subsection{Benchmarks against C implementation}
