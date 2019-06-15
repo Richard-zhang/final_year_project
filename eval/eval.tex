@@ -98,9 +98,40 @@ The compiler we used is gcc (version 9.1.0) with the default optimization. The t
 
 We have implemented three benchmarks to run.
 \begin{enumerate}
-    \item \textbf{Merge sort. }
-    \item \textbf{Dot product. }
-    \item \textbf{Int counting. }
-\end{enumerate}    
-\subsection{Benchmarks against generated Haskell code}
-\subsection{Benchmarks against C implementation}
+    \item \textbf{Merge sort. } It is one of the most classic divide-and-conquer algorithms. Its details are shown in the above subsection.
+    \item \textbf{Dot product. } It computes the inner product of two vectors whose sizes are the same and of the form $2^n$.
+    \item \textbf{Int count. } It counts the number of occurrence of integer given a list of integer ranging from 0 to 50. \hask{split} divides the list by halves. \hask{count} will count the occurrence of integers and output a list of tuple where the integer is the value and the second integer is the number of occurrence of that value. \hask{union} will union the resulting of sub-lists by summing up the occurrence.
+\end{enumerate}
+\subsection{Evaluation}
+We will demonstrate the execution time against different sizes for different levels of divide-and-conquer algorithms as well as the speedup of the parallel algorithms against the sequential algorithm.
+\begin{figure*}[ht]
+    \begin{subfigure}[b]{0.475\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{eval/mergesort-speedup.pdf}
+        \caption{Merge sort: speedup}
+        \label{eval:fig:ms:speed}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.475\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{eval/mergesort-time.pdf}
+        \caption{Merge sort: execution time}
+    \end{subfigure}
+    \vskip\baselineskip
+    \begin{subfigure}[b]{0.475\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{eval/dotprod-speedup.pdf}
+        \caption{Dot product: speedup}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.475\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{eval/dotprod-time.pdf}
+        \caption{Dot product: execution time}
+    \end{subfigure}
+    \caption{Benchmarks results}
+    \label{eval:fig:finalresult}
+\end{figure*}
+\figref{eval:fig:finalresult} shows the result for different cases running on a 32-core machine. For each level $k$, we will generate a total number of $2^k$ threads to execute the parallel computation. The x axis indicates the size of the input where 22 means the input is a list of $2^20$ integers or a pair of list of $2^20$ integers. The execution time is measured in seconds and the speedup is computed by $\frac{t_{\text{sequential}}}{t_\text{parallel}}$. 
+
+For merge sort, the speedup increases as the size increases which is shown by the increasing graph from \figref{eval:fig:ms:speed}. However, this trend holds for up to size 26. When the size is 26, we witness a sudden decrease in speedup for various levels. The reason for this abnormal behavior is yet to be studied. We have overproduced the number of threads and witness that overproduction of threads has positive impacts on the speedup. The best level is 7 which contains 128 threads. It gives a 7.5X speedup for merge sort and 9X speedup for dot product when the size is $2^{25}$. Usually, greater number of threads has better speedup for greater sizes. The level that gives the best performance depends on the number of cores. It is recommended to overproduce the number threads compared the number of cores. However, the performance will not be increased greatly and even slower if the level is too big (see the comparison of speedup line for level = 7 and 8).

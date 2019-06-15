@@ -11,8 +11,10 @@ divConq baseFunc _ _ 0 = baseFunc
 divConq baseFunc alg coalg x =
   alg
     >>> (   arr Inl
-        ||| (   (   (arr Fst >>> divConq baseFunc alg coalg (x - 1))
-                &&& (arr Snd >>> divConq baseFunc alg coalg (x - 1))
+        ||| (   (   (arr Fst >>> 
+                     divConq baseFunc alg coalg (x - 1))
+                &&& (arr Snd >>> 
+                     divConq baseFunc alg coalg (x - 1))
                 )
             >>> arr Inr
             )
