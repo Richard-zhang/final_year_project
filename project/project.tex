@@ -63,7 +63,6 @@ An important feature of Alg is the lack of usual control flow like if branch or 
 
 To summary, algorithms in Alg are represented as a series of transformations of data, making it easy to transform the Alg programs to programs in arrows mechanically since arrows also express flow of data and their transformations naturally. This property allows us to generate parallel code without burdens.
 
-\subsection{Example: Merge sort}
 \begin{listing}[ht]
 \begin{align*}
 \mathbf{ms} &= \text{rec}_T \; \text{mrg} \; \text{spl} = \text{mrg} \circ T \; (\text{rec}_T \; \text{mrg} \; \text{spl}) \circ \text{spl} \\
@@ -77,7 +76,7 @@ By making the hylomorphism as a built-in combinator $\text{rec}_F$, Alg can expr
 
 \section{ParAlg: Alg + role annotations}
 % Each of the Alg constructs has an implicit, but precise data-flow. For example, in e1 ◦ e2, we know that the result of e1 must only use the result of e2. In a sense, we can interpret that e2, and only e2 sends a message to e1. In this section, we extend this interpretation to most of Alg constructs, so that Alg expressions represent both functions and protocols. We call this extension Parallel Algebraic Language (ParAlg). We define first the syntax of ParAlg terms and types, which is a subset of that of Alg that introduces role annotations that represent where is the computation performed and the data stored. We then define a typing derivation for ParAlg that captures the role interfaces of a ParAlg expression. In §4, we prove that well-typed Parallel Algebraic Language expressions, i.e. expressions built by composing sub-expressions that agree on their role interfaces, exactly correspond to deadlock-free global types (Lemmas 4.5 and 4.6).
-Alg programs are point-free programs which has an implicit but precise data-flow. For example, $e_1 \circ e_2$ is the function composition so the output of applying $e_2$ will be used as the input of $e_1$. We can interpret this as $e_2$ sends a message to $e_1$. Parallel Algebraic Language is the formalization of the above idea. In essence, it is Alg with roles annotations, converting implicit data-flow to explicit role communications. Due to the limited contexts, in this section, we will only present the main results and use examples to build intuitions about its principles. More details and proof can be found in \cite{AlgebraicMultipartyProtocol}. We will briefly mention results that will be useful in our project.
+Alg programs are point-free programs which has an implicit but precise data-flow. For example, $e_1 \circ e_2$ is the function composition so the output of applying $e_2$ will be used as the input of $e_1$. We can interpret this as $e_2$ sends a message to $e_1$. Parallel Algebraic Language is the formalization of the above idea. In essence, it is Alg with roles annotations, converting implicit data-flow to explicit role communication. Due to the limited contexts, in this section, we will only present the main results and use examples to build intuitions about its principles. More details and proof can be found in \cite{AlgebraicMultipartyProtocol}. We will briefly mention results that will be useful in our project.
 \subsection{Syntax}
 \begin{table}[ht]
     \centering
