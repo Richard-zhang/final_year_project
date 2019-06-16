@@ -1,3 +1,646 @@
 \appendix
 \chapter{Examples of generated code} \label{chap:egc}
 \section{Merge sort}
+This is the generated code.c at level 3 for merge sort.
+\lstdefinestyle{myCustomMatlabStyle}{
+  language=C,
+  numbers=left,
+  stepnumber=1,
+  numbersep=10pt,
+  tabsize=4,
+  showspaces=false,
+  showstringspaces=false
+}
+\lstset{basicstyle=\tiny,style=myCustomMatlabStyle}
+% \begin{minted}[fontsize=\footnotesize,baselinestretch=1]{c}
+\begin{lstlisting}
+#include<stdio.h>
+#include<stdlib.h>
+#include<chan.h>
+#include<pthread.h>
+#include"data.h"
+#include"func.h"
+chan_t * c1;
+chan_t * c2;
+chan_t * c3;
+chan_t * c4;
+chan_t * c5;
+chan_t * c6;
+chan_t * c7;
+chan_t * c8;
+chan_t * c9;
+chan_t * c10;
+chan_t * c11;
+chan_t * c12;
+chan_t * c13;
+chan_t * c14;
+chan_t * c15;
+chan_t * c16;
+chan_t * c17;
+void proc1Rt()
+{
+    List_int v0;
+    chan_recv_buf(c1, &v0, sizeof(List_int));
+    Sum_Sum_unit_int_Prod_List_int_List_int v1;
+    v1 = split(v0);
+    Label v2;
+    v2 = v1.label;
+    chan_send_int(c2, v2);
+    chan_send_int(c3, v2);
+    chan_send_int(c4, v2);
+    chan_send_int(c5, v2);
+    chan_send_int(c6, v2);
+    chan_send_int(c7, v2);
+    chan_send_int(c8, v2);
+    Sum_unit_int v3;
+    Prod_List_int_List_int v4;
+    int v5;
+    if (v1.label == LEFT)
+    {
+        v3 = v1.value.left;
+        Sum_Sum_unit_int_Prod_List_int_List_int v6;
+        v6 = (Sum_Sum_unit_int_Prod_List_int_List_int) {LEFT, { .left = v3 }};
+        chan_send_buf(c8,
+                      &v6,
+                      sizeof(Sum_Sum_unit_int_Prod_List_int_List_int));
+        v5 = 0;
+    }
+    else
+    {
+        v4 = v1.value.right;
+        Prod_List_int_List_int v7;
+        v7 = v4;
+        chan_send_buf(c5, &v7, sizeof(Prod_List_int_List_int));
+        Sum_Sum_unit_int_Prod_List_int_List_int v8;
+        v8 = split(v4.snd);
+        Label v9;
+        v9 = v8.label;
+        chan_send_int(c2, v9);
+        chan_send_int(c3, v9);
+        chan_send_int(c4, v9);
+        Sum_unit_int v10;
+        Prod_List_int_List_int v11;
+        int v12;
+        if (v8.label == LEFT)
+        {
+            v10 = v8.value.left;
+            Sum_Sum_unit_int_Prod_List_int_List_int v13;
+            v13 = (Sum_Sum_unit_int_Prod_List_int_List_int) {LEFT, { .left = v10 }};
+            chan_send_buf(c4,
+                          &v13,
+                          sizeof(Sum_Sum_unit_int_Prod_List_int_List_int));
+            v12 = 0;
+        }
+        else
+        {
+            v11 = v8.value.right;
+            Prod_List_int_List_int v14;
+            v14 = v11;
+            chan_send_buf(c3, &v14, sizeof(Prod_List_int_List_int));
+            Sum_Sum_unit_int_Prod_List_int_List_int v15;
+            v15 = split(v11.snd);
+            Label v16;
+            v16 = v15.label;
+            chan_send_int(c2, v16);
+            Sum_unit_int v17;
+            Prod_List_int_List_int v18;
+            int v19;
+            if (v15.label == LEFT)
+            {
+                v17 = v15.value.left;
+                Sum_Sum_unit_int_Prod_List_int_List_int v20;
+                v20 = (Sum_Sum_unit_int_Prod_List_int_List_int) {LEFT, { .left = v17 }};
+                chan_send_buf(c2,
+                              &v20,
+                              sizeof(Sum_Sum_unit_int_Prod_List_int_List_int));
+                v19 = 0;
+            }
+            else
+            {
+                v18 = v15.value.right;
+                Prod_List_int_List_int v21;
+                v21 = v18;
+                chan_send_buf(c2, &v21, sizeof(Prod_List_int_List_int));
+                List_int v22;
+                v22 = sort(v18.snd);
+                chan_send_buf(c2, &v22, sizeof(List_int));
+                v19 = 0;
+            }
+            v12 = 0;
+        }
+        v5 = 0;
+    }
+}
+void proc2Rt()
+{
+    int v24;
+    Label v23;
+    chan_recv_int(c2, &v23);
+    if (v23 == LEFT)
+    {
+        v24 = 0;
+    }
+    else
+    {
+        Label v25;
+        chan_recv_int(c2, &v25);
+        if (v25 == LEFT)
+        {
+        }
+        else
+        {
+            Sum_Sum_unit_int_Prod_List_int_List_int v27;
+            Label v26;
+            chan_recv_int(c2, &v26);
+            if (v26 == LEFT)
+            {
+                Sum_Sum_unit_int_Prod_List_int_List_int v28;
+                chan_recv_buf(c2,
+                              &v28,
+                              sizeof(Sum_Sum_unit_int_Prod_List_int_List_int));
+                v27 = v28;
+            }
+            else
+            {
+                Prod_List_int_List_int v29;
+                chan_recv_buf(c2, &v29, sizeof(Prod_List_int_List_int));
+                List_int v30;
+                v30 = sort(v29.fst);
+                List_int v31;
+                chan_recv_buf(c2, &v31, sizeof(List_int));
+                v27 = (Sum_Sum_unit_int_Prod_List_int_List_int) {RIGHT, { .right = (Prod_List_int_List_int) {v30, v31} }};
+            }
+            List_int v32;
+            v32 = merge(v27);
+            chan_send_buf(c9, &v32, sizeof(List_int));
+        }
+        v24 = 0;
+    }
+}
+void proc3Rt()
+{
+    int v34;
+    Label v33;
+    chan_recv_int(c3, &v33);
+    if (v33 == LEFT)
+    {
+        v34 = 0;
+    }
+    else
+    {
+        int v36;
+        Label v35;
+        chan_recv_int(c3, &v35);
+        if (v35 == LEFT)
+        {
+            v36 = 0;
+        }
+        else
+        {
+            Prod_List_int_List_int v37;
+            chan_recv_buf(c3, &v37, sizeof(Prod_List_int_List_int));
+            Sum_Sum_unit_int_Prod_List_int_List_int v38;
+            v38 = split(v37.fst);
+            Label v39;
+            v39 = v38.label;
+            chan_send_int(c10, v39);
+            Sum_unit_int v40;
+            Prod_List_int_List_int v41;
+            int v42;
+            if (v38.label == LEFT)
+            {
+                v40 = v38.value.left;
+                Sum_Sum_unit_int_Prod_List_int_List_int v43;
+                v43 = (Sum_Sum_unit_int_Prod_List_int_List_int) {LEFT, { .left = v40 }};
+                chan_send_buf(c10,
+                              &v43,
+                              sizeof(Sum_Sum_unit_int_Prod_List_int_List_int));
+                v42 = 0;
+            }
+            else
+            {
+                v41 = v38.value.right;
+                Prod_List_int_List_int v44;
+                v44 = v41;
+                chan_send_buf(c10, &v44, sizeof(Prod_List_int_List_int));
+                List_int v45;
+                v45 = sort(v41.snd);
+                chan_send_buf(c10, &v45, sizeof(List_int));
+                v42 = 0;
+            }
+            v36 = v42;
+        }
+        v34 = v36;
+    }
+}
+void proc4Rt()
+{
+    Label v46;
+    chan_recv_int(c4, &v46);
+    if (v46 == LEFT)
+    {
+    }
+    else
+    {
+        Sum_Sum_unit_int_Prod_List_int_List_int v48;
+        Label v47;
+        chan_recv_int(c4, &v47);
+        if (v47 == LEFT)
+        {
+            Sum_Sum_unit_int_Prod_List_int_List_int v49;
+            chan_recv_buf(c4,
+                          &v49,
+                          sizeof(Sum_Sum_unit_int_Prod_List_int_List_int));
+            v48 = v49;
+        }
+        else
+        {
+            Sum_Sum_unit_int_Prod_List_int_List_int v51;
+            Label v50;
+            chan_recv_int(c10, &v50);
+            if (v50 == LEFT)
+            {
+                Sum_Sum_unit_int_Prod_List_int_List_int v52;
+                chan_recv_buf(c10,
+                              &v52,
+                              sizeof(Sum_Sum_unit_int_Prod_List_int_List_int));
+                v51 = v52;
+            }
+            else
+            {
+                Prod_List_int_List_int v53;
+                chan_recv_buf(c10, &v53, sizeof(Prod_List_int_List_int));
+                List_int v54;
+                v54 = sort(v53.fst);
+                List_int v55;
+                chan_recv_buf(c10, &v55, sizeof(List_int));
+                v51 = (Sum_Sum_unit_int_Prod_List_int_List_int) {RIGHT, { .right = (Prod_List_int_List_int) {v54, v55} }};
+            }
+            List_int v56;
+            v56 = merge(v51);
+            List_int v57;
+            chan_recv_buf(c9, &v57, sizeof(List_int));
+            v48 = (Sum_Sum_unit_int_Prod_List_int_List_int) {RIGHT, { .right = (Prod_List_int_List_int) {v56, v57} }};
+        }
+        List_int v58;
+        v58 = merge(v48);
+        chan_send_buf(c11, &v58, sizeof(List_int));
+    }
+}
+void proc5Rt()
+{
+    int v60;
+    Label v59;
+    chan_recv_int(c5, &v59);
+    if (v59 == LEFT)
+    {
+        v60 = 0;
+    }
+    else
+    {
+        Prod_List_int_List_int v61;
+        chan_recv_buf(c5, &v61, sizeof(Prod_List_int_List_int));
+        Sum_Sum_unit_int_Prod_List_int_List_int v62;
+        v62 = split(v61.fst);
+        Label v63;
+        v63 = v62.label;
+        chan_send_int(c12, v63);
+        chan_send_int(c13, v63);
+        chan_send_int(c14, v63);
+        Sum_unit_int v64;
+        Prod_List_int_List_int v65;
+        int v66;
+        if (v62.label == LEFT)
+        {
+            v64 = v62.value.left;
+            Sum_Sum_unit_int_Prod_List_int_List_int v67;
+            v67 = (Sum_Sum_unit_int_Prod_List_int_List_int) {LEFT, { .left = v64 }};
+            chan_send_buf(c14,
+                          &v67,
+                          sizeof(Sum_Sum_unit_int_Prod_List_int_List_int));
+            v66 = 0;
+        }
+        else
+        {
+            v65 = v62.value.right;
+            Prod_List_int_List_int v68;
+            v68 = v65;
+            chan_send_buf(c13, &v68, sizeof(Prod_List_int_List_int));
+            Sum_Sum_unit_int_Prod_List_int_List_int v69;
+            v69 = split(v65.snd);
+            Label v70;
+            v70 = v69.label;
+            chan_send_int(c12, v70);
+            Sum_unit_int v71;
+            Prod_List_int_List_int v72;
+            int v73;
+            if (v69.label == LEFT)
+            {
+                v71 = v69.value.left;
+                Sum_Sum_unit_int_Prod_List_int_List_int v74;
+                v74 = (Sum_Sum_unit_int_Prod_List_int_List_int) {LEFT, { .left = v71 }};
+                chan_send_buf(c12,
+                              &v74,
+                              sizeof(Sum_Sum_unit_int_Prod_List_int_List_int));
+                v73 = 0;
+            }
+            else
+            {
+                v72 = v69.value.right;
+                Prod_List_int_List_int v75;
+                v75 = v72;
+                chan_send_buf(c12, &v75, sizeof(Prod_List_int_List_int));
+                List_int v76;
+                v76 = sort(v72.snd);
+                chan_send_buf(c12, &v76, sizeof(List_int));
+                v73 = 0;
+            }
+            v66 = 0;
+        }
+        v60 = v66;
+    }
+}
+void proc6Rt()
+{
+    int v78;
+    Label v77;
+    chan_recv_int(c6, &v77);
+    if (v77 == LEFT)
+    {
+        v78 = 0;
+    }
+    else
+    {
+        Label v79;
+        chan_recv_int(c12, &v79);
+        if (v79 == LEFT)
+        {
+        }
+        else
+        {
+            Sum_Sum_unit_int_Prod_List_int_List_int v81;
+            Label v80;
+            chan_recv_int(c12, &v80);
+            if (v80 == LEFT)
+            {
+                Sum_Sum_unit_int_Prod_List_int_List_int v82;
+                chan_recv_buf(c12,
+                              &v82,
+                              sizeof(Sum_Sum_unit_int_Prod_List_int_List_int));
+                v81 = v82;
+            }
+            else
+            {
+                Prod_List_int_List_int v83;
+                chan_recv_buf(c12, &v83, sizeof(Prod_List_int_List_int));
+                List_int v84;
+                v84 = sort(v83.fst);
+                List_int v85;
+                chan_recv_buf(c12, &v85, sizeof(List_int));
+                v81 = (Sum_Sum_unit_int_Prod_List_int_List_int) {RIGHT, { .right = (Prod_List_int_List_int) {v84, v85} }};
+            }
+            List_int v86;
+            v86 = merge(v81);
+            chan_send_buf(c15, &v86, sizeof(List_int));
+        }
+        v78 = 0;
+    }
+}
+void proc7Rt()
+{
+    int v88;
+    Label v87;
+    chan_recv_int(c7, &v87);
+    if (v87 == LEFT)
+    {
+        v88 = 0;
+    }
+    else
+    {
+        int v90;
+        Label v89;
+        chan_recv_int(c13, &v89);
+        if (v89 == LEFT)
+        {
+            v90 = 0;
+        }
+        else
+        {
+            Prod_List_int_List_int v91;
+            chan_recv_buf(c13, &v91, sizeof(Prod_List_int_List_int));
+            Sum_Sum_unit_int_Prod_List_int_List_int v92;
+            v92 = split(v91.fst);
+            Label v93;
+            v93 = v92.label;
+            chan_send_int(c16, v93);
+            Sum_unit_int v94;
+            Prod_List_int_List_int v95;
+            int v96;
+            if (v92.label == LEFT)
+            {
+                v94 = v92.value.left;
+                Sum_Sum_unit_int_Prod_List_int_List_int v97;
+                v97 = (Sum_Sum_unit_int_Prod_List_int_List_int) {LEFT, { .left = v94 }};
+                chan_send_buf(c16,
+                              &v97,
+                              sizeof(Sum_Sum_unit_int_Prod_List_int_List_int));
+                v96 = 0;
+            }
+            else
+            {
+                v95 = v92.value.right;
+                Prod_List_int_List_int v98;
+                v98 = v95;
+                chan_send_buf(c16, &v98, sizeof(Prod_List_int_List_int));
+                List_int v99;
+                v99 = sort(v95.snd);
+                chan_send_buf(c16, &v99, sizeof(List_int));
+                v96 = 0;
+            }
+            v90 = v96;
+        }
+        v88 = v90;
+    }
+}
+void proc8Rt()
+{
+    Sum_Sum_unit_int_Prod_List_int_List_int v101;
+    Label v100;
+    chan_recv_int(c8, &v100);
+    if (v100 == LEFT)
+    {
+        Sum_Sum_unit_int_Prod_List_int_List_int v102;
+        chan_recv_buf(c8,
+                      &v102,
+                      sizeof(Sum_Sum_unit_int_Prod_List_int_List_int));
+        v101 = v102;
+    }
+    else
+    {
+        Sum_Sum_unit_int_Prod_List_int_List_int v104;
+        Label v103;
+        chan_recv_int(c14, &v103);
+        if (v103 == LEFT)
+        {
+            Sum_Sum_unit_int_Prod_List_int_List_int v105;
+            chan_recv_buf(c14,
+                          &v105,
+                          sizeof(Sum_Sum_unit_int_Prod_List_int_List_int));
+            v104 = v105;
+        }
+        else
+        {
+            Sum_Sum_unit_int_Prod_List_int_List_int v107;
+            Label v106;
+            chan_recv_int(c16, &v106);
+            if (v106 == LEFT)
+            {
+                Sum_Sum_unit_int_Prod_List_int_List_int v108;
+                chan_recv_buf(c16,
+                              &v108,
+                              sizeof(Sum_Sum_unit_int_Prod_List_int_List_int));
+                v107 = v108;
+            }
+            else
+            {
+                Prod_List_int_List_int v109;
+                chan_recv_buf(c16, &v109, sizeof(Prod_List_int_List_int));
+                List_int v110;
+                v110 = sort(v109.fst);
+                List_int v111;
+                chan_recv_buf(c16, &v111, sizeof(List_int));
+                v107 = (Sum_Sum_unit_int_Prod_List_int_List_int) {RIGHT, { .right = (Prod_List_int_List_int) {v110, v111} }};
+            }
+            List_int v112;
+            v112 = merge(v107);
+            List_int v113;
+            chan_recv_buf(c15, &v113, sizeof(List_int));
+            v104 = (Sum_Sum_unit_int_Prod_List_int_List_int) {RIGHT, { .right = (Prod_List_int_List_int) {v112, v113} }};
+        }
+        List_int v114;
+        v114 = merge(v104);
+        List_int v115;
+        chan_recv_buf(c11, &v115, sizeof(List_int));
+        v101 = (Sum_Sum_unit_int_Prod_List_int_List_int) {RIGHT, { .right = (Prod_List_int_List_int) {v114, v115} }};
+    }
+    List_int v116;
+    v116 = merge(v101);
+    chan_send_buf(c17, &v116, sizeof(List_int));
+}
+void * proc1()
+{
+    proc1Rt();
+    return NULL;
+}
+void * proc2()
+{
+    proc2Rt();
+    return NULL;
+}
+void * proc3()
+{
+    proc3Rt();
+    return NULL;
+}
+void * proc4()
+{
+    proc4Rt();
+    return NULL;
+}
+void * proc5()
+{
+    proc5Rt();
+    return NULL;
+}
+void * proc6()
+{
+    proc6Rt();
+    return NULL;
+}
+void * proc7()
+{
+    proc7Rt();
+    return NULL;
+}
+void * proc8()
+{
+    proc8Rt();
+    return NULL;
+}
+List_int proc0(List_int v0)
+{
+    c1 = chan_init(1);
+    c2 = chan_init(1);
+    c3 = chan_init(1);
+    c4 = chan_init(1);
+    c5 = chan_init(1);
+    c6 = chan_init(1);
+    c7 = chan_init(1);
+    c8 = chan_init(1);
+    c9 = chan_init(1);
+    c10 = chan_init(1);
+    c11 = chan_init(1);
+    c12 = chan_init(1);
+    c13 = chan_init(1);
+    c14 = chan_init(1);
+    c15 = chan_init(1);
+    c16 = chan_init(1);
+    c17 = chan_init(1);
+    pthread_t th1;
+    pthread_create(&th1, NULL, proc1, NULL);
+    pthread_t th2;
+    pthread_create(&th2, NULL, proc2, NULL);
+    pthread_t th3;
+    pthread_create(&th3, NULL, proc3, NULL);
+    pthread_t th4;
+    pthread_create(&th4, NULL, proc4, NULL);
+    pthread_t th5;
+    pthread_create(&th5, NULL, proc5, NULL);
+    pthread_t th6;
+    pthread_create(&th6, NULL, proc6, NULL);
+    pthread_t th7;
+    pthread_create(&th7, NULL, proc7, NULL);
+    pthread_t th8;
+    pthread_create(&th8, NULL, proc8, NULL);
+    chan_send_buf(c1, &v0, sizeof(List_int));
+    List_int v1;
+    chan_recv_buf(c17, &v1, sizeof(List_int));
+    pthread_join(th1, NULL);
+    pthread_join(th2, NULL);
+    pthread_join(th3, NULL);
+    pthread_join(th4, NULL);
+    pthread_join(th5, NULL);
+    pthread_join(th6, NULL);
+    pthread_join(th7, NULL);
+    pthread_join(th8, NULL);
+    chan_dispose(c1);
+    chan_dispose(c2);
+    chan_dispose(c3);
+    chan_dispose(c4);
+    chan_dispose(c5);
+    chan_dispose(c6);
+    chan_dispose(c7);
+    chan_dispose(c8);
+    chan_dispose(c9);
+    chan_dispose(c10);
+    chan_dispose(c11);
+    chan_dispose(c12);
+    chan_dispose(c13);
+    chan_dispose(c14);
+    chan_dispose(c15);
+    chan_dispose(c16);
+    chan_dispose(c17);
+    return v1;
+}
+int main()
+{
+    int * tmp = randomList(1024);
+    List_int a = (List_int) {1024, tmp};
+    double start = get_time();
+    proc0(a);
+    double end = get_time();
+    printf("%lf\n", end - start);
+    return 0;
+}
+\end{lstlisting}
+% \end{minted}
