@@ -9,7 +9,7 @@ Arrow is a general interface to describe computation. It can ease the process of
 \coref{b:ar:c1} shows the Arrow definition in Haskell. Intuitively, an arrow type \hask{y a b}(that is, the application of the parameterised type \hask{y} to the two parameter types \hask{b} and \hask{c}) can be regarded as a computation with input of type \hask{b} and output of type \hask{b}\cite{hughesGeneralisingMonadsArrows2000}. Visually, arrows are like pipelines (shown in \figref{b:ar:p1}). In Haskell, an arrow \hask{y} is a type that implements the following interface (type classes in Haskell are roughly interfaces). \hask{arr} converts an arbitrary function into an arrow. \hask{>>>} sequences two arrows (illustrated in \figref{b:ar:seq}). Taking two input,  \hask{first} apply the arrow to the first input while keeping the second untouched (\figref{b:ar:first}). Conversely, \hask{second} modifies the second input and keeps the first one unchanged. \hask{***} applies two arrows to two input side by side (\figref{b:ar:par}). \hask{&&&} takes one input and applies two separate arrows to the input and its duplications (\figref{b:ar:dup}).
 % TODO add reference to arrow visualization
 
-The simplest instance of arrow class is the function type (shown in \coref{b:ar:c2}). It is worth noticing that only \hask{arr} and \hask{***} need to be implemented. The reset of function in the arrow type class can be defined in terms of the two functions. For example, \mintinline{text}{f &&& g = (f *** g) . arr (\b -> (b, b))} and \mintinline{text}{first = (*** id)}
+The simplest instance of arrow class is the function type (shown in \coref{b:ar:c2}). It is worth noticing that only \hask{arr} and \hask{***} need to be implemented. The rest of functions in the arrow type class can be defined in terms of the two functions. For example, \mintinline{text}{f &&& g = (f *** g) . arr (\b -> (b, b))} and \mintinline{text}{first = (*** id)}
 \begin{code}
   % \inputminted{haskell}{background/ar-def.hs}
   \begin{minted}{haskell}
@@ -72,7 +72,7 @@ The simplest instance of arrow class is the function type (shown in \coref{b:ar:
   \label{b:ar:p1}
 \end{figure*}
 \subsection{Example: Calculate the mean}
-Consider the a function to calculate the mean from a list of floating number, we will compare the usual, arrows implementations. Implementation using arrows can be regarded as point-free programming. Point-free programming is programming paradigm where function definitions only involve combinators and function composition without mentioning variables\cite{TacitProgramming2019}. 
+Consider the function to calculate the mean from a list of floating point numbers, we present the implementation using arrows compared with a point-free Haskell definition. Implementation using arrows can be regarded as point-free programming. Point-free programming is programming paradigm where function definitions only involve combinators and function composition without mentioning variables\cite{TacitProgramming2019}. 
 
 \begin{minted}{haskell}
 mean :: [Float] -> Float
@@ -106,14 +106,14 @@ The arrows implementation can be visualised in \figref{b:ar:p2}.
 mean'' :: [Float] -> Float
 mean'' = liftM2 (/) sum (fromIntegral . length)
 \end{minted}
-Arrows are not the only way to form point-free programs. The above code snippet is the more traditional approach form of point-free mean function in Haskell. We can argue this form of point-free function is more difficult to understand compared to arrows because it involves knowledge of monads (\hask{liftM2}) and does not map to intuitive data-flow.
+The above code snippet is the more traditional approach form of point-free mean function in Haskell. Arrows are not the only way to form point-free programs. We can argue this form of point-free function is more difficult to understand compared to arrows because it involves knowledge of monads (\hask{liftM2}) and does not map to the intuitive data-flow.
 
-The simple example demos that arrows combinators make writing point-free programs easier. Arrows union the implementation of algorithm and data-flow in the algorithm. 
+The simple example demonstrates that arrows combinators make writing point-free programs easier. Arrows unites the implementation of algorithm and data-flow in the algorithm. 
 
 \subsection{Application in parallel computation}
-From the previous example, the data flow of programs written regarding arrow combinators can be easily visualised (shown in \figref{b:ar:p1}). It is intuitive to recognise that the clean separation between the flow of data and actual computation will be useful in generating parallel code. Indeed, arrow describes data flow implicitly, and it is an example of the so-called algebraic pattern. Many works \cite{braunArrowsParallelComputation2018, elliottGenericFunctionalParallel2017b, AlgebraicMultipartyProtocol} has been done to generate parallel code from algebraic patterns. In particular, details of \cite{AlgebraicMultipartyProtocol} are introduced in later section. % TODO
+From the previous example, the data flow of programs written using arrow combinators can be easily visualized (shown in \figref{b:ar:p1}). It is intuitive to recognize that the clean separation between the flow of data and actual computation will be useful in generating parallel code. Indeed, arrow describes data flow implicitly, and it is an example of the so-called algebraic pattern. Many works has been done to generate parallel code from algebraic patterns \cite{braunArrowsParallelComputation2018, elliottGenericFunctionalParallel2017b, AlgebraicMultipartyProtocol}. In particular, details of \cite{AlgebraicMultipartyProtocol} are introduced in \charef{chap:alg}.
 
-We will use some figures to explain the idea behind arrows as a framework for parallel computation. For example, as shown in the \figref{b:ar:p3}, \hask{f *** g} means computations of \hask{f} and \hask{g} happened in parallel. \figref{b:ar:p4} shows that it can be extending to parallel map in terms of arrows, taking an arrow computation \hask{arr ab} and returning a list of computation in parallel (\hask{arr [a] [b]}). 
+We will use some figures to explain the idea behind arrows as a framework for parallel computation. For example, as shown in the \figref{b:ar:p3}, \hask{f *** g} means computations of \hask{f} and \hask{g} happen in parallel. \figref{b:ar:p4} shows that it can be used to implement parallel map in terms of arrows, taking an arrow computation \hask{arr a b} and returning a list of computation in parallel (\hask{arr [a] [b]}). 
 \begin{figure*}[ht]
 \begin{subfigure}[b]{0.475\textwidth}
   \centering
@@ -130,9 +130,9 @@ We will use some figures to explain the idea behind arrows as a framework for pa
 \end{subfigure}
 \end{figure*}
 \section{Recursion Schemes} \label{b:rs}
-Recursion schemes are patterns for expressing general computation. In particular, they are like high order function abstracting recursion so that programmer can express any kind of recursion by data structures combined with recursion schemes instead of writing explicit recursive functions.
+Recursion schemes are patterns for expressing recursive functions. In particular, they are high order function abstracting common patterns of recursion.
 \subsection{Definition}
-We will introduce three typical recursion schemes: catamorphisms, anamorphisms and hylomorphisms (seen in \coref{p:pal:c3}). As mentioned before, recursion schemes express recursion with the help of data structures, in particular, the fixed point of data structures (seen in \coref{p:pal:c2})
+We will introduce three typical recursion schemes: catamorphisms representing folds , anamorphisms representing unfolds and hylomorphisms representing divide-and-conquer algorithm (seen in \coref{p:pal:c3}). Recursion schemes express recursion with the help of data structures that mirror the control structure of the recursion.
 \begin{code}
 \begin{minted}{haskell}
 newtype Fix f = Fix { unfix :: f (Fix f) }
@@ -171,21 +171,20 @@ hylo g f = f . fmap (hylo f g) . g
 \subsection{Example: Merge sort} \label{b:rs:ex}
 We can write merge sort recursively. First of all, we split the list in half and then apply the merge sort recursively to both parts and finally we merge two lists into a single list. 
 
-To write merge sort in terms of recursion scheme, we need to define the recursive structure to represent the control structure. By the definition of merge sort, this structure must have a case with two branches, a base case representing a singleton list and a base case representing an empty list hence this structure is the TreeF we defined above. Splitting a list is like co-algebra while merging is like algebra. We use hylomorphisms to combine them hence getting a sorted list (seen in \coref{p:pal:c4}).
+To write merge sort in terms of recursion scheme, we need to define the recursive structure to represent the control structure. By the definition of merge sort, this structure must have a case with two branches, a base case representing a singleton list and a base case representing an empty list hence this structure is the TreeF we defined above. Splitting a list is a co-algebra while merging is a algebra. We use hylomorphisms to combine them hence getting a sorted list (seen in \coref{p:pal:c4}).
 \begin{code}
 \inputminted{haskell}{project/pal-ms.hs}
 \caption{Merge sort using hylomorphisms} \label{p:pal:c4}
 \end{code}
 \section{Multiparty session types} \label{b:mpst}
-In complicated distributed systems, participants agree on a protocol, specifying type and direction of data exchanged. Multiparty session types are a branch of behavioural types specifically targeted at describing protocols in distributed systems based on asynchronous communication \cite{coppoGentleIntroductionMultiparty2015}. They are a type formalism used to model communication-based programming by codifying the structure of communication. The evolution of computing from the era of data processing to the era of communication witnessed the growth and significance of the theory of session types.
+In complicated distributed systems, participants agree on a protocol, specifying the type and direction of data exchanged. Multiparty session types are a branch of behavioral types specifically targeted at describing protocols in distributed systems based on asynchronous communication \cite{coppoGentleIntroductionMultiparty2015}. They are a type formalism used to model communication-based programming by codifying the structure of the communication. The evolution of computing from the era of data processing to the era of communication witnessed the growth and significance of the theory of session types.
 
-The theory of multiparty session type contains three main elements. Global types (seen in \secref{b:mpst:st}), local (session) types and processes. Processes are the concrete descriptions of the behaviour of the peers involved in the distributed system \cite{coppoGentleIntroductionMultiparty2015} using a formal language. Usually, the most used and the original language is $\pi$-calculus \cite{milnerCalculusMobileProcesses1992}.  However, for the simplicity, we will not introduce $\pi$-calculus % and use message passing primitives in Haskell (seen in section \label{b:mo:mpc}) instead. 
-The coming sections are an intuitive introduction of session types by examples.
+The theory of multiparty session types contains three main elements. Global types (seen in \secref{b:mpst:st}), local (session) types and processes. Processes are the concrete descriptions of the behavior of the peers involved in the distributed system \cite{coppoGentleIntroductionMultiparty2015} using a formal language. The most used and the original language is $\pi$-calculus \cite{milnerCalculusMobileProcesses1992}. The coming sections are an intuitive introduction of session types by examples.
 % TODO: Add descriptions about the MPST 1. describes explicit dataflow 2. so it can be used as the high-level programming languages to generate parallel code 3. in \secref{b:mpst:app}.
 \subsection{Global types and local types} \label{b:mpst:st}
-Global type is at the most abstract level, describing a communication protocol from a neutral viewpoint between two or more participants\cite{coppoGentleIntroductionMultiparty2015}. The syntax of the global types is shown in \tabref{b:mpst:gt} and an example of global types is shown in \tabref{b:mpst:gtex}.
+A global type is at the most abstract level, describing a communication protocol from a neutral viewpoint between two or more participants\cite{coppoGentleIntroductionMultiparty2015}. The syntax of global types is shown in \tabref{b:mpst:gt} and an example of global types is shown in \tabref{b:mpst:gtex}.
 
-Local types or session types characterise the same communication protocol as the global type, but from the viewpoint of each peer \cite{coppoGentleIntroductionMultiparty2015}. Each process is typed by local type. The syntax of local types is shown in \tabref{b:mpst:lt} and an example of local type is shown in \tabref{b:mpst:ltex}. 
+Local types or session types characterise the same communication protocol as the global type, but from the viewpoint of each peer \cite{coppoGentleIntroductionMultiparty2015}. Each process is typed by a local type. The syntax of local types is shown in \tabref{b:mpst:lt} and an example of local type is shown in \tabref{b:mpst:ltex}. 
 
 The relationship between global types and local types are established by the projection operator (seen in the \secref{b:mpst:proj}), and a type system performs syntactic checks, ensuring that processes are typed by their corresponding local types. Hence, at the compile time, three important properties follow \cite{coppoGentleIntroductionMultiparty2015}. 
 \begin{itemize}
@@ -318,24 +317,24 @@ In \secref{b:mpst}, channels are bi-directional and used for communication betwe
 \end{listing}
 \subsection{Concurrency Monads}
 The work done by \cite{claessenFunctionalPearlsPoor1999} constructs a monad to express concurrent computation. The definition is in \coref{b:mo:def}. \hask{Action} is the algebraic datatype representing basic concurrency primitives. \hask{Atom}, the atomic unit of computation, is a computation (wrapped in the \hask{IO} monad) followed by an action. \hask{Fork} is two parallel action. \hask{Stop} is the termination of an action. type \hask{C} is a special case of the continuation monad. The continuation monad is an encapsulation of computations in continuation-passing style (CPS)\footnote{In continuation-passing style function result is not returned, but instead is passed to another function, received as a parameter (continuation)\cite{ControlMonadCont}}. SO \hask{C a} is a CPS computation that produces an intermediate result of type \hask{a} within a CPS computation whose final result type is \hask{Action}. With the help of the monad \hask{C}, sequencing and composing actions can use monadic bind.
-\begin{code}
+\begin{listing}[ht]
   \begin{minted}{haskell}
 data Action =
     Atom (IO Action)
   | Fork Action Action
   | Stop
 
-newtype C a = C { runC :: (a -> Action) -> Action } #\clabel{mo-cm:5}#
+newtype C a = C { runC :: (a -> Action) -> Action }
     
 instance Monad C where
-    (>>=) :: C a -> (a -> C b) -> C b #\clabel{mo-cm:6}#
+    (>>=) :: C a -> (a -> C b) -> C b
     m >>= f  = C $ \k -> runC m (\v -> runC (f v) k)
     return :: a -> C a
     return x = C $ \k -> k x
   \end{minted}
   \caption{The definition of concurrency monad}
   \label{b:mo:def}
-\end{code}
+\end{listing}
 
 
 The idea is using continuation to represent the "future" so that computation can pause and resume as well as expressing sequential computation. Atom wraps the actual computation and Fork is responsible for spawning threads. In addition, in order to write programs in a monadic way easier, some helper functions are defined (shown in \coref{b:mo:helper}). \hask{atom} lifts an IO computation to \hask{C}. And \hask{fork} takes a computation in \hask{C} and return a \hask{C} which involves the \hask{Fork} action. Given a \hask{C a}, \hask{action} gives the result of running the CPS computation. We use \hask{\_. Stop} to represent the final continuation (\hask{Stop} action is the last action). 
@@ -384,8 +383,8 @@ sched as Stop = schedule as
 
 The concurrency monad can be extended to support many features. For example, work done by \cite{marlowMonadDeterministicParallelism} modifies the definition of Action as well as implements a work-stealing parallel scheduler (seen in \coref{b:mo:c3}) to build a monad for parallel computation. 
 
-Besides, extending the concurrency monad to monad for message-passing concurrency can be done by adding channel primitives like newChan, writeChan and readChan into the Action. Since channel primitives are possible to represent in this monad, we naturally think of its prospect in connecting with MPST (will be discussed in the later section).
-\begin{code}
+Besides, extending the concurrency monad to monad for message-passing concurrency can be done by adding channel primitives like newChan, writeChan and readChan into the Action. Since channel primitives are possible to represent in this monad, we naturally think of its prospect in connecting with MPST (will be discussed in \secref{spar:sec:session-typing})
+\begin{listing}[ht]
   % \inputminted{haskell}{background/mo-par.hs}
   \begin{minted}{haskell}
 newtype IVar a = IVar (IORef (IVarContents a)) #\clabel{po:ivar}#
@@ -406,9 +405,9 @@ data Action .=
     \end{itemize}
   }
   \label{b:mo:c3}
-\end{code}
+\end{listing}
 
-In summary, many techniques and ideas like continuation presented in the implementation of this monad afford us inspirations in designing our intermediate language.
+We draw inspiration from this monad to design our intermediate language.
 \section{Free monad} \label{b:fm}
 % TODO add reference to the concurrency monad, show that monad C is not necessary
 Free monad\cite{contributorsCatsFreeMonads} is a concept from category theory. Intuitively, a free monad as a programming abstraction is a technique for implementing EDSLs, where a functor represents basic actions of the EDSL and the free monad of this Functor provides a way to sequence and compose actions. Speaking of the advantages, we are particularly interested in its benefits in flexible interpretations which will be illustrated by an example (\secref{b:fm:e}) and discussed further (\secref{b:fm:a}).
