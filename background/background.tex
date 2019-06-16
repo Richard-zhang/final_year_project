@@ -1,5 +1,5 @@
 \chapter{Background} \label{b} \label{chap:b}
-% This section is an overview of arrows, multiparty session types (MPST) and free monad. Arrow is an interface of implicit data flow, and MPST can be used to describe explicit data flow. Free monad is a technique to convert normal DSL to a monadic DSL. 
+% This section is an overview of arrows, multiparty session types (MPST) and free monad. Arrow is an interface of implicit data flow, and MPST can be used to describe explicit data flow. Free monad is a technique to convert normal EDSL to a monadic EDSL. 
 % As mentioned in the \secref{i:m}, this section is an overview of a high-level language (\secref{b:arrows} and \secref{b:pal}), from which a translation rule will be proposed to our intermediate languages, multiparty session types (\secref{b:mpst}), the theoretical backbone giving rich features of the intermediate languages, and the free monad (\secref{b:fm}), a technique in designing the intermediate languages.
 This section is an overview of techniques that influence the design choices of our monadic language for parallel computation. First of all, we give an overview of techniques applied in the high-level parallel programming framework: arrows (\secref{b:arrows}) and recursion schemes (\secref{b:rs}). We then introduce several techniques for message-passing concurrency: multiparty session types (\secref{b:mpst}) and monadic languages for concurrency (\secref{b:mo}). In the end, we introduce free monads (\secref{b:fm}), a technique valuable in implementing embedded domain-specific languages (EDSL).
 
@@ -429,7 +429,7 @@ Free monad is useful in interpreting an abstract syntax tree (AST). In order to 
   \item Create an AST, usually represented as an ADT
   \item Implement functor for the ADT
   \item Create helper constructors to Free ADT for each type constructor in ADT by liftF 
-  \item Write a monadic program using helper constructors. It is essentially a program written in DSL operations.
+  \item Write a monadic program using helper constructors. It is essentially a program written in EDSL operations.
   \item Build interpreters for Free ADT by interpreting
   \item Interpret the program by the interpreter.
 \end{enumerate}
@@ -492,6 +492,6 @@ Good morning Mary
 % \end{code}
 
 \subsection{Applications} \label{b:fm:a}
-As illustrated by the example (\secref{b:fm:e}), free monad decouple the abstract syntax tree of domain specific language (DSL) and the interpreter. Interpreters with different purposes can be implemented without changing the syntax.
+As illustrated by the example (\secref{b:fm:e}), free monad decouple the abstract syntax tree of domain specific language (EDSL) and the interpreter. Interpreters with different purposes can be implemented without changing the syntax.
 
 In the project, we apply free monad to the intermediate language so not only we make the languages monadic for free but also benefits from decoupling the interpreter and the syntax to implement different interpreters, e.g. Simulator, code generators to different platforms easily.
