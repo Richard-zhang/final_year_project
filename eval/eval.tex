@@ -72,8 +72,45 @@ sort = arr $ Prim "sort" undefined
 \end{table}
     \item Up to this step, we have finished everything we need to do in the Haskell side to express computation. First of all, we will show how to generate C code from a SArrow expression using the framework. Secondly, we will talk about how to complete the implementation for the atomic functions. In the library, we have defined a function \hask{codeGen} that takes an SArrow expression as an input and generates three files in the specified path. The first file is called func.h which contains declarations of all atomic functions. The second file is data.h which includes the definition of data structures involved in C. The third file is code.c which includes all the necessary headers like standard library and channel library and generated code. The structure is similar to what we described in \secref{codegen:sec:structure}. The last job to do is to complete the implementation of the functions declared in the func.h. After that, we use the generated code in whatever way we want. The structures are shown in \tabref{eval:code:step4}.
 \end{enumerate}
-\section{Benchmarks}
+\begin{listing}[ht]
+    \begin{minted}{text}
+0: !<1, [Int]>.?(4, [Int]).end
+1: ?(0,[Int]).Br<[2,3,4],
+    {L: !<4,Either (Either () Int) ([Int],[Int])>.end, 
+     R: !<3,([Int],[Int])>.Br<[2],
+        {L: !<2,Either (Either () Int) ([Int],[Int])>.end, 
+        R: !<2,([Int],[Int])>.!<2,[Int]>.end}>
+        .end}>
+    .end
+2: &(1,
+    {L: end, 
+    R: &(1,
+        {L: ?(1,Either (Either () Int) ([Int],[Int])).end,
+        R: ?(1,([Int],[Int])).?(1,[Int]).end}).!<4,[Int]>
+        .end})
+    .end
+3: &(1,{
+    L: end, 
+    R: ?(1,([Int],[Int])).Br<[4],
+        {L: !<4,Either (Either () Int) ([Int],[Int])>.end,
+        R: !<4,([Int],[Int])>.!<4,[Int]>.end}>
+        .end})
+    .end
+4: &(1,
+    {L: ?(1,Either (Either () Int) ([Int],[Int])).end, 
+    R: &(3,
+        {L: ?(3,Either (Either () Int) ([Int],[Int])).end,
+        R: ?(3,([Int],[Int])).?(3,[Int]).end})
+        .?(2,[Int]).end})
+    .!<0,[Int]>.end
+    \end{minted}
+    \caption{Inferred session types} 
+    \label{eval:code:stypes}
+\end{listing}
 
+In addition to the generated code, we also show the inferred session types of each role in the system for the merge sort at level two in \coref{eval:code:stypes}. We can simply call the function \hask{runType} on any SArrow expression to get a list of session types. The session types is pretty printed. The original representation of session types is in free-monad as explained in \charef{chap:spar}. \hask{br} is a syntax sugar for a series of select (see in \secref{spar:sec:session-typing}).
+
+\section{Benchmarks}
 \begin{listing}[ht]
 \begin{minted}{C}
 int main()
