@@ -33,14 +33,14 @@ Our framework couples with multiparty session type (MPST) \cite{coppoGentleIntro
 \begin{figure}[ht]
     \centering
     \begin{tikzpicture}[xscale=.5]
-    \tikzstyle{proc}  = [rectangle, rounded corners, minimum width=2cm, minimum height=1cm,text centered, draw=black] 
-    \tikzstyle{proc1} = [circle,  minimum width=1cm, minimum height=1cm,text centered, draw=black] 
+    \tikzstyle{proc}  = [rectangle, rounded corners, minimum width=2cm, minimum height=1cm,text centered, draw=black, fill={rgb:orange,1;yellow,2;pink,5}, align=center]
+    \tikzstyle{proc1} = [circle,  minimum width=2cm, minimum height=5cm,text centered, draw=black] 
     \tikzstyle{arrow} = [thick,->,>=stealth]
-    \node (a) [proc] at (0, 3)  {SArrow};
-    \node (b) [proc] at (0, 0)  {SPar};
-    \node (c) [proc] at (0, -3) {C code};
-    \node (d)  at (-4, 5) {Users};
-    \node (e) [align=left] at (4, 5) {Front end of \\ other functional  \\ parallel frameworks};
+    \node (a) [proc, label=right:\charef{chap:arrow}] at (0, 3)  {SArrow: \\ An arrow interface for \\ writing SPar expressions};
+    \node (b) [proc, label=right:\charef{chap:spar}] at (0, 0)  {SPar: \\  A session-typed free monad EDSL \\ for concurrency};
+    \node (c) [proc, label=right:\charef{chap:cg}] at (0, -3) {Low level parallel code: \\ C programs};
+    \node (d)  at (-4, 6) {Users};
+    \node (e) [align=left] at (4, 7) {Front end of \\ other functional  \\ parallel frameworks};
     \draw[arrow] (a) to (b);
     \draw[arrow] (b) to (c);
     \draw[arrow] (d) to (a);
