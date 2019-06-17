@@ -38,13 +38,16 @@ Our framework couples with multiparty session type (MPST) \cite{coppoGentleIntro
     \tikzstyle{arrow} = [thick,->,>=stealth]
     \node (a) [proc, label=right:\charef{chap:arrow}] at (0, 3)  {SArrow: \\ An arrow interface for \\ writing SPar expressions};
     \node (b) [proc, label=right:\charef{chap:spar}] at (0, 0)  {SPar: \\  A session-typed free monad EDSL \\ for concurrency};
-    \node (c) [proc, label=right:\charef{chap:cg}] at (0, -3) {Low level parallel code: \\ C programs};
+    \node (c) [proc, label=right:\charef{chap:cg}] at (0, -3) {Instr: \\ A low-level EDSL \\ for channel  communication};
+    \node (f) [proc, label=right:\charef{chap:cg}] at (0, -6) {Low level parallel code: \\ C programs};
+    % \node (f) [proc, label=right:\charef{chap:cg}] at (0, -6) {Instr: \\ A low-level EDSL \\ for channel  communication};
     \node (d)  at (-4, 6) {Users};
     \node (e) [align=left] at (4, 7) {Front end of \\ other functional  \\ parallel frameworks};
     \draw[arrow] (a) to (b);
     \draw[arrow] (b) to (c);
     \draw[arrow] (d) to (a);
     \draw[arrow] (e) to (a);
+    \draw[arrow] (c) to (f);
     \end{tikzpicture}
     \caption{Visualization of the workflow}
     \label{intro:fig:workflow}
