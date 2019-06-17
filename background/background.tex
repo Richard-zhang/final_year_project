@@ -1,13 +1,10 @@
 \chapter{Background} \label{b} \label{chap:b}
-% This section is an overview of arrows, multiparty session types (MPST) and free monad. Arrow is an interface of implicit data flow, and MPST can be used to describe explicit data flow. Free monad is a technique to convert normal EDSL to a monadic EDSL. 
-% As mentioned in the \secref{i:m}, this section is an overview of a high-level language (\secref{b:arrows} and \secref{b:pal}), from which a translation rule will be proposed to our intermediate languages, multiparty session types (\secref{b:mpst}), the theoretical backbone giving rich features of the intermediate languages, and the free monad (\secref{b:fm}), a technique in designing the intermediate languages.
 This section is an overview of techniques that influence the design choices of our monadic language for parallel computation. First of all, we give an overview of techniques applied in the high-level parallel programming framework: arrows (\secref{b:arrows}) and recursion schemes (\secref{b:rs}). We then introduce several techniques for message-passing concurrency: multiparty session types (\secref{b:mpst}) and monadic languages for concurrency (\secref{b:mo}). In the end, we introduce free monads (\secref{b:fm}), a technique valuable in implementing embedded domain-specific languages (EDSL).
 
 \section{Arrows} \label{b:arrows}
-Arrow is a general interface to describe computation. It can ease the process of writing structured code suitable for parallelising. It also demos a common feature of the frameworks: parallelizability is empowered by underlying implicit but precise data-flow. On the other hand, converting to low-level message-passing code, which requires programmers to define communication using message-passing function and primitives, makes the data-flow explicit.
+Arrow is a general interface to describe computation. It can ease the process of writing structured code suitable for parallelizing. It also demos a common feature of the frameworks: parallelizability is empowered by underlying implicit but precise data-flow. On the other hand, converting to low-level message-passing code, which requires programmers to define communication using message-passing function and primitives, makes the data-flow explicit.
 \subsection{Definition}
 \coref{b:ar:c1} shows the Arrow definition in Haskell. Intuitively, an arrow type \hask{y a b}(that is, the application of the parameterised type \hask{y} to the two parameter types \hask{b} and \hask{c}) can be regarded as a computation with input of type \hask{b} and output of type \hask{b}\cite{hughesGeneralisingMonadsArrows2000}. Visually, arrows are like pipelines (shown in \figref{b:ar:p1}). In Haskell, an arrow \hask{y} is a type that implements the following interface (type classes in Haskell are roughly interfaces). \hask{arr} converts an arbitrary function into an arrow. \hask{>>>} sequences two arrows (illustrated in \figref{b:ar:seq}). Taking two input,  \hask{first} apply the arrow to the first input while keeping the second untouched (\figref{b:ar:first}). Conversely, \hask{second} modifies the second input and keeps the first one unchanged. \hask{***} applies two arrows to two input side by side (\figref{b:ar:par}). \hask{&&&} takes one input and applies two separate arrows to the input and its duplications (\figref{b:ar:dup}).
-% TODO add reference to arrow visualization
 
 The simplest instance of arrow class is the function type (shown in \coref{b:ar:c2}). It is worth noticing that only \hask{arr} and \hask{***} need to be implemented. The rest of functions in the arrow type class can be defined in terms of the two functions. For example, \mintinline{text}{f &&& g = (f *** g) . arr (\b -> (b, b))} and \mintinline{text}{first = (*** id)}
 \begin{code}
@@ -108,7 +105,7 @@ mean'' = liftM2 (/) sum (fromIntegral . length)
 \end{minted}
 The above code snippet is the more traditional approach form of point-free mean function in Haskell. Arrows are not the only way to form point-free programs. We can argue this form of point-free function is more difficult to understand compared to arrows because it involves knowledge of monads (\hask{liftM2}) and does not map to the intuitive data-flow.
 
-The simple example demonstrates that arrows combinators make writing point-free programs easier. Arrows unites the implementation of algorithm and data-flow in the algorithm. 
+The simple example demonstrates that arrows combinators make writing point-free programs easier. Arrows unite the implementation of algorithm and data-flow in the algorithm. 
 
 \subsection{Application in parallel computation}
 From the previous example, the data flow of programs written using arrow combinators can be easily visualized (shown in \figref{b:ar:p1}). It is intuitive to recognize that the clean separation between the flow of data and actual computation will be useful in generating parallel code. Indeed, arrow describes data flow implicitly, and it is an example of the so-called algebraic pattern. Many works has been done to generate parallel code from algebraic patterns \cite{braunArrowsParallelComputation2018, elliottGenericFunctionalParallel2017b, AlgebraicMultipartyProtocol}. In particular, details of \cite{AlgebraicMultipartyProtocol} are introduced in \charef{chap:alg}.
@@ -148,9 +145,9 @@ type Tree = Fix TreeF
 \caption{Definition of fix point of data structures} \label{p:pal:c2}
 \end{code}
 
-Anamorphisms takes a function from a to f a (called the co-algebra) and a value a and return the Fix f. Used Tree as an example, anamorphisms takes a single value a and applies the co-algebra to the value. It continues to apply itself to the branches of the TreeF recursively and finally expands a single value to a complete tree. Intuitively, anamorphism unfolds a single value to a complicated data structure top-down.
+Anamorphisms takes a function from a to f a (called the co-algebra) and a value a and return the Fix f. Used Tree as an example, anamorphisms takes a single value with type a and applies the co-algebra to the value. It continues to apply itself to the branches of the TreeF recursively and finally expands a single value to a complete tree. Intuitively, anamorphism unfolds a single value to a complicated data structure top-down.
 
-Catamorphisms is the reverse of anamorphisms, folding a data structure to a single value bottom-up. It takes a function from f a to a (called the algebra) and Fix f to fold and return a single value a. Catamorphisms and anamorphisms describe the process globally (from a to Fix f and from Fix f to a) while co-algebra and algebra capture what happened locally. The elegant part is while co-algebra and algebra do not involve with any recursion data structure (TreeF is not recursive), catamorphisms consumes recursive data structure while anamorphism builds them.
+Catamorphisms are the reverse of anamorphisms, folding a data structure to a single value bottom-up. It takes a function from f a to a (called the algebra) and Fix f to fold and return a single value a. Catamorphisms and anamorphisms describe the process globally (from a to Fix f and from Fix f to a) while co-algebra and algebra capture what happened locally. The elegant part is while co-algebra and algebra do not involve with any recursion data structure (TreeF is not recursive), catamorphisms consumes recursive data structure while anamorphism builds them.
 
 Hylomorphisms applies anamorphism followed by catamorphisms. It is the most common pattern to use. We will use an example to illustrate its usefulness. It can be thought of as an abstract divide and conquer algorithm.
 % TODO add Divided and conquer analogy
@@ -224,10 +221,10 @@ We will learn that these properties are valuable not only in the distributed sys
 \begin{table}[ht]
   \begin{minipage}{0.45\textwidth}
     \begin{enumerate}
-      \item Customer(0) sends an order number to Agency(1), and Agency sends back a quote to the customer.
-      \item If Customer is happy with the price then Customer selects accept option and notifies Agency.
-      \item If Customer thinks the price is too high then Customer terminate the trade by selecting reject.
-      \item If accept is selected, Agency notify both Customer and Agency2(2). 
+      \item Customer(0) sends an order number to Agency(1), and the Agency sends back a quote to the customer.
+      \item If Customer is happy with the price, then Customer selects accept option and notifies Agency.
+      \item If Customer thinks the price is too high, then Customer terminate the trade by selecting reject.
+      \item If accept is selected, the Agency notifies both Customer and Agency2(2). 
       \item Customer sends an address to Agency2 and Agency2 sends back a delivery date.
     \end{enumerate}
   \end{minipage}
@@ -302,7 +299,7 @@ In order to apply duality into multiparty session types in which more than two p
 \subsection{Applications in parallel computing} \label{b:mpst:app}
 Multiparty session types not only have rich applications in distributed systems but also value in the domain of parallel computation. 
 
-Existing work\cite{ngSafeMPICode} has shown how to generate MPI\footnote{Message Passing Interface (MPI) is a standardised and portable message-passing standard designed by a group of researchers from academia and industry to function on a wide variety of parallel computing architectures \cite{MessagePassingInterface2018}.} programs using session types. Users describe the communication topology as a skeleton using a protocol language which is type checked by session types. After that, an MPI program is generated by merging the skeleton and user-provided kernels for each peer. The parallel code obtained in this way is guaranteed to be deadlock-free and progressing. 
+Existing work\cite{ngSafeMPICode} has shown how to generate MPI\footnote{Message Passing Interface (MPI) is a standardised and portable message-passing standard designed by a group of researchers from academia and industry to function on a wide variety of parallel computing architectures \cite{MessagePassingInterface2018}.} programs using session types. Users describe the communication topology as a skeleton using a protocol language, which is type checked by session types. After that, an MPI program is generated by merging the skeleton and user-provided kernels for each peer. The parallel code obtained in this way is guaranteed to be deadlock-free and progressing. 
 
 \section{Message passing concurrency} \label{b:mo}
 This section introduces some interfaces for message passing concurrency from the primitive case: channel to more advanced one: monad for message passing concurrency.
@@ -365,7 +362,7 @@ example = do
   atom $ putStrLn name
   \end{minted}
 \end{code}
-We can easily define a round-robin scheduler for programs in this monad. We can regard a list of action as a queue of threads that are running concurrently. \hask{schedule} will pattern match on the head of the list. If it is \hask{Atom} then the scheduler will run the computation (seen \hask{a <- ioa} at \cref{mo-cm:1}) and pause its remaining computation and put it at the end of the thread queue (seen at \cref{mo-cm:2}). If it is \hask{Fork} then the scheduler will spawn the thread and put the new thread and the current thread to the bottom of the queue (seen at \cref{mo-cm:3}). Finally, If it is \hask{Stop} then it means this thread has finished and the scheduler will resume with the rest of threads in the queue. For example, to run the above example, we call \hask{schedule [action example]}.
+We can easily define a round-robin scheduler for programs in this monad. We can regard a list of action as a queue of threads that are running concurrently. \hask{schedule} will pattern match on the head of the list. If it is \hask{Atom} then the scheduler will run the computation (seen \hask{a <- ioa} at \cref{mo-cm:1}) and pause its remaining computation and put it at the end of the thread queue (seen at \cref{mo-cm:2}). If it is \hask{Fork} then the scheduler will spawn the thread and put the new thread and the current thread to the bottom of the queue (seen at \cref{mo-cm:3}). Finally, If it is \hask{Stop} then it means this thread has finished, and the scheduler will resume with the rest of threads in the queue. For example, to run the above example, we call \hask{schedule [action example]}.
 \begin{code}
   \begin{minted}{haskell}
 schedule :: [Action] -> IO () 
@@ -409,7 +406,6 @@ data Action .=
 
 We draw inspiration from this monad to design our intermediate language.
 \section{Free monad} \label{b:fm}
-% TODO add reference to the concurrency monad, show that monad C is not necessary
 Free monad\cite{contributorsCatsFreeMonads} is a concept from category theory. Intuitively, a free monad as a programming abstraction is a technique for implementing EDSLs, where a functor represents basic actions of the EDSL and the free monad of this Functor provides a way to sequence and compose actions. Speaking of the advantages, we are particularly interested in its benefits in flexible interpretations which will be illustrated by an example (\secref{b:fm:e}) and discussed further (\secref{b:fm:a}).
 \subsection{Definition}
 In practice, a free monad in Haskell can be defined as an algebraic data type(ADT) (shown in \coref{b:fm:c1}). \hask{Free f} is the monad produced given a functor \hask{f}. \hask{Free} has two type constructors: \hask{Pure} and \hask{Free}. \hask{Monad (Free f)} is the Haskell implementation of the Monad interface for \hask{Free f}. Many useful helper functions are derived from the simple definition of the free monad (shown in \coref{b:fm:c2}). \hask{liftF} lift the functor to its free monad representations. \hask{freeM} maps a natural transformation of functor (\hask{f a -> g a}) to the natural transformation of their free monad versions. Given \hask{m} is a monad, \hask{freeM} is a special case of interpreting \hask{Free m a}: to the \hask{m} monad itself. Finally, \hask{interpret} shows the power of free monad. We can interpret the free monad version of a functor \hask{f} to any monad \hask{m} given a natural transformation from \hask{f} to \hask{m}.

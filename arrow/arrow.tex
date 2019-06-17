@@ -1,9 +1,9 @@
 \chapter{SArrow: An arrow interface for writing SPar expressions} \label{chap:arrow}
-When trying to express more complex and interesting parallel patterns, such as map or reduce, we realize SPar is too low-level. It is difficult to express simple computations because of the overheads of expressing communication patterns by hand. % In addition, compilation from Par-Alg to SPar is hard since they are very different domain specific languages. 
+When trying to express more complex and interesting parallel patterns, such as the map or reduce pattern, we realize SPar is too low-level. It is difficult to express simple computations because of the overheads of expressing communication patterns by hand. 
 
-To solve this issue, we draw inspirations from the Arrow interface, in particular, \cite{braunArrowsParallelComputation2018} where they use arrow interface to do parallel programming in Haskell. We introduce SArrow, an arrow interface for writing SPar expressions.
+To solve this issue, we draw inspirations from the Arrow interface, in particular, \cite{braunArrowsParallelComputation2018} where they use the arrow interface to do parallel programming in Haskell. We introduce SArrow; an arrow interface for writing SPar expressions.
 
-SArrow is an arrow interface for writing SPar expressions. With the help from SArrow, users can use canonical arrow combinators to write algorithms without writing any explicit communication, and gain parallelized algorithms for free.
+SArrow is an arrow interface for writing SPar expressions. With help from SArrow, users can use canonical arrow combinators to write algorithms without writing any explicit communication, and gain parallelized algorithms for free.
 
 \section{Syntax}
 \begin{listing}[ht]
@@ -11,7 +11,7 @@ SArrow is an arrow interface for writing SPar expressions. With the help from SA
 \caption{Definition of SArrow}
 \label{SArrow:def}
 \end{listing}
-The simplified syntax of SArrow can be found in \coref{SArrow:def}. \hask{Pipe a b} data structures is the essential component of SArrow. It regards computation as a pipe where data with type \hask{a} goes into the pipe and data with type \hask{b} get out of the pipe. Internally, it's a record type of four fields. \hask{start} field identifies the process where the input data is received. \hask{cont} field has the type \hask{a -> Proc} which is a continuation waiting for the input data produced by the last pipe. \hask{env} represents a group of Procs interacting inside the pipe to produce the output data, in other words, it is the parallel computation. \hask{end} is the identification of the process that produces the output data in the end. We can retrieve the corresponding process by a lookup in \hask{env} with the key \hask{end}. The returned Proc returns data with type \hask{b}. 
+The simplified syntax of SArrow can be found in \coref{SArrow:def}. \hask{Pipe a b} data structures are the essential component of SArrow. It regards computation as a pipe where data with type \hask{a} goes into the pipe and data with type \hask{b} get out of the pipe. Internally, it's a record type of four fields. \hask{start} field identifies the process where the input data is received. \hask{cont} field has the type \hask{a -> Proc}, which is a continuation waiting for the input data produced by the last pipe. \hask{env} represents a group of Procs interacting inside the pipe to produce the output data; in other words, it is the parallel computation. \hask{end} is the identification of the process that produces the output data in the end. We can retrieve the corresponding process by a lookup in \hask{env} with the key \hask{end}. The returned Proc returns data with type \hask{b}. 
 
 SArrow is a type synonym of \hask{Nat -> Pipe a b}. It consumes \hask{Nat} which means the identifier of a process and output \hask{Pipe a b}. The reason why we use \hask{Nat} as the only parameter is to ensure that processes names are not duplicated. It will be explained more thoroughly in \secref{SArrow:roleAllc}.
 \subsection{Arrow interface}
@@ -34,7 +34,7 @@ As an example, we will illustrate some typical computation patterns used in para
     \label{SArrow:fig:select}
 \end{figure}
 
-First of all, the branching pattern illustrated by \figref{SArrow:fig:select} is equivalent to an expression formed by \hask{|||} combinators, where the data constructor \hask{Left} leads to one computation path and the data constructor \hask{Right} leads to another computation path. It seems to be a simple pattern but it is useful when composed with other more complex patterns. We will use an example to illustrate this at the end of this section.
+First of all, the branching pattern illustrated by \figref{SArrow:fig:select} is equivalent to an expression formed by \hask{|||} combinators, where the data constructor \hask{Left} leads to one computation path and the data constructor \hask{Right} leads to another computation path. It seems to be a simple pattern, but it is useful when composed with other more complex patterns. We will use an example to illustrate this at the end of this section.
 
 \begin{figure*}[ht]
     \begin{subfigure}[b]{0.475\textwidth}
@@ -67,7 +67,7 @@ Secondly, the fundamental building block, the fork-join pattern illustrated by \
     \label{arrow:code:pmap}
 \end{listing}
 
-Thirdly, the familiar parallel map pattern illustrated in \figref{arrow:fig:pmap} is also a candidate to be expressed in SArrow. The code sample is in \coref{arrow:code:pmap}. \hask{pmap} splits the input \hask{a} into 4 chunks using the splitting function \hask{s}, applied the elemental function \hask{f} and the arrow combinator \hask{***} in parallel and finally use the collecting function \hask{c} to collect the results. Usually, the input \hask{a} is a list and \hask{s} splits the list into 4 equal chunks. The size of the tuple determines the degree of parallelism.
+Thirdly, the familiar parallel map pattern illustrated in \figref{arrow:fig:pmap} is also a candidate to be expressed in SArrow. The code sample is in \coref{arrow:code:pmap}. \hask{pmap} splits the input \hask{a} into 4 chunks using the splitting function \hask{s}, applied the elemental function \hask{f} and the arrow combinator \hask{***} in parallel and finally use the collecting function \hask{c} to collect the results. Usually, the input \hask{a} is a list and \hask{s} splits the list into four equal chunks. The size of the tuple determines the degree of parallelism.
 
 \begin{figure}[ht]
     \centering 
@@ -88,7 +88,7 @@ Fourthly, we can apply a similar logic to express the parallel reduce pattern sh
     \label{SArrow:dq}
 \end{listing}
 
-Finally, more complex pattern can be expressed compositionally from simpler patterns expressed in SArrow. We use a typical divide-and-conquer algorithm implemented with fork-join as an example. \figref{SArrow:fig:dq} shows divide-and-conquer algorithms with 2-ways and 3-levels of fork-join. The algorithm in SArrow is in \coref{SArrow:dq}. The divide-and-conquer pattern can be built recursively in Haskell. For the base case, we simply apply the basic computation. Otherwise, we first call split and then call the function recursively with the level decremented by one and, in the end, call the merge to combine the results. Every expression in the function definition is connected using arrow combinators. A 3-level divide-and-conquer algorithm is constructed by passing 3 to the function resulting a algorithm with $2^3 = 8$-way parallelism.
+Finally, a more complex pattern can be expressed compositionally from simpler patterns expressed in SArrow. We use a typical divide-and-conquer algorithm implemented with fork-join as an example. \figref{SArrow:fig:dq} shows divide-and-conquer algorithms with 2-ways and 3-levels of fork-join. The algorithm in SArrow is in \coref{SArrow:dq}. The divide-and-conquer pattern can be built recursively in Haskell. For the base case, we simply apply the basic computation. Otherwise, we first call split and then call the function recursively with the level decremented by one and, in the end, call the merge to combine the results. Every expression in the function definition is connected using arrow combinators. A 3-level divide-and-conquer algorithm is constructed by passing 3 to the function resulting in an algorithm with $2^3 = 8$-way parallelism.
 
 \begin{figure}[ht]
     \centering
@@ -96,13 +96,13 @@ Finally, more complex pattern can be expressed compositionally from simpler patt
     \caption{Combination of branching pattern and divide-and-conquer pattern}
     \label{SArrow:fig:brdv}
 \end{figure}
-In addition, the divide-and-conquer parallel pattern can be optimized when combining with branch pattern. The branch pattern allows us to add shortcuts to the pattern (illustrated in the \figref{SArrow:fig:brdv}, red lines represent the alternative computation path provided by branching patterns). The shortcut gives us the ability to decide whether to do local computation or split  into multiple subtasks depending on the input size. When the input size is small, the overhead of the latter usually outweights its parallelism. Adding the simple branching pattern results in a pattern that is adaptive to various input sizes with better performance.
+Also, the divide-and-conquer parallel pattern can be optimized when combining with the branching pattern. The branching pattern allows us to add shortcuts to the pattern (illustrated in the \figref{SArrow:fig:brdv}, red lines represent the alternative computation path provided by branching patterns). The shortcut gives us the ability to decide whether to do local computation or split into multiple subtasks depending on the input size. When the input size is small, the overhead of the latter usually outweighs its parallelism. Adding the simple branching pattern results in a pattern that is adaptive to various input sizes with better performance.
 
-The implementation demonstrates the power of implementing SArrow as a domain specific language embedded in Haskell. We make full use of Haskell features i.e high order functions and polymorphic functions to construct expressive, composable and \linebreak generic computation patterns.
+The implementation demonstrates the power of implementing SArrow as a domain-specific language embedded in Haskell. We make full use of Haskell features, i.e. high order functions and polymorphic functions to construct expressive, composable and \linebreak generic computation patterns.
 
 More examples of algorithms formed by SArrow, e.g. dot product or merge sort are shown in the \secref{eval}.
 \section{Implementation of arrow combinators} \label{SArrow:impl}
-In this chapter, we will present naive implementation and the optimized solution is introduced in the next section.
+In this chapter, we will present naive implementation, and the optimized solution is introduced in the next section.
 
 \begin{listing}[ht]
     \inputminted{Haskell}{arrow/kleisli.hs} 
@@ -110,9 +110,9 @@ In this chapter, we will present naive implementation and the optimized solution
     \label{arrow:code:kleisli}
 \end{listing}
 
-Kleisli arrow has the same type as the second parameter of monadic bind. The intuition why SArrow is an instance of Arrow comes from the Kleisli arrow of a monad is an instance of Arrow class (shown in \coref{arrow:code:kleisli}). The \hask{cont} field in the \hask{Pipe} has a similar type signature as the \hask{runKleisli} field in the Kleisli arrow. From the previous section, we have shown that Proc is a monad, so \hask{Pipe} is just an extended version of Kleisli arrow where computations in \hask{Pipe} usually finish in one of the process stored in \hask{env} instead of finishing at \hask{cont} like Kleisli arrow. Intuitively, SArrow, a function from the role to \hask{Pipe}, should be an instance of Arrow since \hask{Pipe} can be mad an arrow instance and functions compose.
+Kleisli arrow has the same type as the second parameter of the monadic bind. The intuition why SArrow is an instance of Arrow comes from the Kleisli arrow of a monad is an instance of Arrow class (shown in \coref{arrow:code:kleisli}). The \hask{cont} field in the \hask{Pipe} has a similar type signature as the \hask{runKleisli} field in the Kleisli arrow. From the previous section, we have shown that Proc is a monad, so \hask{Pipe} is just an extended version of Kleisli arrow where computations in \hask{Pipe} usually finish in one of the processes stored in \hask{env} instead of finishing at \hask{cont} like Kleisli arrow. Intuitively, SArrow, a function from the role to \hask{Pipe}, should be an instance of Arrow since \hask{Pipe} can be made into an arrow instance and functions compose.
 
-The essential issue when implementing arrow combinators is how to connect one \hask{Pipe} by another \hask{Pipe}. The first problem we need to address is how to deal with the \hask{cont} in the tail \hask{Pipe}. We know that only one \hask{cont} field exists in the resulting \hask{Pipe} and it must be that from the head \hask{Pipe}. For the \hask{cont} field in the tail \hask{Pipe}, we append the action: receive from end in the first \hask{Pipe} to the beginning of it by monadic binding. We then store the resulting Proc expression in the new \hask{env}. We also extend the Proc corresponding to the end in the head \hask{Pipe} with action: send to the \hask{start} role defined in the tail \hask{Pipe}. Finally, the new env is formed by merging the env from the head \hask{Pipe} and the env from the tail \hask{Pipe}. When there are duplications of role identifications, we compose them using the monadic bind. The \hask{start} field in the resulting \hask{Pipe} is the same as that from the head \hask{Pipe} and the \hask{end} field will be set the same as that in the tail \hask{Pipe}.
+The essential issue when implementing arrow combinators is how to connect one \hask{Pipe} by another \hask{Pipe}. The first problem we need to address is how to deal with the \hask{cont} in the tail \hask{Pipe}. We know that only one \hask{cont} field exists in the resulting \hask{Pipe} and it must be that from the head \hask{Pipe}. For the \hask{cont} field in the tail \hask{Pipe}, we append the action: receive from end in the first \hask{Pipe} to the beginning of it by monadic binding. We then store the resulting Proc expression in the new \hask{env}. We also extend the Proc corresponding to the end in the head \hask{Pipe} with action: send to the \hask{start} role defined in the tail \hask{Pipe}. Finally, the new env is formed by merging the env from the head \hask{Pipe} and the \hask{env} from the tail \hask{Pipe}. When there are duplications of role identifications, we compose them using the monadic bind. The \hask{start} field in the resulting \hask{Pipe} is the same as that from the head \hask{Pipe} and the \hask{end} field will be set the same as that in the tail \hask{Pipe}.
 
 \begin{listing}
 \inputminted{Haskell}{arrow/impl.hs}
@@ -120,14 +120,14 @@ The essential issue when implementing arrow combinators is how to connect one \h
 \label{SArrow:code:impl}
 \end{listing}
 
-We can use the \hask{Pipe} composing function to implement arrow combinators for SArrow. The implementation just applies the first SArrow to the input role and the second SArrow to a new role. Usually in order to avoid duplication of roles, the new role is set to be maximum role in the first \hask{Pipe} + 1 and finally apply the \hask{Pipe} composing functions to both \hask{Pipe}. A simplified code explanation can be seen in \coref{SArrow:code:impl}. The rest of combinators can be implemented in a similar fashion.
+We can use the \hask{Pipe} composing function to implement arrow combinators for SArrow. The implementation just applies the first SArrow to the input role and the second SArrow to a new role. Usually, to avoid duplication of roles, the new role is set to be the maximum role in the first \hask{Pipe} + 1 and finally apply the \hask{Pipe} composing functions to both \hask{Pipe}. A simplified code explanation can be seen in \coref{SArrow:code:impl}. The rest of the combinators can be implemented in a similar fashion.
 
 \section{Strategies for optimized role allocation} \label{SArrow:roleAllc}
-From the last section, we know the number of roles in the system is directly related to the number of processes in the final generated code. Hence, role allocation is an essential part in generating efficient parallel programs. 
+From the last section, we know the number of roles in the system is directly related to the number of processes in the final generated code. Hence, role allocation is an essential part of generating efficient parallel programs. 
 
 In this section, we propose strategies for optimizing role allocation. We have two goals in mind when optimizing; (1) we would like to reduce the number of roles (processes) in the computation, since the overhead of thread creation and data transmission has negative impact on performance; (2) we want to avoid roles duplication when we compose SArrows since role duplication means the different computations must be merged in the same role and computations in the same thread are sequential.
 
-An easy solution for the first goal would be setup an upper bound on the number of roles, and then cycle through this fixed bound when allocating new roles. Processes corresponding to duplicated roles can be simply merged using binds since Proc is a monadic EDSL and duality check ensures binding will not cause deadlocks. However, this strategy is not ideal since duplication of roles will decrease the degree of parallelism in the system.
+An easy solution for the first goal would be to setup an upper bound on the number of roles, and then cycle through this fixed bound when allocating new roles. Processes corresponding to duplicated roles can be simply merged using binds since Proc is a monadic EDSL and duality check ensures binding will not cause deadlocks. However, this strategy is not ideal since the duplication of roles will decrease the degree of parallelism in the system.
 
 The naive strategy used in \secref{SArrow:impl} already satisfies the second goal. However, the number of channels required and the number of roles in the system will grow exponentially. In a divide-and-conquer algorithm, the number of channels increases from 10 to 120 and the number of roles increases from 6 to 36 when the level is increased from 1 to 3.
 
@@ -139,7 +139,7 @@ The naive strategy used in \secref{SArrow:impl} already satisfies the second goa
 \label{SArrow:ra:example}
 \end{table}
 
-For the purpose of illustration, we use inference rules to explain our proposed strategy for optimized role allocations when composing SArrows. Please see \tabref{SArrow:ra:example} as an example. $x \Rightarrow x$ means the computation starts with role $x$ and ends with role $x$.
+For illustration, we use inference rules to explain our proposed strategy for optimized role allocations when composing SArrows. Please see \tabref{SArrow:ra:example} as an example. $x \Rightarrow x$ means the computation starts with role $x$ and ends with role $x$.
 
 \begin{table}[ht]
 \begin{displaymath} 
@@ -169,15 +169,15 @@ For the purpose of illustration, we use inference rules to explain our proposed 
 \label{SArrow:ra:rule}
 \end{table}
 
-The rule for the rest of combinators are shown in \tabref{SArrow:ra:rule}. Notice that for compose, id, arr and ArrowChoice we do not introduce any new roles, in other words, there is no parallelization for these combinators. Reader may find it strange that we do not intent to parallelize arr combinator which lifts a sequential computation represented by Core (a $\rightarrow$ b) into SArrow. It makes sense to introduce a new role to execute the computation and hence parallelize computationally heavy tasks. We use this strategy in the first place but later we found a more suitable strategy exists. This strategy is not ideal because introducing new roles for simple functions will damage performance. Also, another reason not to introduce new role when encountering arr combinators is that we gained function fusion for free. Simple function i.e. fst, inject left or snd are automatically fused into more complex user defined functions.  % o introduce new roles when encounter \hask{&&&}. In this way, we do not sacrifice any degree of parallelization but keep the number of roles in the system at the minimum. 
+The rule for the rest of combinators is shown in \tabref{SArrow:ra:rule}. Notice that for compose, id, arr and ArrowChoice, we do not introduce any new roles; in other words, there is no parallelization for these combinators. The reader may find it strange that we do not intend on parallelizing arr combinator which lifts a sequential computation represented by Core (a $\rightarrow$ b) into SArrow. It makes sense to introduce a new role to execute the computation and hence parallelize computationally heavy tasks. We use this strategy in the first place, but later, we found a more suitable strategy exists. This strategy is not ideal because introducing new roles for simple functions will damage performance. Also, another reason not to introduce a new role when encountering arr combinators is that we gained function fusion for free. Simple function, i.e. fst, inject left, or snd, are automatically fused into more complex user-defined functions.  % o introduce new roles when encountering \hask{&&&}. In this way, we do not sacrifice any degree of parallelization but keep the number of roles in the system at the minimum. 
 
-For the class of combinators belonging to arrow choice, we do not introduce any new role. The expressions at the lhs and at the rhs starts with the same role $x$ because when only one code path will be executed as the name choice suggested so we should not use separate roles for two expressions that will never be executed simultaneously. In the end, we decided the computation end in the role max$(y,z)$. Max guarantees that there will not be role duplications when we compose expressions formed by ArrowChoice combinators with other combinators. For the implementation, all processes in both left and right SArrow expressions are wrapped inside a branch operation separately. Assume max$(y, z) = y$, the process at the role $y$ will be extended with actions that receive data from min$(y, z) = z$ role at its right branch. Finally, applying inject left and inject right at left and right branches gives us an Either type as the output.
+For the class of combinators belonging to arrow choice, we do not introduce any new role. The expressions at the lhs and at the rhs start with the same role $x$ because when only one code path will be executed as the name choice suggested so we should not use separate roles for two expressions that will never be executed simultaneously. In the end, we decided the computation end in the role max$(y,z)$. Max guarantees that there will not be role duplications when we compose expressions formed by ArrowChoice combinators with other combinators. For the implementation, all processes in both left and right SArrow expressions are wrapped inside a branch operation separately. Assume max$(y, z) = y$, the process at the role $y$ will be extended with actions that receive data from min$(y, z) = z$ role at its right branch. Finally, applying inject left and inject right at left and right branches gives us an Either type as the output.
 
-Finally, we decided that the right place to allocate new roles is \hask{&&&} combinator. As shown in type signature, product types mean computation at both branches will both be executed and they are independent. In order to make sure that both computations are executed simultaneously, we constraint that the right SArrow expression must start with a role greater than the end role of the left SArrow expression. This ensures no role duplications, hence maximize parallelism. The combined expression ends in the end role of the right SArrow expression instead of introducing a unnecessary new role. For the implementation, the process corresponding to end role $z$ is extended with actions that receive data from the end role $y$ of the left process, finally outputs a pair.
+Finally, we decided that the right place to allocate new roles is \hask{&&&} combinator. As shown in the type signature, product types mean computation at both branches will both be executed, and they are independent. To make sure that both computations are executed simultaneously, we constraint that the right SArrow expression must start with a role greater than the end role of the left SArrow expression. This ensures no role duplications, hence maximize parallelism. The combined expression ends in the end role of the right SArrow expression instead of introducing an unnecessary new role. For the implementation, the process corresponding to end role $z$ is extended with actions that receive data from the end role $y$ of the left process finally outputs a pair.
 
-Even though from the implementation point of view, optimized role allocation is ad-hoc and more difficult to implement because we need to consider composition by send-and-receive as well as composition by local monadic bind. In contrast, the naive solution in \secref{SArrow:impl} only consider send-and-receive so the code is symmetry for both left and right roles. We believe the effort is worthy because for a n-level divide-and-conquer algorithms, the optimized role allocation strategies allocate $2^n$ roles in total which is the same as the degree of parallelism. All the roles are used to maximize parallelism instead of wasting the valuable resources to create roles that merely transmit data.
+Even though from the implementation point of view, optimized role allocation is ad-hoc and more difficult to implement because we need to consider composition by send-and-receive as well as composition by local monadic bind. In contrast, the naive solution in \secref{SArrow:impl} only consider send-and-receive, so the code is symmetry for both left and right roles. We believe the effort is worthy because, for a n-level divide-and-conquer algorithms, the optimized role allocation strategies allocate $2^n$ roles in total, which is the same as the degree of parallelism. All the roles are used to maximize parallelism instead of wasting valuable resources to create roles that merely transmit data.
 
-Finally, the optimized strategy presented in this chapter is not the only solution. For example, there is a strategy that only introduces new roles into the computation graph when encountering a specific atomic functions. Different strategies result in different communication structures hence different kind of parallelisms. We should choose the right strategy depending on the specific task.
+Finally, the optimized strategy presented in this chapter is not the only solution. For example, there is a strategy that only introduces new roles into the computation graph when encountering a specific atomic function. Different strategies result in different communication structures hence different kind of parallelisms. We should choose the right strategy depending on the specific task.
 \section{Satisfaction of arrow laws}
 We have provided the implementation of SArrow combinators that is similar to the arrow interface. However, the implementation is not enough to state that SArrow is an Arrow. We will present a justification on of basic arrow laws.
 \begin{table}[ht]
@@ -242,11 +242,11 @@ We have provided the implementation of SArrow combinators that is similar to the
         \tikzstyle{proc1} = [circle,  minimum width=1cm, minimum height=1cm,text centered, draw=black] 
         \tikzstyle{arrow} = [thick,->,>=stealth]
         \node [proc1, align=left] (2) at (0, 0) {$X$ \\ $Y \times Z$};
-	 \node [proc] (3) at (1.5, 1) {$a$};
-	 \node [proc] (4) at (1.5, -1) {Id};
-	 \node [proc] (7) at (4, 0) {$\alpha$};
-	 \node [proc1, align=left] (8) at (5, 0) {$X \times Y$ \\ $Z$};
-	 \node [proc1, align=left] (9) at (3, 0) {$X$ \\ $Y \times Z$};
+     \node [proc] (3) at (1.5, 1) {$a$};
+     \node [proc] (4) at (1.5, -1) {Id};
+     \node [proc] (7) at (4, 0) {$\alpha$};
+     \node [proc1, align=left] (8) at (5, 0) {$X \times Y$ \\ $Z$};
+     \node [proc1, align=left] (9) at (3, 0) {$X$ \\ $Y \times Z$};
      \draw[arrow] (2) to (3);
      \draw[arrow] (3) to (9);
      \draw[arrow] (2) to (4);
@@ -259,33 +259,33 @@ We have provided the implementation of SArrow combinators that is similar to the
         \tikzstyle{proc} = [rectangle, rounded corners, minimum width=1cm, minimum height=1cm,text centered, draw=black] 
         \tikzstyle{proc1} = [circle,  minimum width=1cm, minimum height=1cm,text centered, draw=black] 
         \tikzstyle{arrow} = [thick,->,>=stealth]
-		\node [proc1, align=left] (0) at (-1, 0) {$X$ \\ $Y \times Z$};
-		\node [proc] (1) at (0.5, 0) {$\alpha$};
-		\node [proc1, align=left] (2) at (2, 0) {$X \times Y$ \\ $Z$};
-		\node [proc] (5) at (4, 2.5) {a};
-		\node [proc] (6) at (4, 0.75) {Id};
-		\node [proc1] (7) at (5, 1.5) {$X \times Y$};
-		\node [proc1, align=left] (8) at (6, 0) {$X \times Y$ \\ $Z$};
-		\node [proc1] (9) at (3, 1.5) {$X \times Y$};
-		\node [proc] (10) at (4, -1.25) {Id};
-		\draw[arrow] (0) to (1);
-		\draw[arrow] (1) to (2);
-		\draw[arrow] (2) to (9);
-		\draw[arrow] (9) to (5);
-		\draw[arrow] (9) to (6);
-		\draw[arrow] (5) to (7);
-		\draw[arrow] (6) to (7);
-		\draw[arrow] (7) to (8);
-		\draw[arrow] (2) to (10);
+        \node [proc1, align=left] (0) at (-1, 0) {$X$ \\ $Y \times Z$};
+        \node [proc] (1) at (0.5, 0) {$\alpha$};
+        \node [proc1, align=left] (2) at (2, 0) {$X \times Y$ \\ $Z$};
+        \node [proc] (5) at (4, 2.5) {a};
+        \node [proc] (6) at (4, 0.75) {Id};
+        \node [proc1] (7) at (5, 1.5) {$X \times Y$};
+        \node [proc1, align=left] (8) at (6, 0) {$X \times Y$ \\ $Z$};
+        \node [proc1] (9) at (3, 1.5) {$X \times Y$};
+        \node [proc] (10) at (4, -1.25) {Id};
+        \draw[arrow] (0) to (1);
+        \draw[arrow] (1) to (2);
+        \draw[arrow] (2) to (9);
+        \draw[arrow] (9) to (5);
+        \draw[arrow] (9) to (6);
+        \draw[arrow] (5) to (7);
+        \draw[arrow] (6) to (7);
+        \draw[arrow] (7) to (8);
+        \draw[arrow] (2) to (10);
         \draw[arrow] (10) to (8);
     \end{tikzpicture}
     \caption{Graphical representation of equation (6)}
     \label{arrow:fig:eq6}
 \end{figure}
 
-We argue above equation holds if both sides of equation express the same computation. Equation (1), (2) holds because lifting Id from Core to SArrow will not modify the result of computation due to the semantics of Id. Equation (3) is the associativity rule of $>>>$. Left side of the equation sends the output from $a >>> b$ to the input of $c$ while right side sends the output of $a$ to the input $b >>> c$. The communication structure might change but they both represent the same computation. Equation (4) is valid because applying the input value to composition of f;g is the same as applying the input to f followed by a message passing (data communication could be local which means the communication structure for both sides of equations are the same in this case) and then applying it to g. One might claim that the left side is more efficient than the right side due to the fusion depending on the role allocation strategy. Equation (5) holds because they both represent a computation that takes an input pair and applies the function a to its first position and returns the result. Right hand side of equation (7) represents a SArrow expression that applies a on left position of input pair and applies Id on the right position of input pair in parallel, collects the results and applies b on left position of input pair and applies Id on the right position of input pair while left side fused a and b together and apply them in one step hence there is only one join point. \figref{arrow:fig:eq7} is a graphical representation of equation (7). Obviously they represent the same computation. We can also derive equation (6) from its Visualization (see in \figref{arrow:fig:eq6}).
+We argue above equation holds if both sides of equation express the same computation. Equation (1), (2) holds because lifting Id from Core to SArrow will not modify the result of computation due to the semantics of Id. Equation (3) is the associativity rule of $>>>$. Left side of the equation sends the output from $a >>> b$ to the input of $c$ while right side sends the output of $a$ to the input $b >>> c$. The communication structure might change, but they both represent the same computation. Equation (4) is valid because applying the input value to the composition of f;g is the same as applying the input to f followed by a message passing (data communication could be local which means the communication structure for both sides of equations are the same in this case) and then applying it to g. One might claim that the left side is more efficient than the right side due to the fusion depending on the role allocation strategy. Equation (5) holds because they both represent a computation that takes an input pair and applies the function a to its first position and returns the result. Right hand side of equation (7) represents a SArrow expression that applies a on left position of input pair and applies Id on the right position of input pair in parallel, collects the results and applies b on left position of input pair and applies Id on the right position of input pair while left side fused a and b together and applied them in one step hence there is only one join point. \figref{arrow:fig:eq7} is a graphical representation of equation (7). They represent the same computation. We can also derive equation (6) from its Visualization (see in \figref{arrow:fig:eq6}).
 
-From the above explanation, we gain intuition why the left and the right sides of equations produces the same computation result. More importantly, since SArrow is an abstract layer on top of a message-passing intermediate language, we should argue that the underlying communication structures for both sides of an equation does not have error i.e. there is no communication mismatched and computations are deadlock-free. Progressing work from \cite{AlgebraicMultipartyProtocol} can be adapted to show that there exists a global type for an SArrow expression. The consequence is that SPar expressions for all participants beneath a SArrow expression are typeable against the projection of this global type and therefore they are dual pair-wise indicating no communication errors.
+From the above explanation, we gain intuition why the left and the right sides of equations produce the same computation result. More importantly, since SArrow is an abstract layer on top of a message-passing intermediate language, we should argue that the underlying communication structures for both sides of an equation do not have error, i.e. there is no communication mismatched and computations are deadlock-free. Progressing work from \cite{AlgebraicMultipartyProtocol} can be adapted to show that there exists a global type for an SArrow expression. The consequence is that SPar expressions for all participants beneath a SArrow expression are typeable against the projection of this global type and therefore, they are dual pair-wise indicating no communication errors.
 
 \section{Conclusions}
 The Arrow interface is the perfect interface to express general computation for this pro\-ject, not only because it is intuitive to understand and visualize, but also because its combinators \hask{***} and \hask{&&&} have a natural parallel interpretation. 
@@ -293,10 +293,3 @@ The Arrow interface is the perfect interface to express general computation for 
 In addition, SArrow makes hassle-free compilation from Par-Alg to SPar possible because Par-Alg is also an arrow expression and simply interpreting arrow combinators by the SArrow implementations fills the gap between Par-Alg and SPar.
 
 So far, we have introduced our interface for expressing computations. The remained challenge is the code generation from SPar to a target platform. In the next chapter, we will introduce one code generation backend to C. Once we achieve this, every computation in SArrow can be transformed into parallel C code automatically.
-
-% \section{Applications}
-% \subsection{Hassle-free compilation from ParAlg to SArrow} %Hassle-free
-% \subsection{An interface for arrow computation with automatic parallelization}
-% \section{Power of arrow and EDSL: &)expressibility and composability}
-% \subsection{Arrow interface}
-% \subsection{Haskell as the host language}
