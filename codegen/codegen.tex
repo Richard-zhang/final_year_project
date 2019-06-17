@@ -2,7 +2,7 @@
 SPar has two components: Core representing the unit of computation and Proc as a skeleton of the communication. Naturally, the process of code generation from SPar should be divided into two parts correspondingly. We choose to make the two parts independent of each other so that it is possible to swap the code generation strategy of one component without modifying another one.
 
 The procedure of code generation is standard: transformation. We start our programs in a high level EDSL and run a series of transformations to a low-level EDSL. SPar expressions are converted to a low-level EDSL which is then transformed to an abstract syntax tree (AST) of C \cite{LanguagecAnalysisGeneration}. The generated code is obtained by pretty printing the AST.
-\section{Instr: A low-level EDSL for channel communication}
+\section{Instr: A low-level EDSL for channel communication} \label{codegen:sec:instr}
 In Proc, we have high-level actions like select, broadcast and branch abstracting implementation details such as variable declaration, variable assignment, channel initialization, channel communication and channel deletion. Hence, we need to define an EDSL containing instructions related to these low-level operations. We name it Instr. programs will be translated to sequences of Instr. 
 
 When we design Instr, we keep the simplicity in mind, so Instr is not dependent to any specific target language. Any reasonable target language with a channel communication library can be easily used as a target from Instr.
