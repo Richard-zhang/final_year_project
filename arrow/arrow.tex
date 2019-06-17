@@ -1,9 +1,9 @@
 \chapter{SArrow: An arrow interface for writing SPar expressions} \label{chap:arrow}
-When trying to express more complicated and interesting parallel patterns, e.g map or reduce, We realize SPar is too low-level so that it is difficult to express simple computation because of overheads of expressing communication patterns by hand. In addition, compilation from Par-Alg to SPar is hard since they are very different domain specific languages. 
+When trying to express more complex and interesting parallel patterns, such as map or reduce, we realize SPar is too low-level. It is difficult to express simple computations because of the overheads of expressing communication patterns by hand. % In addition, compilation from Par-Alg to SPar is hard since they are very different domain specific languages. 
 
-To solve both issues, we draw inspirations from the Arrow interface (in particular, work done by \cite{braunArrowsParallelComputation2018} where they use arrow interface to express parallel computation) and introduce SArrow.
+To solve this issue, we draw inspirations from the Arrow interface, in particular, \cite{braunArrowsParallelComputation2018} where they use arrow interface to do parallel programming in Haskell. We introduce SArrow, an arrow interface for writing SPar expressions.
 
-SArrow is an arrow interface for writing SPar expressions. Withe the help from SArrow, Users can use canonical arrow combinators to write algorithms in Arrow without writing any explicit communication and gain parallelized algorithms for free. Similarly, SArrow makes hassle-free compilation from Par-Alg to SPar possible because Par-Alg is also an arrow expression and simply interpreting arrow combinators by the SArrow implementations fills the gap between Par-Alg and SPar.
+SArrow is an arrow interface for writing SPar expressions. With the help from SArrow, users can use canonical arrow combinators to write algorithms without writing any explicit communication, and gain parallelized algorithms for free.
 
 \section{Syntax}
 \begin{listing}[ht]
@@ -11,11 +11,11 @@ SArrow is an arrow interface for writing SPar expressions. Withe the help from S
 \caption{Definition of SArrow}
 \label{SArrow:def}
 \end{listing}
-The simplified syntax of SArrow can be found in \coref{SArrow:def}. SArrow is a type synonym of \hask{Nat -> Pipe a b}. It consumes \hask{Nat} which means the identifier of a process and output \hask{Pipe a b}. The reson why we use \hask{Nat} as the only parameter is to ensuring no duplication of processes name since in most of the time, duplication is bad for parallelization. It will be explained more thoroughly in \secref{SArrow:roleAllc}.
+The simplified syntax of SArrow can be found in \coref{SArrow:def}. \hask{Pipe a b} data structures is the essential component of SArrow. It regards computation as a pipe where data with type \hask{a} goes into the pipe and data with type \hask{b} get out of the pipe. Internally, it's a record type of four fields. \hask{start} field identifies the process where the input data is received. \hask{cont} field has the type \hask{a -> Proc} which is a continuation waiting for the input data produced by the last pipe. \hask{env} represents a group of Procs interacting inside the pipe to produce the output data, in other words, it is the parallel computation. \hask{end} is the identification of the process that produces the output data in the end. We can retrieve the corresponding process by a lookup in \hask{env} with the key \hask{end}. The returned Proc returns data with type \hask{b}. 
 
-\hask{Pipe a b} data structures is the essential component of SArrow. It regards computation as a pipe where data with type \hask{a} goes into the pipe and data with type \hask{b} get out of the pipe. Internally, it's a record type of four fields. \hask{start} field identifies the process where the input data is received. \hask{cont} field has the type \hask{a -> Proc} which is a continuation waiting for the input data produced by the last pipe. \hask{env} represents a group of Procs interacting inside the pipe to produce the output data, in other words, it is the parallel computation. \hask{end} indicates the process that produces the output data in the end. We can retrieve the corresponding process by a look up on the env with the key \hask{end}. The returned Proc returns a data with type \hask{b}.
+SArrow is a type synonym of \hask{Nat -> Pipe a b}. It consumes \hask{Nat} which means the identifier of a process and output \hask{Pipe a b}. The reason why we use \hask{Nat} as the only parameter is to ensure that processes names are not duplicated. It will be explained more thoroughly in \secref{SArrow:roleAllc}.
 \subsection{Arrow interface}
-\hask{SArrow} is an instance of Arrow typeclass as well as ArrowChoice type class. For example, the type signature of the combinators \hask{>>>}, \hask{|||}, \hask{&&&} and \hask{arr} are shown below. The main difference between their type signatures and the usual arrow interface is that in the \hask{arr}, the function is wrapped with Core. In general, it captures the same meaning as the usual arrow interfaces. Implementation details of these combinators will be explained in \secref{SArrow:impl}.
+\hask{SArrow} is an instance of the Arrow typeclass as well as ArrowChoice type class. For example, the type signature of the combinators \hask{>>>}, \hask{|||}, \hask{&&&} and \hask{arr} are shown below. The main difference between their type signatures and the usual arrow interface is that in the \hask{arr}, the function is wrapped with Core. In general, it captures the same meaning as the usual arrow interfaces. Implementation details of these combinators will be explained in \secref{SArrow:impl}.
 \begin{code}
 \begin{minted}{Haskell}
 (>>>) :: SArrow a b -> SArrow b c -> SArrow a c
@@ -25,16 +25,17 @@ arr :: Core (a -> b) -> SArrow a b
 (***) :: SArrow b c -> SArrow b' c' -> SArrow (b, b') (c, c')
 \end{minted}
 \end{code}
-\subsection{Example: Parallel programming patterns}
+
 As an example, we will illustrate some typical computation patterns used in parallel computing.
 \begin{figure}[ht]
     \centering
-    \includegraphics[width=0.3\textwidth]{arrow/select.png}
+    \includegraphics[width=0.2\textwidth]{arrow/select.png}
     \caption{Visualization of the branching pattern \cite{mccoolStructuredParallelPrograming2012}}
     \label{SArrow:fig:select}
 \end{figure}
 
-First of all, the branching pattern illustrated by \figref{SArrow:fig:select} is equivalent to an expression formed by \hask{|||} combinators, where the data constructor \hask{Left} leads to one computation path and the data constructor \hask{Right} leads to another computation path. It seems to be a simple pattern but it is useful when composed with other complicated patterns. We will use an example to illustrate at the end of this section.
+First of all, the branching pattern illustrated by \figref{SArrow:fig:select} is equivalent to an expression formed by \hask{|||} combinators, where the data constructor \hask{Left} leads to one computation path and the data constructor \hask{Right} leads to another computation path. It seems to be a simple pattern but it is useful when composed with other more complex patterns. We will use an example to illustrate this at the end of this section.
+
 \begin{figure*}[ht]
     \begin{subfigure}[b]{0.475\textwidth}
        \centering
@@ -51,7 +52,9 @@ First of all, the branching pattern illustrated by \figref{SArrow:fig:select} is
     \end{subfigure}
     \caption{Fork-join pattern and divide-and-conquer algorithms}
 \end{figure*}
-Secondly, the fundamental building block of parallel pattern, the fork-join pattern illustrated by \figref{SArrow:fig:fork} can be expressed by \hask{&&&} combinator. The SArrow produced by \hask{&&&} has the two-ary tuple as the output type collecting the computation result of the main thread and the forked thread and also acts as a synchronization point.
+
+Secondly, the fundamental building block, the fork-join pattern illustrated by \figref{SArrow:fig:fork} can be expressed by \hask{&&&} combinator. The SArrow produced by \hask{&&&} produces a tuple as output by collecting the computation result of the main thread and the forked thread and also acts as a synchronization point.
+
 \begin{figure}[ht]
     \centering
     \includegraphics[width=0.5\textwidth]{arrow/pmap.png} 
@@ -63,7 +66,8 @@ Secondly, the fundamental building block of parallel pattern, the fork-join patt
     \caption{Parallel map in SArrow}
     \label{arrow:code:pmap}
 \end{listing}
-Thirdly, the familiar parallel map pattern illustrated in \figref{arrow:fig:pmap} is also a candidate to be expressed in SArrow. The code sample is in \coref{arrow:code:pmap}. \hask{pmap} splits the input \hask{a} into 4 chunks using the splitting function \hask{s}, applied the elemental function \hask{f} and the arrow combinator \hask{***} in parallel and finally use the collecting function \hask{c} to collect the results. Usually, the input \hask{a} is a list and \hask{s} splits the list into 4 equal chunks. The number of times where function is \hask{f} applied decides the number of ways of parallelism. % We will describe a possible solution to make \hask{pmap} more generic so that we do not need write a new functions for every number of ways of parallelism. (TODO).
+
+Thirdly, the familiar parallel map pattern illustrated in \figref{arrow:fig:pmap} is also a candidate to be expressed in SArrow. The code sample is in \coref{arrow:code:pmap}. \hask{pmap} splits the input \hask{a} into 4 chunks using the splitting function \hask{s}, applied the elemental function \hask{f} and the arrow combinator \hask{***} in parallel and finally use the collecting function \hask{c} to collect the results. Usually, the input \hask{a} is a list and \hask{s} splits the list into 4 equal chunks. The size of the tuple determines the degree of parallelism.
 
 \begin{figure}[ht]
     \centering 
@@ -76,14 +80,15 @@ Thirdly, the familiar parallel map pattern illustrated in \figref{arrow:fig:pmap
     \caption{Parallel reduce in SArrow}
     \label{arrow:code:preduc}
 \end{listing}
-Fourthly, we can apply the similar logic to express parallel reduce pattern shown in \figref{arrow:fig:preduc}. The code sample is in \coref{arrow:code:preduc}. The result of parallel reduce has similar type signature as the collecting function in \hask{pmap} so it is often used with the \hask{pmap} function. We use nested tuple \hask{(a, (a, (a,a)))} to represent a sized array of data. The \hask{helper} function transforms the array representation of data into a form so that we apply the reduce function \hask{r} to the elements pair-wise and parallel.
+Fourthly, we can apply a similar logic to express the parallel reduce pattern shown in \figref{arrow:fig:preduc}. The code sample is in \coref{arrow:code:preduc}. The result of parallel reduce has similar type signature as the collecting function in \hask{pmap} so it is often used with the \hask{pmap} function. We use nested tuple \hask{(a, (a, (a,a)))} to represent a sized array of data. The \hask{helper} function transforms the array representation of data into a form so that we apply the reduce function \hask{r} to the elements pair-wise and parallel.
 
 \begin{listing}[ht]
     \inputminted{Haskell}{arrow/dq.hs}
     \caption{2-ways and 3-levels divided-and-conquer algorithm in SArrow}
     \label{SArrow:dq}
 \end{listing}
-Finally, more complicated pattern can be expressed compositely from simpler pattern expressed in SArrow. We can use a typical divide-and-conquer algorithms implemented with fork-join as an example. \figref{SArrow:fig:dq} shows a divide-and-conquer algorithms with 2-ways and 3-levels of fork-join. The algorithm can be expressed in SArrow shown in \coref{SArrow:dq}. The divide-and-conquer pattern can be built recursively in Haskell. For the base case, we simply apply the basic computation. Otherwise, we first call split and then call the function recursively with the level decremented by one and, in the end, call the merge to combine the results. Every expressions in the function definition are connected using arrow combinators. A 3-level divided-and-conquer algorithm is constructed by passing 3 to the function resulting a algorithm with $2^3 = 8$-way parallelism.
+
+Finally, more complex pattern can be expressed compositionally from simpler patterns expressed in SArrow. We use a typical divide-and-conquer algorithm implemented with fork-join as an example. \figref{SArrow:fig:dq} shows divide-and-conquer algorithms with 2-ways and 3-levels of fork-join. The algorithm in SArrow is in \coref{SArrow:dq}. The divide-and-conquer pattern can be built recursively in Haskell. For the base case, we simply apply the basic computation. Otherwise, we first call split and then call the function recursively with the level decremented by one and, in the end, call the merge to combine the results. Every expression in the function definition is connected using arrow combinators. A 3-level divided-and-conquer algorithm is constructed by passing 3 to the function resulting a algorithm with $2^3 = 8$-way parallelism.
 
 \begin{figure}[ht]
     \centering
@@ -91,9 +96,9 @@ Finally, more complicated pattern can be expressed compositely from simpler patt
     \caption{Combination of branching pattern and divide-and-conquer pattern}
     \label{SArrow:fig:brdv}
 \end{figure}
-In addition, the divide-and-conquer parallel pattern can be optimized when combining with branch pattern. The branch pattern allows us to add shortcuts to the pattern (illustrated in the \figref{SArrow:fig:brdv}, redlines represent the alternative computation path provided by branching patterns). The shortcut give us the ability to decide whether to do local computation or split  into multiple subtasks depending on the input size. When the input size is small, the overhead of the latter usually outweighs its parallelism. Adding the simple branching pattern results in a pattern that is adaptive to various input size with better performance.
+In addition, the divide-and-conquer parallel pattern can be optimized when combining with branch pattern. The branch pattern allows us to add shortcuts to the pattern (illustrated in the \figref{SArrow:fig:brdv}, red lines represent the alternative computation path provided by branching patterns). The shortcut gives us the ability to decide whether to do local computation or split  into multiple subtasks depending on the input size. When the input size is small, the overhead of the latter usually outweights its parallelism. Adding the simple branching pattern results in a pattern that is adaptive to various input sizes with better performance.
 
-The implementation demos the power of implementing SArrow as a domain specific language embedded in Haskell. We make full use of Haskell features, i.e high order functions and polymorphic functions to construct expressive, composable and generic computation patterns.
+The implementation demonstrates the power of implementing SArrow as a domain specific language embedded in Haskell. We make full use of Haskell features i.e high order functions and polymorphic functions to construct expressive, composable and \linebreak generic computation patterns.
 
 More examples of algorithms formed by SArrow, e.g. dot product or merge sort are shown in the \secref{eval}.
 \section{Implementation of arrow combinators} \label{SArrow:impl}
@@ -104,7 +109,8 @@ In this chapter, we will present naive implementation and the optimized solution
     \caption{The implementation of arrow instance for Kleisli arrow of a monad}
     \label{arrow:code:kleisli}
 \end{listing}
-The intuition why SArrow is an instance of Arrow comes from the Kleisli arrow of a monad is an instance of Arrow class (shown in \coref{arrow:code:kleisli}). The \hask{cont} field in the Pipe has similar type signatures as the \hask{runKleisli} field in the Kleisli arrow. From the previous section, we shown that Proc is a monad so Pipe is just an extended version of Kleisli arrow where computations in Pipe usually finish in one of the process stored in \hask{env} instead of finishing at \hask{cont} like Kleisli arrow. Intuitively, SArrow, a function from the role to the Pipe, should be an instance of Arrow since Pipe looks like an arrow instance and functions are composite.
+
+Kleisli arrow has the same type as the second parameter of monadic bind. The intuition why SArrow is an instance of Arrow comes from the Kleisli arrow of a monad is an instance of Arrow class (shown in \coref{arrow:code:kleisli}). The \hask{cont} field in the Pipe has a similar type signature as the \hask{runKleisli} field in the Kleisli arrow. From the previous section, we have shown that Proc is a monad, so Pipe is just an extended version of Kleisli arrow where computations in Pipe usually finish in one of the process stored in \hask{env} instead of finishing at \hask{cont} like Kleisli arrow. Intuitively, SArrow, a function from the role to Pipe, should be an instance of Arrow since Pipe can be mad an arrow instance and functions compose.
 
 The essential issue when implementing arrow combinators is how to connect one Pipe by another Pipe. The first problem we need to address is how to deal with the \hask{cont} in the tail Pipe. We know that only one \hask{cont} field exists in the resulting Pipe and it must be that from the head Pipe. Hence the only option is to convert it to a Proc expression and store the converted expression in the updated env in the resulting Pipe. A right way to do it bind the cont with the action: receive from end in the first Pipe. Also, extend the proc related to the end in the head Porc with action: send to start in the second Pipe. Besides addition of the converted \hask{cont} expression, the new env is formed by merging the env from the head Pipe and the env from the tail Pipe. Merging two envs is trivial. When there are duplication, we simply use monadic bind to combine them so that the actions belonging to head Pipe followed by the actions belonging to the tail Pipe. The \hask{start} field in the resulting Pipe is the same as that from the head Pipe and the \hask{end} field will be set the same as that from the tail Pipe.
 \begin{listing}
@@ -278,7 +284,9 @@ We argue above equation holds if both sides of equation express the same computa
 \section{Conclusions}
 Arrow interface is the perfect interface to express general computation for this project because not only is it intuitive to understand and visualize but also its combinators \hask{***} and \hask{&&&} has built-in parallel natural. Progressing work from \cite{AlgebraicMultipartyProtocol} can be adapted to show that there exists a global type for an SArrow expression. This means SPar expressions for all participants beneath the SArrow expression are typeable against the projection of this global type and therefore they are dual pair-wise indicating no communication errors. It means every computation composed by SArrow is deadlock-free.
 
-So far, we've used SArrow to help us compile Par-Alg to SPar. The remained challenge is the code generation from SPar to a target platform. In the next chapter, we will introduce our methods for code generation and specifically code generation to C. Once we achieved this, every computation in SArrow can be transformed into parallel C code in one step.
+In addition, SArrow makes hassle-free compilation from Par-Alg to SPar possible because Par-Alg is also an arrow expression and simply interpreting arrow combinators by the SArrow implementations fills the gap between Par-Alg and SPar.
+
+So far, we have introduced our interface for expressing computations. The remained challenge is the code generation from SPar to a target platform. In the next chapter, we will introduce our methods for code generation and specifically code generation to C. Once we achieved this, every computation in SArrow can be transformed into parallel C code in one step.
 
 % \section{Applications}
 % \subsection{Hassle-free compilation from ParAlg to SArrow} %Hassle-free
