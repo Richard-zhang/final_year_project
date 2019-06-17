@@ -4,7 +4,7 @@ Haskell does not support session types natively. Other encodings of session type
 
 Essentially, what we do is to infer a collection of local types from a set of SPar expressions. The collection not only can be used to check the duality compatibility of the overall computation but also can work with external tool \cite{langeVerifyingAsynchronousInteractions2019} for additional analysis and verification
 \subsection{Representations of session types in Haskell}
-Session types belong to the family of behavioral types. So the type looks very similar to the value that will be typed. We exploit this similarity to defined our session types in terms of free monad, the same method we have used in defining Proc.
+Session types belong to the family of behavioral types. We can learn from \secref{b:mpst} that behavioral types have a correspondence between types and operations that will be typed. We exploit this similarity to defined our session types in terms of free monad, the same method we have used in defining Proc.
 
 \begin{listing}[ht]
     \inputminted{Haskell}{impl/type.hs}
