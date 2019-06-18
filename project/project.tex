@@ -10,7 +10,7 @@ Algebraic Functional Language (Alg) is an example of a high-level language to ge
     F_1 \times F_2 & Product functor
 \end{grammar}
 \hfill
-\begin{grammar}{t_1, t_2 \Coloneqq}{Type}
+\begin{grammar}{t_1, t_2 \Coloneqq}{Types}
     () \mid \text{int} \mid \dots & Primitive types\\
     a \rightarrow b & Function types\\
     a + b & Sum types \\
@@ -19,7 +19,7 @@ Algebraic Functional Language (Alg) is an example of a high-level language to ge
     \mu .F & Recursive types\\
 \end{grammar}
 \vskip\baselineskip
-\begin{grammar}{e_1, e_2 \Coloneqq}{Expression}
+\begin{grammar}{e_1, e_2 \Coloneqq \quad \text{Expressions}}{}
     f \mid v \mid \text{const $e$} \mid e_1 \circ e_2 \mid \pi_i \mid e_1 \vartriangle e_2 \mid e_1 \triangledown e_2 \mid l_i \mid F \; e \mid \text{in}_F \mid \text{out}_F \mid \text{rec}_F \; e_1 \; e_2
 \end{grammar}
 \caption{Syntax of Alg language}

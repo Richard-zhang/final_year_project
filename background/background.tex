@@ -183,7 +183,7 @@ The theory of multiparty session types contains three main elements. Global type
 \subsection{Global types and local types} \label{b:mpst:st}
 A global type is at the most abstract level, describing a communication protocol from a neutral viewpoint between two or more participants\cite{coppoGentleIntroductionMultiparty2015}. The syntax of global types is shown in \figref{b:mpst:gt} and an example of global types is shown in \figref{b:mpst:gtex}.
 
-Local types or session types characterise the same communication protocol as the global type, but from the viewpoint of each peer \cite{coppoGentleIntroductionMultiparty2015}. Each process is typed by a local type. The syntax of local types is shown in \figref{b:mpst:lt} and an example of local type is shown in \figref{b:mpst:ltex}. 
+Local types or session types characterize the same communication protocol as the global type, but from the viewpoint of each peer \cite{coppoGentleIntroductionMultiparty2015}. Each process is typed by a local type. The syntax of local types is shown in \figref{b:mpst:lt} and an example of local type is shown in \figref{b:mpst:ltex}. 
 
 The relationship between global types and local types are established by the projection operator (seen in the \secref{b:mpst:proj}), and a type system performs syntactic checks, ensuring that processes are typed by their corresponding local types. Hence, at the compile time, three important properties follow \cite{coppoGentleIntroductionMultiparty2015}. 
 \begin{itemize}
@@ -192,13 +192,12 @@ The relationship between global types and local types are established by the pro
   \item \textbf{progress}: Every message sent is eventually received, and every process waiting for a message eventually receives one \cite{coppoGentleIntroductionMultiparty2015}.
 \end{itemize}
 We will learn that these properties are valuable not only in the distributed system but also in the domain of parallel computing in \secref{b:mpst:app}.
-% In the theory of multiparty session types, the whole distributed system is described by global types representing the communication protocols from a global viewpoint.  Each process is typed by local types which characterise the same communication protocols as global types but from a perspective of individual participants \cite{coppoGentleIntroductionMultiparty2015}.
 \begin{figure}[ht]
 \centering
 \begin{grammar}{G\Coloneqq}{Global types}
   p \rightarrow q : \langle S \rangle.G & Value exchange \\
   p \rightarrow q : \langle T \rangle.G & Channel exchange \\
-  p \rightarrow q : \{ l_i : G_i \}_{i \in I} & Bracnhing \\
+  p \rightarrow q : \{ l_i : G_i \}_{i \in I} & Branching \\
   \mu \mathbf{t}.G  \mid \mathbf{t} \mid \text{end} & Recursion/End
 \end{grammar}
 \caption{Global types} \label{b:mpst:gt}
@@ -215,7 +214,7 @@ We will learn that these properties are valuable not only in the distributed sys
   ? ( p, T ) . T & Channel Receive\\
   ? ( p, S ) . T & Sorts Receive\\
   \oplus \langle p, \{ l_i : T_i \}_{i \in I} \rangle & Selection \\
-  \&(p, \{l_i : T_i \}_{i \in I}) & Bracnhing \\
+  \&(p, \{l_i : T_i \}_{i \in I}) & Branching \\
   \mu \mathbf{t}.T  \mid \mathbf{t} \mid \text{end} & Recursion/End
 \end{grammar}
 \caption{Session types/local types} \label{b:mpst:lt}
@@ -278,7 +277,7 @@ $$
 \label{b:mpst:pdef}
 \end{figure}
 \subsubsection{Duality of session types}
-In binary session types where all protocals are pairwise, duality formalises the relationship between the types of opposite endpoints. For a type $T$, its dual or co type, written $\bar{T}$ is defined inductively as in \figref{b:mpst:dualdef}.
+In binary session types where all protocols are pairwise, duality formalizes the relationship between the types of opposite endpoints. For a type $T$, its dual or co type, written $\bar{T}$ is defined inductively as in \figref{b:mpst:dualdef}.
 \begin{figure}[H]
 \includegraphics[width=\textwidth]{background/image/dual-def.png}
 \caption{Inductive definition of duality}
@@ -400,7 +399,7 @@ data Action .=
     \begin{itemize}
       \item[\cref{po:ivar}] Parent threads and child threads communicate data via IVar
       \item[\cref{po:get}] Get operation blocks when the underlying IVarContents is Blocked  
-      \item[\cref{po:put}] Put operation updates the underlying IVarContetns to Full with the result a and resume the list of blocking threads by applying a to the continuation.
+      \item[\cref{po:put}] Put operation updates the underlying IVarContents to Full with the result a and resume the list of blocking threads by applying a to the continuation.
     \end{itemize}
   }
   \label{b:mo:c3}
@@ -485,11 +484,6 @@ Good morning Tom
 Mary
 Good morning Mary
 \end{minted}
-% \begin{listing}
-%   \inputminted{haskell}{background/fm-example.hs}
-%   \caption{An example of free moand}
-%   \label{b:fm:c3}
-% \end{code}
 
 \subsection{Applications} \label{b:fm:a}
 As illustrated by the example (\secref{b:fm:e}), a free monad decouples the abstract syntax tree of domain-specific language and the interpreter. Interpreters with different purposes can be implemented without changing the syntax.
