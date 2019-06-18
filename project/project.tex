@@ -2,7 +2,7 @@
 Algebraic Functional Language (Alg) is an example of a high-level language to generate parallel code, proposed in the paper \cite{AlgebraicMultipartyProtocol}. The work done by \cite{AlgebraicMultipartyProtocol} also proposes a method to do the code generation. Part of this project is about implementing an alternative code generation backend for this language. In the evaluation section, we will compare the speed of the generated code of our method against the original method. We will give an overview of the language in this section.  
 \section{Alg}
 \subsection{Syntax}
-\begin{table}[ht]
+\begin{figure}[ht]
 \begin{grammar}{F_1, F_2 \Coloneqq}{}
     I & Identity functor\\
     K t & Constant functor\\
@@ -24,7 +24,7 @@ Algebraic Functional Language (Alg) is an example of a high-level language to ge
 \end{grammar}
 \caption{Syntax of Alg language}
 \label{project:syntax}
-\end{table}
+\end{figure}
 \begin{listing}[ht]
 \begin{lstlisting}{language=Haskell}
     newtype L = K () + K Int * I
@@ -33,8 +33,8 @@ Algebraic Functional Language (Alg) is an example of a high-level language to ge
 \caption{Type of integer list in PAL}
 \label{p:pal:c1}
 \end{listing}
-The syntax of Alg is shown in \tabref{project:syntax}. In terms of the syntax of expressions, $f$ represents atomic functions which are functions of which we only know their types \cite{AlgebraicMultipartyProtocol}. The presence of atomic functions is important in the code generation, which we will discuss in the later chapter. $v$ is a primitive value like integer 1.$F$ represents functor and $a, b$ are types. Besides primitive types, function types and the recursive type constructor $\mu$, Alg uses four functors to form more types hence representing data structures by composing them. For example, a list of integers is expressed in \coref{p:pal:c1}. Alg is a point-free language.
-\begin{table}[ht]
+The syntax of Alg is shown in \figref{project:syntax}. In terms of the syntax of expressions, $f$ represents atomic functions which are functions of which we only know their types \cite{AlgebraicMultipartyProtocol}. The presence of atomic functions is important in the code generation, which we will discuss in the later chapter. $v$ is a primitive value like integer 1.$F$ represents functor and $a, b$ are types. Besides primitive types, function types and the recursive type constructor $\mu$, Alg uses four functors to form more types hence representing data structures by composing them. For example, a list of integers is expressed in \coref{p:pal:c1}. Alg is a point-free language.
+\begin{figure}[ht]
     \[\inference{f : a -> b \in \Gamma}{|- f : a -> b}\]
     \[\inference{|- e : a}{|- \text{cons} \; e : b -> a}\]
     \[\inference{}{|- \text{id} : a -> a}\]
@@ -49,14 +49,14 @@ The syntax of Alg is shown in \tabref{project:syntax}. In terms of the syntax of
     \[\inference{|- e_1 : F \; b -> b, \quad |- e_2 : a -> F \; a}{\text{rec}_F \; e_1 \; e_2: a -> b}\]
     \caption{Typing rules for Alg}
     \label{project:typing}
-\end{table}
-\begin{table}[ht]
+\end{figure}
+\begin{figure}[ht]
     \includegraphics[width=\textwidth]{project/semantics.png}
     \caption{Semantics of Alg expression\cite{AlgebraicMultipartyProtocol}} 
     \label{project:Semantics}
-\end{table}
+\end{figure}
 
-The typing rules for Alg are expressed in \tabref{project:typing} and the semantics for Al is shown in \tabref{project:Semantics}. 
+The typing rules for Alg are expressed in \figref{project:typing} and the semantics for Al is shown in \figref{project:Semantics}. 
 
 An important feature of Alg is the lack of usual control flow like if a branch or while loop to build algorithms, instead, it uses the flow of transformation of data structures to replace conventional control flow. For example, $\triangledown$ combinator is the case operation whose types is $a + b \rightarrow c$. It can be seen as an analogy of if branch in normal programming languages. $\vartriangle$ combinator represents split operation. More importantly, the combinator $\text{rec}_F$ uses the idea of recursion schemes (explained in \secref{b:rs}) to build divide-and-conquer algorithms. 
 
@@ -78,13 +78,13 @@ By making the hylomorphism as a built-in combinator $\text{rec}_F$, Alg can expr
 Alg programs are point-free programs which have an implicit but precise data-flow that does not rely on an external context. For example, $e_1 \circ e_2$ is the function composition so the output of applying $e_2$ will be used as the input of $e_1$. We can interpret this as $e_2$ sends a message to $e_1$. Parallel Algebraic Language is the formalization of the above idea. In essence, it is Alg with role annotations, converting implicit data-flow to explicit role communication. In this section, we will present the main results and use examples to build intuitions about its principles. More details and proofs can be found in \cite{AlgebraicMultipartyProtocol}. We will briefly mention the results that will be useful in our project.
 
 \subsection{Syntax}
-\begin{table}[ht]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=\textwidth]{project/paralg.png}
     \caption{Syntax of ParAlg}
     \label{project:tab:paralg}
-\end{table}
-The syntax of ParAlg is shown in \tabref{project:tab:paralg}. $r$ is the role identifier representing a unit of computation. $R_1 \times R_2$ specifies that the input is split across roles $R_1$ and $R_2$ \cite{AlgebraicMultipartyProtocol}. More explanation of different constructor can be seen in \cite{AlgebraicMultipartyProtocol}. In short, ParAlg is just Alg with role annotations at certain points. 
+\end{figure}
+The syntax of ParAlg is shown in \figref{project:tab:paralg}. $r$ is the role identifier representing a unit of computation. $R_1 \times R_2$ specifies that the input is split across roles $R_1$ and $R_2$ \cite{AlgebraicMultipartyProtocol}. More explanation of different constructor can be seen in \cite{AlgebraicMultipartyProtocol}. In short, ParAlg is just Alg with role annotations at certain points. 
 
 Notice that $\text{rec}_F$ in Alg does not belong to constructs of ParAlg. So we need to unroll recursion a fixed number of times and then apply the role annotations to the unrolled expression. The unroll process is shown in \coref{p:pal:c5} and in this example, the number of unrollings is 1. The unroll-and-annotate operation will parallelize the recursive functions.
 \subsection{Inferring global types}

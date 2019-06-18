@@ -179,9 +179,9 @@ In complicated distributed systems, participants agree on a protocol, specifying
 The theory of multiparty session types contains three main elements. Global types (seen in \secref{b:mpst:st}), local (session) types and processes. Processes are the concrete descriptions of the behavior of the peers involved in the distributed system \cite{coppoGentleIntroductionMultiparty2015} using a formal language. The most used and the original language is $\pi$-calculus \cite{milnerCalculusMobileProcesses1992}. The coming sections are an intuitive introduction of session types by examples.
 % TODO: Add descriptions about the MPST 1. describes explicit dataflow 2. so it can be used as the high-level programming languages to generate parallel code 3. in \secref{b:mpst:app}.
 \subsection{Global types and local types} \label{b:mpst:st}
-A global type is at the most abstract level, describing a communication protocol from a neutral viewpoint between two or more participants\cite{coppoGentleIntroductionMultiparty2015}. The syntax of global types is shown in \tabref{b:mpst:gt} and an example of global types is shown in \tabref{b:mpst:gtex}.
+A global type is at the most abstract level, describing a communication protocol from a neutral viewpoint between two or more participants\cite{coppoGentleIntroductionMultiparty2015}. The syntax of global types is shown in \figref{b:mpst:gt} and an example of global types is shown in \figref{b:mpst:gtex}.
 
-Local types or session types characterise the same communication protocol as the global type, but from the viewpoint of each peer \cite{coppoGentleIntroductionMultiparty2015}. Each process is typed by a local type. The syntax of local types is shown in \tabref{b:mpst:lt} and an example of local type is shown in \tabref{b:mpst:ltex}. 
+Local types or session types characterise the same communication protocol as the global type, but from the viewpoint of each peer \cite{coppoGentleIntroductionMultiparty2015}. Each process is typed by a local type. The syntax of local types is shown in \figref{b:mpst:lt} and an example of local type is shown in \figref{b:mpst:ltex}. 
 
 The relationship between global types and local types are established by the projection operator (seen in the \secref{b:mpst:proj}), and a type system performs syntactic checks, ensuring that processes are typed by their corresponding local types. Hence, at the compile time, three important properties follow \cite{coppoGentleIntroductionMultiparty2015}. 
 \begin{itemize}
@@ -191,7 +191,7 @@ The relationship between global types and local types are established by the pro
 \end{itemize}
 We will learn that these properties are valuable not only in the distributed system but also in the domain of parallel computing in \secref{b:mpst:app}.
 % In the theory of multiparty session types, the whole distributed system is described by global types representing the communication protocols from a global viewpoint.  Each process is typed by local types which characterise the same communication protocols as global types but from a perspective of individual participants \cite{coppoGentleIntroductionMultiparty2015}.
-\begin{table}[ht]
+\begin{figure}[ht]
 \centering
 \begin{grammar}{G\Coloneqq}{Global types}
   p \rightarrow q : \langle S \rangle.G & Value exchange \\
@@ -200,8 +200,8 @@ We will learn that these properties are valuable not only in the distributed sys
   \mu \mathbf{t}.G  \mid \mathbf{t} \mid \text{end} & Recursion/End
 \end{grammar}
 \caption{Global types} \label{b:mpst:gt}
-\end{table}
-\begin{table}[ht]
+\end{figure}
+\begin{figure}[ht]
 \begin{grammar}{S\Coloneqq}{Sorts}
   \text{bool} \mid \text{nat} \mid \text{string} \\
   \dots\\
@@ -217,8 +217,8 @@ We will learn that these properties are valuable not only in the distributed sys
   \mu \mathbf{t}.T  \mid \mathbf{t} \mid \text{end} & Recursion/End
 \end{grammar}
 \caption{Session types/local types} \label{b:mpst:lt}
-\end{table}
-\begin{table}[ht]
+\end{figure}
+\begin{figure}[ht]
   \begin{minipage}{0.45\textwidth}
     \begin{enumerate}
       \item Customer(0) sends an order number to Agency(1), and the Agency sends back a quote to the customer.
@@ -243,8 +243,8 @@ We will learn that these properties are valuable not only in the distributed sys
   \end{minipage}
   \caption{An example of a protocol described by global types G}
   \label{b:mpst:gtex}
-\end{table}
-\begin{table}[ht]
+\end{figure}
+\begin{figure}[ht]
   \begin{minipage}{0.45\textwidth}
     \begin{align*}
       S \triangleq \mu t.(\&\{ & \text{balance}: ![\text{nat}];t, \\
@@ -261,27 +261,27 @@ We will learn that these properties are valuable not only in the distributed sys
   \end{minipage}
   \caption{Session types of client and server end point of a ATM service}
   \label{b:mpst:ltex}
-\end{table}
+\end{figure}
 \subsubsection{Projection between global types and local types} \label{b:mpst:proj}
-Projection is the formalization of the relationship between global and local types. It is an operation extracting the local type of each peer from the global type \cite{coppoGentleIntroductionMultiparty2015}. The definition of projection is shown in \tabref{b:mpst:pdef}.
+Projection is the formalization of the relationship between global and local types. It is an operation extracting the local type of each peer from the global type \cite{coppoGentleIntroductionMultiparty2015}. The definition of projection is shown in \figref{b:mpst:pdef}.
 
-As an example, a projection of global type in \tabref{b:mpst:gtex} is
+As an example, a projection of global type in \figref{b:mpst:gtex} is
 $$
   G \upharpoonright 0 = !\langle 1, \text{string} \rangle;?(1, \text{string});\&(1, \{ \text{accept}: ?(1, \text{string});!\langle 2, \text{string} \rangle;?(2, \text{int}), 
   \text{reject}: \text{end} \})
 $$  
-\begin{table}[H]
+\begin{figure}[H]
 \includegraphics[width=\textwidth]{background/image/proj-def.png}
 \caption{The definition of projection of a global type G onto a participants q\cite{coppoGentleIntroductionMultiparty2015}}
 \label{b:mpst:pdef}
-\end{table}
+\end{figure}
 \subsubsection{Duality of session types}
-In binary session types where all protocals are pairwise, duality formalises the relationship between the types of opposite endpoints. For a type $T$, its dual or co type, written $\bar{T}$ is defined inductively as in \tabref{b:mpst:dualdef}.
-\begin{table}[H]
+In binary session types where all protocals are pairwise, duality formalises the relationship between the types of opposite endpoints. For a type $T$, its dual or co type, written $\bar{T}$ is defined inductively as in \figref{b:mpst:dualdef}.
+\begin{figure}[H]
 \includegraphics[width=\textwidth]{background/image/dual-def.png}
 \caption{Inductive definition of duality}
 \label{b:mpst:dualdef}
-\end{table}
+\end{figure}
 
 Duality is essential for checking type compatibility. Compatible types mean that each common channel $k$ is associated with complementary behavior: this ensures that the interactions on $k$ run without errors. 
 

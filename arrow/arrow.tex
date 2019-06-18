@@ -131,17 +131,17 @@ An easy solution for the first goal would be to setup an upper bound on the numb
 
 The naive strategy used in \secref{SArrow:impl} already satisfies the second goal. However, the number of channels required and the number of roles in the system will grow exponentially. In a divide-and-conquer algorithm, the number of channels increases from 10 to 120 and the number of roles increases from 6 to 36 when the level is increased from 1 to 3.
 
-\begin{table}[ht]
+\begin{figure}[ht]
 \begin{displaymath} 
     \inference[id]{x: \text{Role}, \quad a: \text{Type}}{id : \text{SArrow a a}, x \Rightarrow x}
 \end{displaymath}
 \caption{Role allocation for id}
 \label{SArrow:ra:example}
-\end{table}
+\end{figure}
 
-For illustration, we use inference rules to explain our proposed strategy for optimized role allocations when composing SArrows. Please see \tabref{SArrow:ra:example} as an example. $x \Rightarrow x$ means the computation starts with role $x$ and ends with role $x$.
+For illustration, we use inference rules to explain our proposed strategy for optimized role allocations when composing SArrows. Please see \figref{SArrow:ra:example} as an example. $x \Rightarrow x$ means the computation starts with role $x$ and ends with role $x$.
 
-\begin{table}[ht]
+\begin{figure}[ht]
 \begin{displaymath} 
     \inference[compose]{e1 : \text{SArrow a b}, x \Rightarrow y, \quad e2: \text{SArrow b c}, y \Rightarrow z}{e1 \; \hask{>>>} \; e2 : \text{SArrow a c}, x \Rightarrow z}
 \end{displaymath}
@@ -167,9 +167,9 @@ For illustration, we use inference rules to explain our proposed strategy for op
 \end{displaymath}
 \caption{Rules fo role allocations of different combinators}
 \label{SArrow:ra:rule}
-\end{table}
+\end{figure}
 
-The rule for the rest of combinators is shown in \tabref{SArrow:ra:rule}. Notice that for compose, id, arr and ArrowChoice, we do not introduce any new roles; in other words, there is no parallelization for these combinators. The reader may find it strange that we do not intend on parallelizing arr combinator which lifts a sequential computation represented by Core (a $\rightarrow$ b) into SArrow. It makes sense to introduce a new role to execute the computation and hence parallelize computationally heavy tasks. We use this strategy in the first place, but later, we found a more suitable strategy exists. This strategy is not ideal because introducing new roles for simple functions will damage performance. Also, another reason not to introduce a new role when encountering arr combinators is that we gained function fusion for free. Simple function, i.e. fst, inject left, or snd, are automatically fused into more complex user-defined functions.  % o introduce new roles when encountering \hask{&&&}. In this way, we do not sacrifice any degree of parallelization but keep the number of roles in the system at the minimum. 
+The rule for the rest of combinators is shown in \figref{SArrow:ra:rule}. Notice that for compose, id, arr and ArrowChoice, we do not introduce any new roles; in other words, there is no parallelization for these combinators. The reader may find it strange that we do not intend on parallelizing arr combinator which lifts a sequential computation represented by Core (a $\rightarrow$ b) into SArrow. It makes sense to introduce a new role to execute the computation and hence parallelize computationally heavy tasks. We use this strategy in the first place, but later, we found a more suitable strategy exists. This strategy is not ideal because introducing new roles for simple functions will damage performance. Also, another reason not to introduce a new role when encountering arr combinators is that we gained function fusion for free. Simple function, i.e. fst, inject left, or snd, are automatically fused into more complex user-defined functions.  % o introduce new roles when encountering \hask{&&&}. In this way, we do not sacrifice any degree of parallelization but keep the number of roles in the system at the minimum. 
 
 For the class of combinators belonging to arrow choice, we do not introduce any new role. The expressions at the lhs and at the rhs start with the same role $x$ because when only one code path will be executed as the name choice suggested so we should not use separate roles for two expressions that will never be executed simultaneously. In the end, we decided the computation end in the role max$(y,z)$. Max guarantees that there will not be role duplications when we compose expressions formed by ArrowChoice combinators with other combinators. For the implementation, all processes in both left and right SArrow expressions are wrapped inside a branch operation separately. Assume max$(y, z) = y$, the process at the role $y$ will be extended with actions that receive data from min$(y, z) = z$ role at its right branch. Finally, applying inject left and inject right at left and right branches gives us an Either type as the output.
 
@@ -180,7 +180,7 @@ Even though from the implementation point of view, optimized role allocation is 
 Finally, the optimized strategy presented in this chapter is not the only solution. For example, there is a strategy that only introduces new roles into the computation graph when encountering a specific atomic function. Different strategies result in different communication structures hence different kind of parallelisms. We should choose the right strategy depending on the specific task.
 \section{Satisfaction of arrow laws}
 We have provided the implementation of SArrow combinators that is similar to the arrow interface. However, the implementation is not enough to state that SArrow is an Arrow. We will present a justification on of basic arrow laws.
-\begin{table}[ht]
+\begin{figure}[ht]
     \begin{align*}
         arr(Id) >>> a &= a \tag{1}\\
         a >>> arr(Id) &= a \tag{2}\\
@@ -192,9 +192,9 @@ We have provided the implementation of SArrow combinators that is similar to the
     \end{align*}
     \caption{Arrow laws \cite{atkeyWhatCategoricalModel2011}}
     \label{arrow:tab:law}
-\end{table}
+\end{figure}
 
-\tabref{arrow:tab:law} shows the rules of arrow laws. We include the subset of the laws that contain the $first$ combinator. The other half of the laws that contain the \hask{second} combinator can be proved by symmetry. \hask{first} combinator is implemented as \hask{first = (*** id)} and $\alpha :: ((x, y), z) -> (x, (y, z))$.
+\figref{arrow:tab:law} shows the rules of arrow laws. We include the subset of the laws that contain the $first$ combinator. The other half of the laws that contain the \hask{second} combinator can be proved by symmetry. \hask{first} combinator is implemented as \hask{first = (*** id)} and $\alpha :: ((x, y), z) -> (x, (y, z))$.
 \begin{figure}[ht]
     \centering
     \begin{tikzpicture}[xscale=1.5]
