@@ -16,16 +16,6 @@
   doi = {10.1007/978-3-319-18941-3_4}
 }
 
-@article{ngSafeMPICode,
-  title = {Safe {{MPI Code Generation}} Based on {{Session Types}}},
-  abstract = {This paper presents a code generation framework for type-safe and deadlock-free Message Passing Interface (MPI) programs. The code generation process starts with the definition of the global topology using a protocol specification language based on parameterised multiparty session types (MPST). An MPI parallel program backbone is automatically generated from the global specification. The backbone code can then be merged with the sequential code describing the application behaviour, resulting in a complete MPI program. This merging process is fully automated through the use of an aspect-oriented compilation approach. In this way, programmers only need to supply the intended communication protocol and provide sequential code to automatically obtain parallelised programs that are guaranteed free from communication mismatch, type errors or deadlocks. The code generation framework also integrates an optimisation method that overlaps communication and computation, and can derive not only representative parallel programs with common parallel patterns (such as ring and stencil), but also distributed applications from any MPST protocols. We show that our tool generates efficient and scalable MPI applications, and improves productivity of programmers. For instance, our benchmarks involving representative parallel and applicationspecific patterns speed up sequential execution by up to 31 times and reduce programming effort by an average of 39\%.},
-  language = {en},
-  author = {Ng, Nicholas and Coutinho, Jose G F and Yoshida, Nobuko},
-  keywords = {read},
-  pages = {22},
-  file = {/Users/r/Zotero/storage/U7H9HDKV/Ng et al. - Safe MPI Code Generation based on Session Types.pdf}
-}
-
 @article{swierstraDataTypesCarte2008,
   title = {Data Types {\`a} La Carte},
   volume = {18},
@@ -55,16 +45,6 @@
   pages = {73-129},
   file = {/Users/r/Zotero/storage/ZSWY2TQT/Hughes - 2005 - Programming with Arrows.pdf},
   doi = {10.1007/11546382_2}
-}
-
-@misc{contributorsCatsFreeMonads,
-  title = {Cats: {{FreeMonads}}},
-  shorttitle = {Cats},
-  abstract = {Lightweight, modular, and extensible library for functional programming},
-  journal = {Cats},
-  howpublished = {http://typelevel.org/cats/},
-  author = {{contributors}, Cats},
-  file = {/Users/r/Zotero/storage/Z6M7N3GV/freemonad.html}
 }
 
 @article{MessagePassingInterface2018,
@@ -368,23 +348,6 @@ The key idea in tacit programming is to assist in operating at the appropriate l
   file = {/Users/r/Zotero/storage/AWZLRZHE/Reified_type.html}
 }
 
-@misc{LanguagecAnalysisGeneration,
-  title = {Language-c: {{Analysis}} and Generation of {{C}} Code},
-  shorttitle = {Language-c},
-  abstract = {Install via `cabal~install~language-c`.},
-  journal = {Hackage},
-  howpublished = {//hackage.haskell.org/package/language-c},
-  file = {/Users/r/Zotero/storage/LG4WVB4T/language-c.html}
-}
-
-@misc{treatPureImplementationGo2019,
-  title = {Pure {{C}} Implementation of {{Go}} Channels. {{Contribute}} to Tylertreat/Chan Development by Creating an Account on {{GitHub}}},
-  copyright = {Apache-2.0},
-  author = {Treat, Tyler},
-  month = may,
-  year = {2019}
-}
-
 @article{Quickhull2019,
   title = {Quickhull},
   copyright = {Creative Commons Attribution-ShareAlike License},
@@ -431,12 +394,6 @@ The key idea in tacit programming is to assist in operating at the appropriate l
   note = {Page Version ID: 879757605}
 }
 
-@misc{DataTypeable,
-  title = {Data.{{Typeable}}},
-  howpublished = {http://hackage.haskell.org/package/base-4.12.0.0/docs/Data-Typeable.html\#t:Typeable},
-  file = {/Users/r/Zotero/storage/F62HF8SZ/Data-Typeable.html}
-}
-
 @article{eisenbergDEPENDENTTYPESHASKELLa,
   title = {{{DEPENDENT TYPES IN HASKELL}}: {{THEORY AND PRACTICE}}},
   language = {en},
@@ -475,6 +432,146 @@ The key idea in tacit programming is to assist in operating at the appropriate l
   year = {2019},
   keywords = {Computer Science - Programming Languages},
   file = {/Users/r/Zotero/storage/IWZGJTDX/Lange and Yoshida - 2019 - Verifying Asynchronous Interactions via Communicat.pdf}
+}
+
+@article{AmdahlLaw2019,
+  title = {Amdahl's Law},
+  copyright = {Creative Commons Attribution-ShareAlike License},
+  abstract = {In computer architecture, Amdahl's law (or Amdahl's argument) is a formula which gives the theoretical speedup in latency of the execution of a task at fixed workload that can be expected of a system whose resources are improved. It is named after computer scientist Gene Amdahl, and was presented at the AFIPS Spring Joint Computer Conference in 1967.
+Amdahl's law is often used in parallel computing to predict the theoretical speedup when using multiple processors. For example, if a program needs 20 hours using a single processor core, and a particular part of the program which takes one hour to execute cannot be parallelized, while the remaining 19 hours (p = 0.95) of execution time can be parallelized, then regardless of how many processors are devoted to a parallelized execution of this program, the minimum execution time cannot be less than that critical one hour. Hence, the theoretical speedup is limited to at most 20 times 
+  
+    
+      
+        
+          (
+          
+            
+              
+                
+                  1
+                  
+                    1
+                    -
+                    p
+                  
+                
+              
+            
+            =
+            20
+          
+          )
+        
+      
+    
+    \{\textbackslash{}displaystyle \textbackslash{}left(\{\textbackslash{}dfrac \{1\}\{1-p\}\}=20\textbackslash{}right)\}
+  . For this reason, parallel computing with many processors is useful only for highly parallelizable programs.},
+  language = {en},
+  journal = {Wikipedia},
+  month = may,
+  year = {2019},
+  file = {/Users/r/Zotero/storage/54MXJX64/index.html},
+  note = {Page Version ID: 897444639}
+}
+
+@misc{DataTypeablea,
+  title = {Data.{{Typeable}}},
+  howpublished = {http://hackage.haskell.org/package/base-4.12.0.0/docs/Data-Typeable.html},
+  file = {/Users/r/Zotero/storage/IGM8SUPE/Data-Typeable.html}
+}
+
+@misc{Language,
+  title = {Language.{{C}}},
+  howpublished = {http://hackage.haskell.org/package/language-c-0.8.2/docs/Language-C.html},
+  file = {/Users/r/Zotero/storage/IYXPM3KF/Language-C.html}
+}
+
+@misc{treatPureImplementationGo2019a,
+  title = {Pure {{C}} Implementation of {{Go}} Channels. {{Contribute}} to Tylertreat/Chan Development by Creating an Account on {{GitHub}}},
+  copyright = {Apache-2.0},
+  howpublished = {https://github.com/tylertreat/chan},
+  author = {Treat, Tyler},
+  month = jun,
+  year = {2019}
+}
+
+@misc{FreeMonadNLab,
+  title = {Free Monad in {{nLab}}},
+  howpublished = {https://ncatlab.org/nlab/show/free+monad},
+  file = {/Users/r/Zotero/storage/599YYS6J/free+monad.html}
+}
+
+@misc{contributorsCatsFreeMonadsa,
+  title = {Cats: {{FreeMonads}}},
+  shorttitle = {Cats},
+  abstract = {Lightweight, modular, and extensible library for functional programming},
+  journal = {Cats},
+  howpublished = {https://typelevel.org/cats/datatypes/freemonad.html},
+  author = {{contributors}, Cats},
+  file = {/Users/r/Zotero/storage/JFRXSEET/freemonad.html}
+}
+
+@inproceedings{marlowMonadDeterministicParallelism2011,
+  title = {A Monad for Deterministic Parallelism},
+  volume = {46},
+  isbn = {1-4503-0860-0},
+  booktitle = {{{ACM SIGPLAN Notices}}},
+  publisher = {{ACM}},
+  author = {Marlow, Simon and Newton, Ryan and Peyton Jones, Simon},
+  year = {2011},
+  pages = {71-82}
+}
+
+@book{coleAlgorithmicSkeletonsStructured1989,
+  title = {Algorithmic Skeletons: Structured Management of Parallel Computation},
+  isbn = {0-262-53086-4},
+  publisher = {{Pitman London}},
+  author = {Cole, Murray I.},
+  year = {1989}
+}
+
+@inproceedings{ngProtocolsDefault2015,
+  series = {Lecture {{Notes}} in {{Computer Science}}},
+  title = {Protocols by {{Default}}},
+  isbn = {978-3-662-46663-6},
+  abstract = {This paper presents a code generation framework for type-safe and deadlock-free Message Passing Interface (MPI) programs. The code generation process starts with the definition of the global topology using a protocol specification language based on parameterised multiparty session types (MPST). An MPI parallel program backbone is automatically generated from the global specification. The backbone code can then be merged with the sequential code describing the application behaviour, resulting in a complete MPI program. This merging process is fully automated through the use of an aspect-oriented compilation approach. In this way, programmers only need to supply the intended communication protocol and provide sequential code to automatically obtain parallelised programs that are guaranteed free from communication mismatch, type errors or deadlocks. The code generation framework also integrates an optimisation method that overlaps communication and computation, and can derive not only representative parallel programs with common parallel patterns (such as ring and stencil), but also distributed applications from any MPST protocols. We show that our tool generates efficient and scalable MPI applications, and improves productivity of programmers. For instance, our benchmarks involving representative parallel and application-specific patterns speed up sequential execution by up to 31 times and reduce programming effort by an average of 39\%.},
+  language = {en},
+  booktitle = {Compiler {{Construction}}},
+  publisher = {{Springer Berlin Heidelberg}},
+  author = {Ng, Nicholas and {de Figueiredo Coutinho}, Jose Gabriel and Yoshida, Nobuko},
+  editor = {Franke, Bj{\"o}rn},
+  year = {2015},
+  keywords = {Kernel Function,Loop Condition,Message Pass Interface,Parallel Application,Session Type},
+  pages = {212-232},
+  file = {/Users/r/Zotero/storage/I7ERCDKM/Ng et al. - 2015 - Protocols by Default.pdf}
+}
+
+@article{orchardSessionTypesLinearity2017,
+  title = {Session Types with Linearity in {{Haskell}}},
+  journal = {Behavioural Types: from Theory to Tools},
+  author = {Orchard, Dominic and Yoshida, Nobuko},
+  year = {2017},
+  pages = {219}
+}
+
+@article{claessenPoorManConcurrency1999,
+  title = {A Poor Man's Concurrency Monad},
+  volume = {9},
+  number = {3},
+  journal = {Journal of Functional Programming},
+  author = {Claessen, Koen},
+  year = {1999},
+  pages = {313-323}
+}
+
+@article{mcdonellTypesafeRuntimeCode2016,
+  title = {Type-Safe Runtime Code Generation: Accelerate to {{LLVM}}},
+  volume = {50},
+  number = {12},
+  journal = {ACM SIGPLAN Notices},
+  author = {McDonell, Trevor L. and Chakravarty, Manuel MT and Grover, Vinod and Newton, Ryan R.},
+  year = {2016},
+  pages = {201-212}
 }
 
 
