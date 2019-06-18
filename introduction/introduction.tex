@@ -37,7 +37,7 @@ Our framework couples with multiparty session type (MPST) \cite{coppoGentleIntro
     \tikzstyle{proc1} = [circle,  minimum width=2cm, minimum height=5cm,text centered, draw=black] 
     \tikzstyle{arrow} = [thick,->,>=stealth]
     \node (a) [proc, label=right:\charef{chap:arrow}] at (0, 3)  {SArrow: \\ An arrow interface for \\ writing SPar expressions};
-    \node (b) [proc, label=right:\charef{chap:spar}] at (0, 0)  {SPar: \\  A session-typed free monad EDSL \\ for concurrency};
+    \node (b) [proc, label=right:{\charef{chap:spar}, \ref{chap:impl}}] at (0, 0)  {SPar: \\  A session-typed free monad EDSL \\ for concurrency};
     \node (c) [proc, label=right:\charef{chap:cg}] at (0, -3) {Instr: \\ A low-level EDSL \\ for channel  communication};
     \node (f) [proc, label=right:\charef{chap:cg}] at (0, -6) {Low level parallel code: \\ C programs};
     % \node (f) [proc, label=right:\charef{chap:cg}] at (0, -6) {Instr: \\ A low-level EDSL \\ for channel  communication};
