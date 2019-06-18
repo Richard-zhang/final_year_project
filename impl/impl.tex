@@ -1,6 +1,6 @@
 \chapter{SPar: Implementation} \label{chap:impl}
 \section{Session types} \label{impl:sec:session}
-Haskell does not support session types natively. Other encodings of session types in Haskell is too much for this project since Proc does not support all actions that can be typed by session types, i.e. channel delegation. We decided to create our representation of session types in Haskell corresponding to a set of actions supported by Proc. We will introduce two methods for session typing the group of Proc programs followed by duality checking. One is at the value level, and another is at the type level.
+Haskell does not support session types natively. Using other encodings of session types in Haskell is too much for this project since Proc does not support all actions that can be typed by session types, i.e. channel delegation. We decided to create our representation of session types in Haskell corresponding to a set of actions supported by Proc. We will introduce two methods for session typing the group of Proc programs followed by duality checking. One is at the value level, and another is at the type level.
 
 Essentially, what we do is to infer a collection of local types from a set of SPar expressions. The collection not only can be used to check the duality compatibility of the overall computation but also can work with external tool \cite{langeVerifyingAsynchronousInteractions2019} for additional analysis and verification
 \subsection{Representations of session types in Haskell}
