@@ -1,9 +1,9 @@
-\chapter{SArrow: An arrow interface for writing SPar expressions} \label{chap:arrow}
+\chapter{SArrow: An Arrow interface for writing SPar expressions} \label{chap:arrow}
 When trying to express more complex and interesting parallel patterns, such as the map or reduce pattern, we realize SPar is too low-level. It is difficult to express simple computations because of the overheads of expressing communication patterns by hand. 
 
-To solve this issue, we draw inspirations from the Arrow interface, in particular, \cite{braunArrowsParallelComputation2018} where they use the arrow interface to do parallel programming in Haskell. We introduce SArrow; an arrow interface for writing SPar expressions.
+To solve this issue, we draw inspirations from the Arrow interface, in particular, \cite{braunArrowsParallelComputation2018} where they use the Arrow interface to do parallel programming in Haskell. We introduce SArrow; an Arrow interface for writing SPar expressions.
 
-SArrow is an arrow interface for writing SPar expressions. With help from SArrow, users can use canonical arrow combinators to write algorithms without writing any explicit communication, and gain parallelized algorithms for free.
+SArrow is an Arrow interface for writing SPar expressions. With help from SArrow, users can use canonical arrow combinators to write algorithms without writing any explicit communication, and gain parallelized algorithms for free.
 
 \section{Syntax}
 \begin{listing}[ht]
@@ -15,7 +15,7 @@ The simplified syntax of SArrow can be found in \coref{SArrow:def}. \hask{Pipe a
 
 SArrow is a type synonym of \hask{Nat -> Pipe a b}. It consumes \hask{Nat} which means the identifier of a process and output \hask{Pipe a b}. The reason why we use \hask{Nat} as the only parameter is to ensure that processes names are not duplicated. It will be explained more thoroughly in \secref{SArrow:roleAllc}.
 \subsection{Arrow interface}
-\hask{SArrow} is an instance of the Arrow typeclass as well as ArrowChoice type class. For example, the type signature of the combinators \hask{>>>}, \hask{|||}, \hask{&&&} and \hask{arr} are shown below. The main difference between their type signatures and the usual arrow interface is that in the \hask{arr}, the function is wrapped with Core. In general, it captures the same meaning as the usual arrow interfaces. Implementation details of these combinators will be explained in \secref{SArrow:impl}.
+\hask{SArrow} is an instance of the Arrow typeclass as well as ArrowChoice type class. For example, the type signature of the combinators \hask{>>>}, \hask{|||}, \hask{&&&} and \hask{arr} are shown below. The main difference between their type signatures and the usual Arrow interface is that in the \hask{arr}, the function is wrapped with Core. In general, it captures the same meaning as the usual Arrow interfaces. Implementation details of these combinators will be explained in \secref{SArrow:impl}.
 \begin{code}
 \begin{minted}{Haskell}
 (>>>) :: SArrow a b -> SArrow b c -> SArrow a c
@@ -179,7 +179,7 @@ Even though from the implementation point of view, optimized role allocation is 
 
 Finally, the optimized strategy presented in this chapter is not the only solution. For example, there is a strategy that only introduces new roles into the computation graph when encountering a specific atomic function. Different strategies result in different communication structures hence different kind of parallelisms. We should choose the right strategy depending on the specific task.
 \section{Satisfaction of arrow laws}
-We have provided the implementation of SArrow combinators that is similar to the arrow interface. However, the implementation is not enough to state that SArrow is an Arrow. We will present a justification on of basic arrow laws.
+We have provided the implementation of SArrow combinators that is similar to the Arrow interface. However, the implementation is not enough to state that SArrow is an Arrow. We will present a justification on of basic arrow laws.
 \begin{figure}[ht]
     \begin{align*}
         arr(Id) >>> a &= a \tag{1}\\
