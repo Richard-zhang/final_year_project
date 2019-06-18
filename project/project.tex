@@ -1,5 +1,5 @@
 \chapter{Alg : Algebraic Functional Language} \label{chap:alg}
-Algebraic Functional Language (Alg) is an example of a high-level language to generate parallel code, proposed in the paper \cite{AlgebraicMultipartyProtocol}. The work done by \cite{AlgebraicMultipartyProtocol} also proposes a method to do the code generation. Part of this project is about implementing an alternative code generation backend for this language. In the evaluation section, we will compare the speed of the generated code of our method against the original method. We will give an overview of the language in this section.  
+Algebraic Functional Language (Alg) is an example of a high-level language to generate parallel code, proposed in the paper \cite{castroAlgebraicMultipartyProtocol}. The work done by \cite{castroAlgebraicMultipartyProtocol} also proposes a method to do the code generation. Part of this project is about implementing an alternative code generation backend for this language. In the evaluation section, we will compare the speed of the generated code of our method against the original method. We will give an overview of the language in this section.  
 \section{Alg}
 \subsection{Syntax}
 \begin{figure}[ht]
@@ -33,7 +33,7 @@ Algebraic Functional Language (Alg) is an example of a high-level language to ge
 \caption{Type of integer list in PAL}
 \label{p:pal:c1}
 \end{listing}
-The syntax of Alg is shown in \figref{project:syntax}. In terms of the syntax of expressions, $f$ represents atomic functions which are functions of which we only know their types \cite{AlgebraicMultipartyProtocol}. The presence of atomic functions is important in the code generation, which we will discuss in the later chapter. $v$ is a primitive value like integer 1.$F$ represents functor and $a, b$ are types. Besides primitive types, function types and the recursive type constructor $\mu$, Alg uses four functors to form more types hence representing data structures by composing them. For example, a list of integers is expressed in \coref{p:pal:c1}. Alg is a point-free language.
+The syntax of Alg is shown in \figref{project:syntax}. In terms of the syntax of expressions, $f$ represents atomic functions which are functions of which we only know their types \cite{castroAlgebraicMultipartyProtocol}. The presence of atomic functions is important in the code generation, which we will discuss in the later chapter. $v$ is a primitive value like integer 1.$F$ represents functor and $a, b$ are types. Besides primitive types, function types and the recursive type constructor $\mu$, Alg uses four functors to form more types hence representing data structures by composing them. For example, a list of integers is expressed in \coref{p:pal:c1}. Alg is a point-free language.
 \begin{figure}[ht]
     \[\inference{f : a -> b \in \Gamma}{|- f : a -> b}\]
     \[\inference{|- e : a}{|- \text{cons} \; e : b -> a}\]
@@ -52,7 +52,7 @@ The syntax of Alg is shown in \figref{project:syntax}. In terms of the syntax of
 \end{figure}
 \begin{figure}[ht]
     \includegraphics[width=\textwidth]{project/semantics.png}
-    \caption{Semantics of Alg expression\cite{AlgebraicMultipartyProtocol}} 
+    \caption{Semantics of Alg expression\cite{castroAlgebraicMultipartyProtocol}} 
     \label{project:Semantics}
 \end{figure}
 
@@ -75,7 +75,7 @@ By making the hylomorphism as a built-in combinator $\text{rec}_F$, Alg can expr
 
 \section{ParAlg: Alg + role annotations}
 % Each of the Alg constructs has an implicit, but precise data-flow. For example, in e1 ◦ e2, we know that the result of e1 must only use the result of e2. In a sense, we can interpret that e2, and only e2 sends a message to e1. In this section, we extend this interpretation to most of Alg constructs, so that Alg expressions represent both functions and protocols. We call this extension Parallel Algebraic Language (ParAlg). We define first the syntax of ParAlg terms and types, which is a subset of that of Alg that introduces role annotations that represent where is the computation performed and the data stored. We then define a typing derivation for ParAlg that captures the role interfaces of a ParAlg expression. In §4, we prove that well-typed Parallel Algebraic Language expressions, i.e. expressions built by composing sub-expressions that agree on their role interfaces, exactly correspond to deadlock-free global types (Lemmas 4.5 and 4.6).
-Alg programs are point-free programs which have an implicit but precise data-flow that does not rely on an external context. For example, $e_1 \circ e_2$ is the function composition so the output of applying $e_2$ will be used as the input of $e_1$. We can interpret this as $e_2$ sends a message to $e_1$. Parallel Algebraic Language is the formalization of the above idea. In essence, it is Alg with role annotations, converting implicit data-flow to explicit role communication. In this section, we will present the main results and use examples to build intuitions about its principles. More details and proofs can be found in \cite{AlgebraicMultipartyProtocol}. We will briefly mention the results that will be useful in our project.
+Alg programs are point-free programs which have an implicit but precise data-flow that does not rely on an external context. For example, $e_1 \circ e_2$ is the function composition so the output of applying $e_2$ will be used as the input of $e_1$. We can interpret this as $e_2$ sends a message to $e_1$. Parallel Algebraic Language is the formalization of the above idea. In essence, it is Alg with role annotations, converting implicit data-flow to explicit role communication. In this section, we will present the main results and use examples to build intuitions about its principles. More details and proofs can be found in \cite{castroAlgebraicMultipartyProtocol}. We will briefly mention the results that will be useful in our project.
 
 \subsection{Syntax}
 \begin{figure}[ht]
@@ -84,11 +84,11 @@ Alg programs are point-free programs which have an implicit but precise data-flo
     \caption{Syntax of ParAlg}
     \label{project:tab:paralg}
 \end{figure}
-The syntax of ParAlg is shown in \figref{project:tab:paralg}. $r$ is the role identifier representing a unit of computation. $R_1 \times R_2$ specifies that the input is split across roles $R_1$ and $R_2$ \cite{AlgebraicMultipartyProtocol}. More explanation of different constructor can be seen in \cite{AlgebraicMultipartyProtocol}. In short, ParAlg is just Alg with role annotations at certain points. 
+The syntax of ParAlg is shown in \figref{project:tab:paralg}. $r$ is the role identifier representing a unit of computation. $R_1 \times R_2$ specifies that the input is split across roles $R_1$ and $R_2$ \cite{castroAlgebraicMultipartyProtocol}. More explanation of different constructor can be seen in \cite{castroAlgebraicMultipartyProtocol}. In short, ParAlg is just Alg with role annotations at certain points. 
 
 Notice that $\text{rec}_F$ in Alg does not belong to constructs of ParAlg. So we need to unroll recursion a fixed number of times and then apply the role annotations to the unrolled expression. The unroll process is shown in \coref{p:pal:c5} and in this example, the number of unrollings is 1. The unroll-and-annotate operation will parallelize the recursive functions.
 \subsection{Inferring global types}
-ParAlg turns implicit data-flow into communication, and hence, we should be able to derive its communication protocols from valid ParAlg programs. In \cite{AlgebraicMultipartyProtocol}, global types (explained in \secref{b:mpst}) are used to represent communication protocols for ParAlg, which means for any valid ParAlg program, we can infer its corresponding global type. The inference rules and typing for ParAlg can be seen in \cite{AlgebraicMultipartyProtocol}. 
+ParAlg turns implicit data-flow into communication, and hence, we should be able to derive its communication protocols from valid ParAlg programs. In \cite{castroAlgebraicMultipartyProtocol}, global types (explained in \secref{b:mpst}) are used to represent communication protocols for ParAlg, which means for any valid ParAlg program, we can infer its corresponding global type. The inference rules and typing for ParAlg can be seen in \cite{castroAlgebraicMultipartyProtocol}. 
 \begin{listing}[ht]
     \begin{align*}
        G = \\ 
@@ -122,9 +122,9 @@ The ParAlg expression for two unrolling of the merge sort is shown in \coref{pro
 \begin{figure}[ht]
     \centering
     \includegraphics[width=0.7\textwidth]{project/pipeline.png}
-    \caption{Overview of code generating pipeline from Alg\cite{AlgebraicMultipartyProtocol}}
+    \caption{Overview of code generating pipeline from Alg\cite{castroAlgebraicMultipartyProtocol}}
     \label{project:fig:pipeline}
 \end{figure}
-A visualization of the compilation pipeline can be seen in the \figref{project:fig:pipeline}. More details about Alg and ParAlg can found in \cite{AlgebraicMultipartyProtocol}.
+A visualization of the compilation pipeline can be seen in the \figref{project:fig:pipeline}. More details about Alg and ParAlg can found in \cite{castroAlgebraicMultipartyProtocol}.
 
 Alg is a point-free language. Without the use of explicit variables, point-free programs express the underlying data-flow of the computation clearly. Adding role annotations transforms Alg programs to ParAlg programs converting the implicit data-flow to explicit communication. Communication will aid us to generate parallel code using message-passing concurrency. We will introduce our method from the next chapter.
