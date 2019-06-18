@@ -94,12 +94,12 @@ ParAlg turns implicit data-flow into communication, and hence, we should be able
        G = \\ 
        & r_0 -> r_1: \text{Rec L} \\
        & r_1 -> \{r_2, r_3\}\\
-       & \{ l_0 : && r_1 -> r_3 : () + \text{int}.\\
-       & && \text{end};\\
-       &  l_1 : && r_1 -> r_2 : \text{Rec L}.\\
-       &           && r_1 -> r_3 : \text{Rec L}.\\
-       &           && r_2 -> r_3 : \text{Rec L}.\\
-       &           && \text{end} \}; \\
+       & \{ l_0 : r_1 -> r_3 : () + \text{int}.\\
+       & \quad \text{end};\\
+       &  l_1 :  r_1 -> r_2 : \text{Rec L}.\\
+       &  \,\quad  r_1 -> r_3 : \text{Rec L}.\\
+       &  \,\quad  r_2 -> r_3 : \text{Rec L}.\\
+       &  \,\quad  \text{end} \}; \\
        & r_3 -> r_0 : \text{Rec L}.\\
        & \text{end}\\
     \end{align*}
