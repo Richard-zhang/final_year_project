@@ -308,7 +308,7 @@ This section introduces some interfaces for message passing concurrency from the
 
 For simplicity, they are represented in Haskell, but in general, most languages can implement similar interfaces. 
 \subsection{Primitives for message-passing concurrency} \label{b:mo:mpc}
-In \secref{b:mpst}, channels are bi-directional and used for communication between two parties. In Haskell, channel primitives are represented in \coref{b:mo:c1}. However, just using these primitives cannot guarantee progress or communication safety. For example, a program that has one thread writing channel once combined with another thread reading channel twice is type-correct but will cause deadlock. Many kinds of research to encode MPST using Haskell's type system are presented in \cite{orchardSessionTypesLinearity2017} so that an (MPST) type-correct Haskell program assures progress, communication safety and session fidelity.
+In \secref{b:mpst}, channels are bi-directional and used for communication between two parties. In Haskell, channel primitives are represented in \coref{b:mo:c1}. However, just using these primitives cannot guarantee progress or communication safety. For example, a program that has one thread writing channel once combined with another thread reading channel twice is type-correct but will cause deadlock. Many kinds of researches to encode MPST using Haskell's type system are presented in \cite{orchardSessionTypesLinearity2017} so that an (MPST) type-correct Haskell program assures progress, communication safety and session fidelity.
 \begin{listing}[ht]
   \inputminted{haskell}{background/mo-chan.hs}
   \caption{Channel primitives in Haskell}
