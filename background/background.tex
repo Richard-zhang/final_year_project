@@ -7,7 +7,7 @@ Arrow is a general interface to describe computation. It can ease the process of
 \coref{b:ar:c1} shows the Arrow definition in Haskell. Intuitively, an arrow type \hask{y a b}(that is, the application of the parameterised type \hask{y} to the two parameter types \hask{b} and \hask{c}) can be regarded as a computation with input of type \hask{b} and output of type \hask{b}\cite{hughesGeneralisingMonadsArrows2000}. Visually, arrows are like pipelines (shown in \figref{b:ar:p1}). In Haskell, an arrow \hask{y} is a type that implements the following interface (type classes in Haskell are roughly interfaces). \hask{arr} converts an arbitrary function into an arrow. \hask{>>>} sequences two arrows (illustrated in \figref{b:ar:seq}). Taking two input,  \hask{first} apply the arrow to the first input while keeping the second untouched (\figref{b:ar:first}). Conversely, \hask{second} modifies the second input and keeps the first one unchanged. \hask{***} applies two arrows to two input side by side (\figref{b:ar:par}). \hask{&&&} takes one input and applies two separate arrows to the input and its duplications (\figref{b:ar:dup}).
 
 The simplest instance of arrow class is the function type (shown in \coref{b:ar:c2}). It is worth noticing that only \hask{arr} and \hask{***} need to be implemented. The rest of functions in the arrow type class can be defined in terms of the two functions. For example, \mintinline{text}{f &&& g = (f *** g) . arr (\b -> (b, b))} and \mintinline{text}{first = (*** id)}
-\begin{code}
+\begin{listing}[ht]
   % \inputminted{haskell}{background/ar-def.hs}
   \begin{minted}{haskell}
     class Arrow y where 
@@ -24,8 +24,8 @@ The simplest instance of arrow class is the function type (shown in \coref{b:ar:
     % \end{itemize}
   % }
   \label{b:ar:c1}
-\end{code}
-\begin{code}
+\end{listing}
+\begin{listing}[ht]
   % \inputminted{haskell}{background/ar-func.hs}
   \begin{minted}{haskell}
     instance Arrow (->) where
@@ -34,7 +34,7 @@ The simplest instance of arrow class is the function type (shown in \coref{b:ar:
   \end{minted}
   \caption{$(\rightarrow)$ instance of Arrow class}
   \label{b:ar:c2}
-\end{code}
+\end{listing}
 \begin{figure*}
   \centering
   \begin{subfigure}[b]{0.475\textwidth}
@@ -129,8 +129,9 @@ We will use some figures to explain the idea behind arrows as a framework for pa
 \section{Recursion Schemes} \label{b:rs}
 Recursion schemes are patterns for expressing recursive functions. In particular, they are high order function abstracting common patterns of recursion.
 \subsection{Definition}
-We will introduce three typical recursion schemes: catamorphisms representing folds , anamorphisms representing unfolds and hylomorphisms representing divide-and-conquer algorithm (seen in \coref{p:pal:c3}). Recursion schemes express recursion with the help of data structures that mirror the control structure of the recursion.
-\begin{code}
+We will introduce three typical recursion schemes: catamorphisms representing folds, anamorphisms representing unfolds and hylomorphisms representing divide-and-con\-quer algorithms (seen in \coref{p:pal:c3}). Recursion schemes express recursion with the help of data structures that mirror the control structure of the recursion.
+
+\begin{listing}[ht]
 \begin{minted}{haskell}
 newtype Fix f = Fix { unfix :: f (Fix f) }
 
@@ -143,15 +144,14 @@ data TreeF a =
 type Tree = Fix TreeF
 \end{minted}
 \caption{Definition of fix point of data structures} \label{p:pal:c2}
-\end{code}
+\end{listing}
 
 Anamorphisms takes a function from a to f a (called the co-algebra) and a value a and return the Fix f. Used Tree as an example, anamorphisms takes a single value with type a and applies the co-algebra to the value. It continues to apply itself to the branches of the TreeF recursively and finally expands a single value to a complete tree. Intuitively, anamorphism unfolds a single value to a complicated data structure top-down.
 
 Catamorphisms are the reverse of anamorphisms, folding a data structure to a single value bottom-up. It takes a function from f a to a (called the algebra) and Fix f to fold and return a single value a. Catamorphisms and anamorphisms describe the process globally (from a to Fix f and from Fix f to a) while co-algebra and algebra capture what happened locally. The elegant part is while co-algebra and algebra do not involve with any recursion data structure (TreeF is not recursive), catamorphisms consumes recursive data structure while anamorphism builds them.
 
 Hylomorphisms applies anamorphism followed by catamorphisms. It is the most common pattern to use. We will use an example to illustrate its usefulness. It can be thought of as an abstract divide and conquer algorithm.
-% TODO add Divided and conquer analogy
-\begin{code}
+\begin{listing}[ht]
 \begin{minted}{haskell}
 ana :: Functor f => (a -> f a) -> a -> Fix f
 ana coalg = Fix . fmap (ana coalg) . coalg
@@ -163,16 +163,16 @@ hylo :: (f b -> b) -> (a -> f a) -> b -> a
 hylo g f = f . fmap (hylo f g) . g
 \end{minted}
 \caption{Recursion schemes in haskell} \label{p:pal:c3}
-\end{code}
+\end{listing}
 
 \subsection{Example: Merge sort} \label{b:rs:ex}
 We can write merge sort recursively. First of all, we split the list in half and then apply the merge sort recursively to both parts and finally we merge two lists into a single list. 
 
 To write merge sort in terms of recursion scheme, we need to define the recursive structure to represent the control structure. By the definition of merge sort, this structure must have a case with two branches, a base case representing a singleton list and a base case representing an empty list hence this structure is the TreeF we defined above. Splitting a list is a co-algebra while merging is a algebra. We use hylomorphisms to combine them hence getting a sorted list (seen in \coref{p:pal:c4}).
-\begin{code}
+\begin{listing}[ht]
 \inputminted{haskell}{project/pal-ms.hs}
 \caption{Merge sort using hylomorphisms} \label{p:pal:c4}
-\end{code}
+\end{listing}
 \section{Multiparty session types} \label{b:mpst}
 In complicated distributed systems, participants agree on a protocol, specifying the type and direction of data exchanged. Multiparty session types are a branch of behavioral types specifically targeted at describing protocols in distributed systems based on asynchronous communication \cite{coppoGentleIntroductionMultiparty2015}. They are a type formalism used to model communication-based programming by codifying the structure of the communication. The evolution of computing from the era of data processing to the era of communication witnessed the growth and significance of the theory of session types.
 
@@ -335,7 +335,7 @@ instance Monad C where
 
 
 The idea is using continuation to represent the "future" so that computation can pause and resume as well as expressing sequential computation. Atom wraps the actual computation and Fork is responsible for spawning threads. In addition, in order to write programs in a monadic way easier, some helper functions are defined (shown in \coref{b:mo:helper}). \hask{atom} lifts an IO computation to \hask{C}. And \hask{fork} takes a computation in \hask{C} and return a \hask{C} which involves the \hask{Fork} action. Given a \hask{C a}, \hask{action} gives the result of running the CPS computation. We use \hask{\_. Stop} to represent the final continuation (\hask{Stop} action is the last action). 
-\begin{code}
+\begin{listing}[ht]
 \begin{minted}{haskell}
 atom :: IO a -> C a
 atom m = C $ \k -> Atom $ do
@@ -350,7 +350,7 @@ action m = m (\_. Stop)
 \end{minted}
 \caption{Helper functions}
 \label{b:mo:helper}
-\end{code}
+\end{listing}
 An example of programme written in the concurrency monad is shown below.
 \begin{code}
   \begin{minted}{haskell}
@@ -409,16 +409,16 @@ We draw inspiration from this monad to design our intermediate language.
 Free monad\cite{contributorsCatsFreeMonads} is a concept from category theory. Intuitively, a free monad as a programming abstraction is a technique for implementing EDSLs, where a functor represents basic actions of the EDSL and the free monad of this Functor provides a way to sequence and compose actions. Speaking of the advantages, we are particularly interested in its benefits in flexible interpretations which will be illustrated by an example (\secref{b:fm:e}) and discussed further (\secref{b:fm:a}).
 \subsection{Definition}
 In practice, a free monad in Haskell can be defined as an algebraic data type(ADT) (shown in \coref{b:fm:c1}). \hask{Free f} is the monad produced given a functor \hask{f}. \hask{Free} has two type constructors: \hask{Pure} and \hask{Free}. \hask{Monad (Free f)} is the Haskell implementation of the Monad interface for \hask{Free f}. Many useful helper functions are derived from the simple definition of the free monad (shown in \coref{b:fm:c2}). \hask{liftF} lift the functor to its free monad representations. \hask{freeM} maps a natural transformation of functor (\hask{f a -> g a}) to the natural transformation of their free monad versions. Given \hask{m} is a monad, \hask{freeM} is a special case of interpreting \hask{Free m a}: to the \hask{m} monad itself. Finally, \hask{interpret} shows the power of free monad. We can interpret the free monad version of a functor \hask{f} to any monad \hask{m} given a natural transformation from \hask{f} to \hask{m}.
-\begin{code}
+\begin{listing}[ht]
   \inputminted{haskell}{background/fm-construction.hs}
   \caption{Free monad in Haskell}
   \label{b:fm:c1}
-\end{code}
-\begin{code}
+\end{listing}
+\begin{listing}[ht]
   \inputminted{haskell}{background/fm-helper.hs}
   \caption{Helper functions based on free monad}
   \label{b:fm:c2}
-\end{code}
+\end{listing}
 \subsection{Example} \label{b:fm:e}
 Free monad is useful in interpreting an abstract syntax tree (AST). In order to apply free monad to a given AST, we can follow a routine \cite{contributorsCatsFreeMonads}.
 \begin{enumerate}
