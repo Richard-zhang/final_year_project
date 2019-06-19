@@ -1,15 +1,15 @@
-data InterpState = InterpState
+data MyState = MyState
     {
         outputValues :: [(Nat, String)],
         trace :: [String],
         messageQueue :: [(Nat, Nat, String)]
     }
 
-interpret :: [(Proc (), Nat)] -> State InterpState ()
+interpret :: [(Proc (), Nat)] -> State MyState ()
 interpret []       = return ()
 interpret (x : xs) = interp x xs
 
-interp :: (Proc (), Nat) -> [(Proc (), Nat)] -> State InterpState ()
+interp :: (Proc (), Nat) -> [(Proc (), Nat)] -> State MyState ()
 interp (Pure value, role) xs = do
     updateOutputValue role value
     interpret xs

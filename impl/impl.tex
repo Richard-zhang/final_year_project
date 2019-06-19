@@ -12,7 +12,7 @@ Session types belong to the family of behavioral types. We can learn from \secre
     \label{impl:code:type}
 \end{listing}
 
-The \coref{impl:code:type} shows the definition in Haskell. \hask{SType} is the session type in Haskell. It is parameterized by a type variable \hask{a} so that the value-level session types and the type-level session types can share the same basic definition of session types. \hask{S} is mapped to $! \langle p, S \rangle. T$. \hask{R} is mapped to $?(p, S).T$. \hask{B} is mapped to Branch type, and \hask{Se} is mapped to Select type.
+\coref{impl:code:type} shows the definition in Haskell. \hask{SType} is the session type in Haskell. It is parameterized by a type variable \hask{a} so that the value-level session types and the type-level session types can share the same basic definition of session types. \hask{S} is mapped to $! \langle p, S \rangle. T$. \hask{R} is mapped to $?(p, S).T$. \hask{B} is mapped to Branch type, and \hask{Se} is mapped to Select type.
 \subsection{Value-level duality check}
 For the value-level session types, the type variable \hask{a} is instantiated with type \hask{TypeRep}. \hask{TypeRep} reifies types to some extent by associating type representations to types \cite{DataTypeablea}. Due to session types are represented as value expressions in Haskell, session typing a Proc program is the same as writing an interpreter which can be easily done since Proc is a free monad. 
 
